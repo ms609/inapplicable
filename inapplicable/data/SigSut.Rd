@@ -1,11 +1,16 @@
 \name{SigSut}
 \alias{SigSut}
+\alias{SigSut.data}
+\alias{SigSut.phy}
+\alias{SigSut.preparedata}
+\alias{SigSut.parstree}
+\alias{SigSut.besttree}
 \docType{data}
 \title{Phylogenetic data from Sigwart and Sutton 2007}
 \description{
 Phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith (submitted)
 }
-\usage{data(SigSut)}
+\usage{data('SigSut.RData')}
 \format{
   The format is:
  chr "SigSut"
@@ -20,7 +25,7 @@ The parsimony scores generated using this method are identical to those produced
 
 I have also replaced the ambiguous token ('?') with an 'ambiguous but applicable' token ('+') where appropriate.
 
-The dataset contains three items:
+The dataset contains:
   \item{SigSut.data}{The dataset, in the format produced by read.nexus.data('SigSut-fold.nex')}
   \item{SigSut.phy}{The dataset, in phyDat format}
   \item{SigSut.preparedata}{The dataset, in the format produced by prepare.data(SigSut.data)}
@@ -37,7 +42,7 @@ Sigwart, J. D., & Sutton, M. D. (2007). Deep molluscan phylogeny: synthesis of p
 M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \examples{
-data(SigSut)
+data('SigSut.RData')
 contrast3 <- matrix(data=c(1,0,0, 0,1,0, 0,0,1, 1,1,0, 1,1,1), ncol=3, byrow=TRUE)
 dimnames(contrast3) <- list(c(0:1, "x", '+', '?'), c(0:1, '-'))
 as.phyDat(SigSut.data, type="USER", contrast = contrast3)

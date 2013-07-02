@@ -22,9 +22,8 @@ pratchet.inapp(start.tree, data, outgroup = NULL, maxit = 5000, maxiter = 500, m
   \item{rearrangements}{Method to use when rearranging trees: NNI, SPR or TBR}
   \item{\dots}{Other arguments to pass to subsequent functions}
 }
-\details{}
 \value{Returns a tree modified by parsimony ratchet iteration, retaining the position of the root}
-\references{Nixon, K. C. (1999). The Parsimony Ratchet, a New Method for Rapid Parsimony Analysis. Cladistics, 15(4), 407–414. doi:10.1111/j.1096-0031.1999.tb00277.x}
+\references{Nixon, K. C. (1999). The Parsimony Ratchet, a New Method for Rapid Parsimony Analysis. Cladistics, 15(4), 407-414. doi:10.1111/j.1096-0031.1999.tb00277.x}
 \author{
 Martin R. Smith
 Adapted from phangorn:::pratchet
@@ -35,7 +34,7 @@ Adapted from phangorn:::pratchet
 \code{\link{sectorial.search}}
 }
 \examples{
-load('SigSut.RData')
+data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)

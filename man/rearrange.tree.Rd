@@ -24,9 +24,6 @@ rearrange.tree(tree, data, rearrange, return.single = TRUE, iter = "<unknown>", 
   \item{cores}{Number of separate rearrangements to evaluate in parallel}
   \item{trace}{Determines how much information to output to screen}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
 \value{The most parsimonious of the trees generated, with attributes 'hits' and 'pscore'}
 \author{Martin R. Smith}
 \seealso{
@@ -35,7 +32,7 @@ rearrange.tree(tree, data, rearrange, return.single = TRUE, iter = "<unknown>", 
   \code{\link{rooted.tbr}}
 }
 \examples{
-load('SigSut.RData')
+data('SigSut')
 rearrange.tree(SigSut.parstree, SigSut.preparedata, rooted.nni)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

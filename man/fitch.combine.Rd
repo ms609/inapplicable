@@ -53,7 +53,7 @@ fitch.combine.single(c(FALSE, FALSE, TRUE), c(TRUE, FALSE, FALSE), 3)
 fitch.combine.single(c(FALSE, TRUE, FALSE, FALSE), c(TRUE, TRUE, TRUE, FALSE), 4)
 
 ## Reconstruct the possible token states in a node whose children are the terminals 'Wiwaxia' and 'Halkieria'
-load('SigSut.RData')
+data('SigSut')
 fitch.combine(SigSut.preparedata$Wiwaxia, SigSut.preparedata$Halkieria, 3)
 
 ## The function is currently defined as

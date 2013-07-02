@@ -12,7 +12,6 @@
   \item{tree}{ A rooted tree in phylo format }
   \item{data}{ The output of prepare.data() }
 }
-\details{}
 \value{
 parsimony.inapp returns the parsimony score of the tree, given the data.
 fitch.inapp returns
@@ -23,16 +22,9 @@ fitch.inapp returns
 M. R. Smith (submitted) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \author{Martin R. Smith}
-\note{}
-\seealso{
-%% ~~objects to See Also as \code{\link{help}}, ~~~
-}
 \examples{
-load('SigSut.RData')
+data('SigSut')
 parsimony.inapp(SigSut.parstree, SigSut.preparedata)
 parsimony.inapp(SigSut.besttree, SigSut.preparedata)
 }
-
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{ tree }

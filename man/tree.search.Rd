@@ -19,15 +19,12 @@ tree.search(start.tree, data, outgroup, method = "NNI", maxiter = 100, maxhits =
   \item{trace}{Higher values provide more verbose user feedback in stdout}
   \item{\dots}{Other arguments to pass to subsequent functions}
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{
 A tree, with an attribute \code{pscore} conveying its parsimony score.
 Note that the pscore will be inherited from the tree's attributes, which is only valid if it 
 was generated using the same \code{data} that is passed here.
 }
-\references{}
 \author{
 Martin R. Smith
 }
@@ -38,7 +35,7 @@ Martin R. Smith
 \code{\link{pratchet.inapp}}, alternative heuristic, useful to escape local optima.
 }
 \examples{
-load('SigSut.RData')
+data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)

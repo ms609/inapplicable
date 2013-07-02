@@ -14,12 +14,9 @@ single.taxon.tree(label)
 \arguments{
   \item{label}{A character vector specifying the label of the tip}
 }
-\details{}
 \value{
 A phyDat object containing a single tip with the specified label
 }
-\author{}
-
 \seealso{
 \code{\link{two.tip.tree}}
 }

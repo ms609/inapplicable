@@ -1,21 +1,8 @@
-sectorial.inapp <- function (tree, data, outgroup=NULL, maxit=100, maxiter=500, k=5, trace=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", ...) {
-## Returns a tree modified by a sectorial search.
-## It is recommended that a whole-tree TBR is run every few iterations, to ensure global optimality.
-# ARGUMENTS:
-#   «tree», a rooted phylogenetic tree with the desired outgroup.
-#   «data», output from optimize.data
-#   «outgroup», a vector containing the taxa that form the outgroup to the tree
-#   «maxit», maximum pratchet iterations to perform;
-#   «maxiter», maximum NNI or SPR iterations to perform;
-#   «k», stop when k searches have improved their sectorial score
-#   «smallest.sector», sectors with fewer than «smallest.sector» taxa will not be selected; 4 is the smallest sensible value
-#   «largest.sector», sectors with more than «largest.sector» taxa will not be selected
-#   «rearrangements», method to use when rearranging subtrees: NNI, SPR or TBR
-# RETURN:
-#   a rooted tree with pscore <= «start»
+sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter=500, k=5, trace=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop("«data» must be a phyDat object, or the output of prepare.data(«phyDat object»).")
-  if (is.null(tree)) stop("a starting «tree» must be provided")
+  if (is.null(start.tree)) stop("a «start.tree» must be provided")
+  tree <- start.tree
   if (trace >= 0) cat('Sectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
   sector.data <- function (data, tips) {
@@ -83,19 +70,6 @@ sectorial.inapp <- function (tree, data, outgroup=NULL, maxit=100, maxiter=500, 
 }  # sectorial.inapp
 
 pratchet.inapp <- function (tree, data, outgroup=NULL, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", ...) {
-## Returns a tree modified by parsimony ratchet iteration, retaining the position of the root
-## adapted from phangorn::pratchet
-# ARGUMENTS:
-#   «data», the output of optimize.data()
-#   «outgroup» (optional), the outgroup of the tree, if not implicit from «start.tree»
-#   «start.tree» (optional), a rooted phylogenetic tree from which to begin the search (phyDat format)
-#   «maxit», maximum pratchet iterations to perform;
-#   «maxiter», maximum NNI or SPR iterations to perform on each pratchet iteration;
-#   «maxhit», maximum times to hit best score before terminating each pratchet iteration;
-#   «k», stop when k ratchet iterations have found the same best score
-#   «rearrangements», method to use when rearranging trees: NNI, SPR or TBR
-# RETURN:
-#   a rooted tree with pscore <= «start»
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop("«data» must be a phyDat object, or the output of prepare.data(«phyDat object»).")
   eps <- 1e-08
@@ -144,7 +118,7 @@ pratchet.inapp <- function (tree, data, outgroup=NULL, maxit=5000, maxiter=500, 
     
   attr(tree, 'hits') <- NULL
   tree
-}  # pratchet.inapp
+}
 
 bootstrap.inapp <- function (phy, x, outgroup, maxiter, trace=0, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
@@ -174,20 +148,6 @@ bootstrap.inapp <- function (phy, x, outgroup, maxiter, trace=0, ...) {
 }
 
 tree.search <- function (start.tree, data, outgroup, method='NNI', maxiter=100, maxhits=20, forest.size=1, cores=4, trace=1, ...) {
-## Seek a more parsimonious tree, given a dataset that contains hierarchical characters.
-# ARGUMENTS:
-#   «tree», a rooted phylogenetic tree with the desired outgroup.  Edge lengths are not supported and will be deleted.
-#   «data», output from optimize.data
-#   «outgroup», a vector containing the taxa that form the outgroup to the tree
-#   «method», string describing rearrangements to perform, one of 'NNI', 'SPR' or 'TBR'
-#   «maxiter», the maximum number of iterations to perform before abandoning the search
-#   «maxhits», the maximum times to hit the best pscore before abandoning the search
-#   «forest.size», the maximum number of trees to return
-#   «cores», number of trees to examine in parallel on each iteration
-# RETURN:
-#   A tree, with an attribute «pscore» conveying its parsimony score.
-#   Note that the pscore will be inherited from the tree's attributes, which is only valid if it 
-#   was generated using the same data that is passed here.
   start.tree$edge.length <- NULL # Edge lengths are not supported
   tree <- set.outgroup(start.tree, outgroup)
   attr(tree, 'hits') <- 1
@@ -231,10 +191,10 @@ tree.search <- function (start.tree, data, outgroup, method='NNI', maxiter=100, 
   } else tree
 }
 
-sectorial.search <- function (start.tree, data, outgroup, method='NNI') {
-# A recipe - delete?
+sectorial.search <- function (start.tree, data, outgroup, rearrangements='NNI') {
   best.score <- attr(start.tree, 'pscore')
-  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(njtree$edge[,2])*0.25, rearrangements=method)
+  if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data)
+  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(njtree$edge[,2])*0.25, rearrangements=rearrangements)
   sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=20, trace=3)
   sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=2000, maxhits=25, trace=3)
   sect <- tree.search(sect, data, outgroup, method='SPR', maxiter=2000, maxhits=50, trace=3)

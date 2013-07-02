@@ -43,6 +43,11 @@ Goloboff, P. (1999). Analyzing Large Data Sets in Reasonable Times: Solutions fo
 Martin R. Smith
 }
 
+\seealso{
+\code{\link{tree.search}}
+\code{\link{pratchet.inapp}}
+}
+
 \examples{
 
 load(SigSut)
@@ -67,6 +72,4 @@ function (start.tree, data, outgroup, rearrangements='NNI') {
 }
 
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{ tree }

@@ -1,0 +1,13 @@
+Package: inapplicable
+Type: Package
+Title: Inapplicable data in parsimony analysis
+Version: 0.01.153
+Date: 2013-07-02
+Author: Martin R. Smith
+Maintainer: Martin R. Smith <martins@gmail.com>
+Description: Performs parsimony calculations and tree-search on datasets that contain inapplicable data.
+## An implementation of the algorithm proposed in 
+## M. R. Smith (submitted) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+## Deposited at Data Dryad, doi: 10.5061/dryad.n2k53/1
+Depends: phangorn
+License: CC-0

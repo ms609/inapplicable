@@ -1,0 +1,15 @@
+     citHeader("To cite in a publication please use:")
+     
+     year <- "submitted"
+     vers <- paste("R package version", meta$Version)
+     
+     citEntry(entry = "Manual",
+              title = "Incorporating inapplicable data in parsimony analyses",
+              author = personList(as.person("Martin R. Smith")),
+              year = year,
+              note = vers,
+     
+              textVersion =
+              paste0("Martin R. Smith (submitted). ",
+                     "Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX",
+                     ", doi: 10.1093/sysbio/syXXXX"))

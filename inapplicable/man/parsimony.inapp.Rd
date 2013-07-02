@@ -28,9 +28,9 @@ M. R. Smith (submitted) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+load('SigSut.RData')
+parsimony.inapp(SigSut.parstree, SigSut.preparedata)
+parsimony.inapp(SigSut.besttree, SigSut.preparedata)
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

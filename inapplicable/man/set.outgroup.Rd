@@ -24,7 +24,7 @@ Martin R. Smith
 }
 
 \seealso{
-\code{\link{ape,root}} ought to produce the same result as this function, but does not always do so in practice.
+\code{\link{root}} ought to produce the same result as this function, but does not always do so in practice.
 }
 \examples{
   tree <- read.tree(text='(((a,b),c),(d,e));')

@@ -35,8 +35,10 @@ M. R. Smith (submitted) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 \code{\link[phangorn:phangorn-package]{phangorn}} ~~
 }
 \examples{
+load('SigSut.RData')
+data <- SigSut.preparedata; tree <- SigSut.parstree; outgroup<-c('Lingula', 'Mickwitzia', 'Neocrania')
 parsimony.inapp(tree, data)
-tree.search(start.tree, data, outgroup, method='NNI')
+\dontrun{tree.search(tree, data, outgroup, method='NNI')
 pratchet.inapp(tree, data, outgroup)
-sectorial.search(start.tree, data, outgroup)
+sectorial.search(tree, data, outgroup)}
 }

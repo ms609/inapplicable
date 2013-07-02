@@ -1,13 +1,13 @@
 sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter=500, k=5, trace=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
-  if (class(data) != '*phyDat') stop("«data» must be a phyDat object, or the output of prepare.data(«phyDat object»).")
-  if (is.null(start.tree)) stop("a «start.tree» must be provided")
+  if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
+  if (is.null(start.tree)) stop("a start.tree must be provided")
   tree <- start.tree
   if (trace >= 0) cat('Sectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
   sector.data <- function (data, tips) {
   # REQUIRE
-  ##  «data», the output of prepare.data()   
+  ##  "data", the output of prepare.data()   
     at <- attributes(data)
     state.union <- data[[tips[1]]]
     for (tip in tips[2:length(tips)]) {
@@ -40,7 +40,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter
       crown.data <- sector.data(data, crown$tip.label)
       if (!is.null(crown.data)) break else cat('unsuitable (no data); trying')
       candidate.nodes <- candidate.nodes[-which(candidate.nodes==sector)]
-      if (length(candidate.nodes == 0)) stop('No selectable sectors contain parsimony information! Either «largest.sector» is close to «smallest.sector» or your dataset is short of parsimony information.')
+      if (length(candidate.nodes == 0)) stop('No selectable sectors contain parsimony information! Either "largest.sector" is close to "smallest.sector" or your dataset is short of parsimony information.')
     } 
     if (trace >= 0) cat(' Sector OK.')
     crown <- root(add.tip(crown, 0, 'SECTOR_ROOT'), length(crown$tip.label) + 1, resolve.root=TRUE)
@@ -69,11 +69,12 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter
   tree
 }  # sectorial.inapp
 
-pratchet.inapp <- function (tree, data, outgroup=NULL, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", ...) {
+pratchet.inapp <- function (start.tree, data, outgroup=NULL, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
-  if (class(data) != '*phyDat') stop("«data» must be a phyDat object, or the output of prepare.data(«phyDat object»).")
+  tree <- start.tree; start.tree <- NULL
+  if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
   eps <- 1e-08
-  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- parsimony.inapp(tree, data, trace=trace)
+  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- parsimony.inapp(tree, data)
   mp <- attr(tree, "pscore")
   if (trace >= 0) cat("* Initial pscore:", mp)
 
@@ -123,9 +124,9 @@ pratchet.inapp <- function (tree, data, outgroup=NULL, maxit=5000, maxiter=500, 
 bootstrap.inapp <- function (phy, x, outgroup, maxiter, trace=0, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
 # ARGUMENTS: 
-#   «phy», a starting tree in phydat format
-#   «x», data, in the format produced by optimize.data()
-#   «FUN», a function of the form METHOD.inapp() to be used to generate a new candidate tree from the bootstrapped dataset
+#   "phy", a starting tree in phydat format
+#   "x", data, in the format produced by optimize.data()
+#   "FUN", a function of the form METHOD.inapp() to be used to generate a new candidate tree from the bootstrapped dataset
 # RETURN:
 #   a tree with a better pscore under re-weighted characters
   # Begin with "normal" characters, x[[1]]
@@ -194,7 +195,7 @@ tree.search <- function (start.tree, data, outgroup, method='NNI', maxiter=100, 
 sectorial.search <- function (start.tree, data, outgroup, rearrangements='NNI') {
   best.score <- attr(start.tree, 'pscore')
   if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data)
-  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(njtree$edge[,2])*0.25, rearrangements=rearrangements)
+  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
   sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=20, trace=3)
   sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=2000, maxhits=25, trace=3)
   sect <- tree.search(sect, data, outgroup, method='SPR', maxiter=2000, maxhits=50, trace=3)

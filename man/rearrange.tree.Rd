@@ -8,7 +8,7 @@ Rearrange phylogenetic tree
 Performs one rearrangement of the specified method on the tree provided.
 }
 \usage{
-rearrange.tree(tree, data, rearrange, return.single = TRUE, iter = "«unknown»", cores = 4, trace = 0)
+rearrange.tree(tree, data, rearrange, return.single = TRUE, iter = "<unknown>", cores = 4, trace = 0)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -35,7 +35,7 @@ rearrange.tree(tree, data, rearrange, return.single = TRUE, iter = "«unknown»", 
   \code{\link{rooted.tbr}}
 }
 \examples{
-load(SigSut)
+load('SigSut.RData')
 rearrange.tree(SigSut.parstree, SigSut.preparedata, rooted.nni)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

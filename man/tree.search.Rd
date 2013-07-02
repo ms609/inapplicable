@@ -3,11 +3,11 @@
 \title{Search for Most Parsimonious Trees}
 \description{Run standard search algorithms (NNI, SPR or TBR) to search for a more parsimonious tree}
 \usage{
-tree.search(tree, data, outgroup, method = "NNI", maxiter = 100, maxhits = 20, forest.size = 1, cores = 4, trace = 1, ...)
+tree.search(start.tree, data, outgroup, method = "NNI", maxiter = 100, maxhits = 20, forest.size = 1, cores = 4, trace = 1, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{tree}{A fully-resolved tree in phyDat format, with the desired outgroup. Edge lengths are not supported and will be deleted.}
+  \item{start.tree}{A fully-resolved tree in phyDat format, with the desired outgroup. Edge lengths are not supported and will be deleted.}
   \item{data}{A matrix, ideally in the format produced by \code{\link{prepare.data}}, 
   alternatively as a phyDat object.  May contain inapplicable data.}
   \item{outgroup}{A vector listing the taxa in the outgroup}
@@ -17,6 +17,7 @@ tree.search(tree, data, outgroup, method = "NNI", maxiter = 100, maxhits = 20, f
   \item{forest.size}{The maximum number of trees to return - useful in concert with \code{\link{consensus}}}
   \item{cores}{Number of trees to examine in parallel on each iteration; may speed up search on multicore machines}
   \item{trace}{Higher values provide more verbose user feedback in stdout}
+  \item{\dots}{Other arguments to pass to subsequent functions}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -37,7 +38,7 @@ Martin R. Smith
 \code{\link{pratchet.inapp}}, alternative heuristic, useful to escape local optima.
 }
 \examples{
-load(SigSut)
+load('SigSut.RData')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)

@@ -117,9 +117,9 @@ add.tip <- function (tree, where, label) {
 }
 
 root.robust <- function (tree, outgroup) {
-  if (class(tree) != 'phylo') stop ('«tree» must be of class "phylo"')
+  if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
   if (class(outgroup) == 'character') outgroup <- which(tree$tip.label %in% outgroup)
-  if (length(outgroup) < 1) stop ('«outgroup» not specified')
+  if (length(outgroup) < 1) stop ('"outgroup" not specified')
   if (!is.null(tree$edge.length)) {tree$edge.length <- NULL; warning('Edge lengths are not supported and have been dropped.')}
   nTips <- length(tree$tip.label)
   root <- nTips + 1L
@@ -160,15 +160,16 @@ root.robust <- function (tree, outgroup) {
 
 descendants <- function (tree, node, just.tips = FALSE) {
 # ARGUMENTS:
-#   «tree», a phydat object
-#   «node», number of an internal node
-#   «just.tips», should return value include all nodes or just tips?
+#   "tree", a phydat object
+#   "node", number of an internal node
+#   "just.tips", should return value include all nodes or just tips?
 # RETURN:
 #   vector containing descendant nodes in numerical order
   nTip <- length(tree$tip.label)
   edge <- tree$edge
   edge1 <- edge[,1]
   edge2 <- edge[,2]
+  is.descendant = NULL # pass CMD check
   is.descendant <<- logical(nTip * 2L + 1L)
   node.children <- function (oNode) {
     nc <- edge2[edge1==oNode]

@@ -13,13 +13,14 @@ pratchet.inapp(start.tree, data, outgroup = NULL, maxit = 5000, maxiter = 500, m
 \arguments{
   \item{start.tree}{A phyDat object denoting the topology to begin the search from}
   \item{data}{The output of \code{\link{prepare.data}} (or a matrix in phyDat format)}
-  \item{outgroup}{a vector specifying all tips in the outgroup, if \code{start.tree} is not rooted appropriately}
-  \item{maxit}{maximum pratchet iterations to perform}
-  \item{maxiter}{maximum pratchet iterations to perform}
-  \item{maxhits}{ maximum times to hit best score before terminating each pratchet iteration}
-  \item{k}{stop when k ratchet iterations have found the same best score}
+  \item{outgroup}{A vector specifying all tips in the outgroup, if \code{start.tree} is not rooted appropriately}
+  \item{maxit}{Maximum pratchet iterations to perform}
+  \item{maxiter}{Maximum pratchet iterations to perform}
+  \item{maxhits}{Maximum times to hit best score before terminating each pratchet iteration}
+  \item{k}{Stop when k ratchet iterations have found the same best score}
   \item{trace}{Larger number provide more verbose reporting in stdout}
-  \item{rearrangements}{method to use when rearranging trees: NNI, SPR or TBR}
+  \item{rearrangements}{Method to use when rearranging trees: NNI, SPR or TBR}
+  \item{\dots}{Other arguments to pass to subsequent functions}
 }
 \details{}
 \value{Returns a tree modified by parsimony ratchet iteration, retaining the position of the root}
@@ -34,7 +35,7 @@ Adapted from phangorn:::pratchet
 \code{\link{sectorial.search}}
 }
 \examples{
-load(SigSut)
+load('SigSut.RData')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)

@@ -3,7 +3,7 @@ parsimony.inapp <- function (tree, data) return (fitch.inapp(tree, data)[[1]])
 fitch.inapp <- function (tree, data) {
   # Data
   if (class(data) == 'phyDat') data <- prepare.data(data)
-  if (class(data) != '*phyDat') stop('Invalid data type; try «data» <- prepare.data(«valid.phyDat.object»).')
+  if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
   weight <- attr(data, 'weight')
   nChar <- attr(data, 'nr') # strictly, transformation series patterns; these'll be upweighted later
   # Tree
@@ -16,7 +16,9 @@ fitch.inapp <- function (tree, data) {
   root.node.index <- min(node)
   # Workspace: matrix of possible states
   na.matrix <- matrix(NA, ncol=nChar, nrow=32)
+  charlist <- NULL 
   charlist <<- mclapply(1:(length(tip.label)+nTip-1), function (tl) {if (tl <= nTip) data[[tip.label[tl]]] else na.matrix} )
+  local.pscore <- NULL
   local.pscore <<- rep(0, nChar)
   nLevel <- length(attr(data, 'levels'))
   left.child   <- c(rep(0,nTip), children[1,])
@@ -64,12 +66,12 @@ fitch.combine <- function (a, b, inapplicable.level) {
 fitch.combine.single <- function (a, b, inapplicable.level) {
 ## data$levels[inapplicable.level] must be the inapplicable token
 # REQUIRE
-#   «a», states that the left node could take - a vector comprising TRUE or FALSE statements
+#   "a", states that the left node could take - a vector comprising TRUE or FALSE statements
 #        for tokens 1:(inapplicable.level-1), with a[inapplicable.level] representing the inapplicable token
-#   «b», as «a», for the right node
-#   «inapplicable.level» <- length(«data»$level)
+#   "b", as "a", for the right node
+#   "inapplicable.level" <- length("data"$level)
 # RETURN
-#   A list comprising: [[1]], state at node, in format of «a»; [[2]], unweighted addition to pscore
+#   A list comprising: [[1]], state at node, in format of "a"; [[2]], unweighted addition to pscore
   shared <- a & b
   if (any(shared)) return (list(shared, 0))
   if (!any(a[-inapplicable.level]) || !any(b[-inapplicable.level])) return (list(a|b, 0))

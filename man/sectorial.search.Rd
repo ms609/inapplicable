@@ -8,8 +8,8 @@ Sectorial searching
 Performs a sectorial search on a tree, preserving the position of the root
 }
 \usage{
-sectorial.search(start.tree, data, outgroup, rearrangements = "NNI") {
-sectorial.inapp(tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k = 5, trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
+sectorial.search(start.tree, data, outgroup, rearrangements = "NNI")
+sectorial.inapp(start.tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k = 5, trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
 }
 \arguments{
   \item{start.tree}{A rooted, resolved tree in phyDat format from which to start the search}
@@ -22,6 +22,7 @@ sectorial.inapp(tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k = 5, 
   \item{smallest.sector}{sectors with fewer than \code{smallest.sector} taxa will not be selected; 4 is the smallest sensible value}
   \item{largest.sector}{sectors with more than \code{largest.sector} taxa will not be selected}
   \item{rearrangements}{method to use when rearranging subtrees: NNI, SPR or TBR}
+  \item{\dots}{Other arguments to pass to subsequent functions}
 }
 \details{
 \code{sectorial.inapp} performs a sectorial search on the tree specified. A sectorial search detaches 
@@ -49,8 +50,7 @@ Martin R. Smith
 }
 
 \examples{
-
-load(SigSut)
+load('SigSut.RData')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)
@@ -61,7 +61,7 @@ sectorial.inapp(njtree, SigSut.preparedata, outgroup, maxit=1, maxiter=50, large
 function (start.tree, data, outgroup, rearrangements='NNI') {
   best.score <- attr(start.tree, 'pscore')
   if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data)
-  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(njtree$edge[,2])*0.25, rearrangements=rearrangements)
+  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
   sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=20, trace=3)
   sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=2000, maxhits=25, trace=3)
   sect <- tree.search(sect, data, outgroup, method='SPR', maxiter=2000, maxhits=50, trace=3)
@@ -70,6 +70,5 @@ function (start.tree, data, outgroup, rearrangements='NNI') {
     return (sect)
   } else return (set.outgroup(start.tree, outgroup))
 }
-
 }
 \keyword{ tree }

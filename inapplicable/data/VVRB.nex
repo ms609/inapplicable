@@ -1,0 +1,87 @@
+#NEXUS
+begin data;
+  dimensions ntax=23 nchar=57;
+  format datatype=standard gap=- missing=? Interleave=no;
+  matrix 
+    Aphroditacea      111111110-111+010111111111111+10-00000-----0----------0--
+    Eunicida          111111110-1111010111111011101010-00000-----0----------0--
+    Canalipalpata     111111110-11100101111000000-1000-00000-----0----------0--
+    Chrysopetalidae   111111110-1111110111111111111010-00000-----0----------0--
+    Scolecida         111111110-1111010111+000000-1000-00000-----0----------0--
+    Helicoradomenia   1110111111?0000000000000000---01110001010000--------0-?--
+    Chaetoderma       1110111111?0000000000000000---01111001010000--------0-1--
+    Lepidochitona     111001111110000000000000000---0122100101100100000-2010111
+    Neopilina         ?1???11?100?---000000010000---01221000-----100000-00001-0
+    Terebratulina     100000000-11000000000000000---00-00110-----110010-1000020
+    Lingula           100000000-11000000000000000---00-00110-----121010-1000020
+    Nemertean         1010?10?0-00---000000000000---00-00000-----0--------0-0--
+    Plumulites        ??????????1?????011??????????????00000-----11000103301010
+    Turrilepas        ????????????????1?1?????????????????00-----11000103301010
+    Lepidocoleus      ????????????????1?1?????????????????00-----11000113301010
+    Canadia           ??????????1??01?011?101000000000-00000-----0----------0--
+    Echinochiton      ??????????????0?000?000?000---?????00101+11100000-20+0?1+
+    Polysacos         ??????????????0?000?000?000---?????00101+1110000102210111
+    Acaenoplax        ??????????????0?000?000?000---???1100101000100000-2000100
+    Halkieria         ??????????????0?000?000?000---?????001011101++000-10+000+
+    Wiwaxia           ??????????1???0?000?000?000---010??0011+1+00--------0-0--
+    Orthrozanclus     ??????????????0?000?000?000---?????001++1101+++00-000000+
+    Odontogriphus     ??????????????0?000?0000000---01021000-----0----------0--
+  ;
+end;
+
+BEGIN TAXA;
+	DIMENSIONS NTAX = 23;
+	TAXLABELS
+		Turrilepas
+		Plumulites
+		Lepidocoleus
+		Chrysopetalidae
+		Eunicida
+		Aphroditacea
+		Scolecida
+		Canalipalpata
+		Canadia
+		Chaetoderma
+		Neopilina
+		Acaenoplax
+		Helicoradomenia
+		Orthrozanclus
+		Halkieria
+		Wiwaxia
+		Polysacos
+		Echinochiton
+		Odontogriphus
+		Terebratulina
+		Lingula
+		Lepidochitona
+		Nemertean
+	;
+END;
+BEGIN TREES;
+	TRANSLATE
+		1	Turrilepas,
+		2	Plumulites,
+		3	Lepidocoleus,
+		4	Chrysopetalidae,
+		5	Eunicida,
+		6	Aphroditacea,
+		7	Scolecida,
+		8	Canalipalpata,
+		9	Canadia,
+		10	Chaetoderma,
+		11	Neopilina,
+		12	Acaenoplax,
+		13	Helicoradomenia,
+		14	Orthrozanclus,
+		15	Halkieria,
+		16	Wiwaxia,
+		17	Polysacos,
+		18	Echinochiton,
+		19	Odontogriphus,
+		20	Terebratulina,
+		21	Lingula,
+		22	Lepidochitona,
+		23	Nemertean
+	;
+	TREE * vvrb-strict = [&R] ((((((10,12,13),11),((17,18),22),14,15,16,19),(((1,3),2),4,5,6,7,8,9)),(20,21)),23);
+END;

@@ -1,1 +1,5 @@
-exportPattern("^[[:alpha:]]+")
+export(rearrange.tree, set.outgroup, root.robust, rooted.nni, rooted.spr, rooted.tbr, tbr)
+export(parsimony.inapp, fitch.inapp)
+export(extract.clade.robust, add.tip, two.tip.tree)
+export(prepare.data)
+export(sectorial.inapp, pratchet.inapp, tree.search, sectorial.search)

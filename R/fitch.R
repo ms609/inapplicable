@@ -1,14 +1,4 @@
-parsimony.inapp <- function (tree, data) {
-## Determine true parsimony score for a rooted tree
-# ARGUMENTS: 
-#   «tree», a rooted tree
-#   «data», the output of optimize.data()
-#   «target» (optional), a best score; abandon search if score will exceed «target»
-# RETURN:
-#   if «target» is exceeded: a non-integer larger than «target»
-#   if «target» is not exceeded: the parsimony score of «tree» 
-  return (fitch.inapp(tree, data)[[1]])
-}
+parsimony.inapp <- function (tree, data) return (fitch.inapp(tree, data)[[1]])
 
 fitch.inapp <- function (tree, data) {
   # Data
@@ -52,17 +42,17 @@ fitch.inapp <- function (tree, data) {
   return (list(sum(pvec), pvec))
 }
 
-fitch.combine <- function (a, b, nLevel) {
+fitch.combine <- function (a, b, inapplicable.level) {
   shared <- a & b
   unions <- as.logical(colSums(shared))
-  al<-a[-nLevel,]; bl<-b[-nLevel,]
+  al<-a[-inapplicable.level,]; bl<-b[-inapplicable.level,]
   one.child.inapp.only <- !colSums(al) | !colSums(bl)
   intersects <- !unions
   
   ret <- matrix(FALSE, nrow(a), nCol <- ncol(a))
   ret[,unions] <- shared[,unions]
   ret[,intersects] <- a[,intersects] | b[,intersects]
-  ret[nLevel, !one.child.inapp.only] <- FALSE
+  ret[inapplicable.level, !one.child.inapp.only] <- FALSE
   
   col.score <- rep(TRUE, nCol)
   col.score[unions] <- FALSE
@@ -71,19 +61,19 @@ fitch.combine <- function (a, b, nLevel) {
   return (list(ret, col.score))
 }
 
-fitch.combine.single <- function (a, b, nLevel) {
-## data$levels[nLevel] must be the inapplicable token
+fitch.combine.single <- function (a, b, inapplicable.level) {
+## data$levels[inapplicable.level] must be the inapplicable token
 # REQUIRE
 #   «a», states that the left node could take - a vector comprising TRUE or FALSE statements
-#        for tokens 1:(nLevel-1), with a[nLevel] representing the inapplicable token
+#        for tokens 1:(inapplicable.level-1), with a[inapplicable.level] representing the inapplicable token
 #   «b», as «a», for the right node
-#   «nLevel» <- length(«data»$level)
+#   «inapplicable.level» <- length(«data»$level)
 # RETURN
 #   A list comprising: [[1]], state at node, in format of «a»; [[2]], unweighted addition to pscore
   shared <- a & b
   if (any(shared)) return (list(shared, 0))
-  if (!any(a[-nLevel]) || !any(b[-nLevel])) return (list(a|b, 0))
+  if (!any(a[-inapplicable.level]) || !any(b[-inapplicable.level])) return (list(a|b, 0))
   ret <- a|b
-  ret[nLevel] <- FALSE
+  ret[inapplicable.level] <- FALSE
   return (list(ret, 1))
 }

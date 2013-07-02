@@ -32,7 +32,6 @@ single.taxon.tree <- function (label) {
 }
 
 extract.clade.robust <- function (phy, node) {
-# Modified from ape:::extract.clade.  Added support for extracting nodes.  Removed features unneccesary for TBR.
   phy.tip.label <- phy$tip.label
   phy.edge <- phy$edge
   nTip <- length(phy.tip.label)
@@ -64,12 +63,6 @@ extract.clade.robust <- function (phy, node) {
 ecr <- extract.clade.robust
 
 add.tip <- function (tree, where, label) {
-## Adds a tip to a phylogenetic tree.  Can be seen as a special case of ape:::bind.tree.fast.
-# ARGUMENTS: 
-#   «tree», a phylogenetic tree
-#   «where», the node or tip that should form the sister taxon to the new node.
-#            To add a new tip at the root, use "where = 0"
-#   «label», the character string to entitle the new tip
   nTip <- length(tree$tip.label)
   nNode <- tree$Nnode
   ROOT <- nTip + 1L
@@ -124,12 +117,6 @@ add.tip <- function (tree, where, label) {
 }
 
 root.robust <- function (tree, outgroup) {
-## ape:::root performs inconsistently.
-# ARGUMENTS:
-#   «tree», a phyDat object, with all nodes resolved.
-#   «outgroup», a vector of mode numeric or character specifying the new outgroup.
-# RETURN:
-#   A rooted phyDat object; the root node is resolved and has two branches, one of which is «outgroup»
   if (class(tree) != 'phylo') stop ('«tree» must be of class "phylo"')
   if (class(outgroup) == 'character') outgroup <- which(tree$tip.label %in% outgroup)
   if (length(outgroup) < 1) stop ('«outgroup» not specified')

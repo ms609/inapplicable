@@ -22,11 +22,6 @@ rearrange.tree <- function (tree, data, rearrange, return.single=TRUE, iter='«un
 }
 
 rooted.nni <- function (tree) {
-  ## abridged from phangorn::treeManipulation.R::nnin
-  # ARGUMENTS:
-  #   «tree», a rooted phylogenetic tree with the desired outgroup, perhaps generated using set.outgroup(tree, outgroup).
-  # RETURN: 
-  #   the input tree modified by a random NNI iteration, retaining the position of the root
   edge <- matrix(tree$edge, ncol = 2)
   parent <- edge[, 1]
   child <- edge[, 2]
@@ -46,20 +41,13 @@ rooted.nni <- function (tree) {
   tree$edge[ind1, 2] <- e2
   tree$edge[ind2, 2] <- e1
   if(!is.null(tree$edge.length)) {
-    warning("Edge lengths have been deleted")  # I don't need this information so won't bother retaining it.
+    warning("Edge lengths have been deleted")
     tree$edge.length <- NULL
-    #nnin has a line akin to: tree1$edge.length[c(ind1, ind2)] <- tree$edge.length[c(ind2, ind1)]
   }
-  
   tree <- renumber(phangorn:::reorderPruning(tree))  
 }
 
 rooted.spr <- function(tree) {
-## Returns a tree modified by a random SPR iteration, retaining the position of the root
-# ARGUMENTS:
-#   «tree», a rooted phylogenetic tree (phyDat format)
-# RETURN:
-#   a tree modified by a random SPR iteration, retaining the position of the root
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
   nTips <- length(tree$tip.label)
   root <- nTips + 1L
@@ -86,11 +74,6 @@ rooted.spr <- function(tree) {
 }
 
 rooted.tbr <- function(tree) {
-## Returns all trees produced by TBR at a random edge, retaining the position of the root
-# ARGUMENTS:
-#   «tree», a rooted and resolved phylogenetic tree (phyDat format, without branch length information)
-# RETURN:
-#   a tree topology produced by one TBR rearrangement
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
   root <- 1 + (nTips <- dim(tree$edge)[1] - tree$Nnode + 1)
   root.children <- Children(tree, root)
@@ -114,12 +97,6 @@ rooted.tbr <- function(tree) {
 }
 
 tbr <- function(tree, edge.to.break=NULL) {
-## Perform a TBR operation on a tree
-# ARGUMENTS:
-#   «tree», a phylo object with nodes in postorder
-#   «edge.to.break» (optional), an edge to bisect, generated randomly if not specified
-# RETURN:
-#   A tree topology generated after one TBR operation
   tree.edge <- tree$edge
   tree.parent <- tree.edge[,1]
   tree.child <- tree.edge[,2]

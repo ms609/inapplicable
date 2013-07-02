@@ -24,10 +24,11 @@ Martin R. Smith
 }
 
 \seealso{
-\code{\link{ape,root}} \textit{should} produce the same result as this function, but does not always do so in practice.
+\code{\link{ape,root}} ought to produce the same result as this function, but does not always do so in practice.
 }
 \examples{
-tree <- read.tree(text='(((a,b),c),(d,e));')
-plot(tree)
-plot(root.robust(tree, 'e'))
-plot(root.robust(tree, 4:5))
+  tree <- read.tree(text='(((a,b),c),(d,e));')
+  plot(tree)
+  plot(root.robust(tree, 'e'))
+  plot(root.robust(tree, 4:5))
+}

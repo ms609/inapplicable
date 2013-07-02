@@ -15,7 +15,7 @@ tbr(tree, edge.to.break = NULL)
   \item{tree}{
 A fully resolved tree in phyDat format
 }
-  \item{edge.to.break}{A specific edge to bisect, if desired}
+  \item{edge.to.break}{Edge to bisect, generated randomly if not specified}
 }
 \details{
 Branch lengths are not (yet) supported.

@@ -26,6 +26,7 @@ The parsimony scores generated using this method are identical to those produced
 I have also replaced the ambiguous token ('?') with an 'ambiguous but applicable' token ('+') where appropriate.
 
 The dataset contains:
+\itemize{
   \item{SigSut.data}{The dataset, in the format produced by read.nexus.data('SigSut-fold.nex')}
   \item{SigSut.phy}{The dataset, in phyDat format}
   \item{SigSut.preparedata}{The dataset, in the format produced by prepare.data(SigSut.data)}
@@ -34,15 +35,16 @@ The dataset contains:
   \item{SigSut.besttree}{The phylogenetic tree (in phylo format) recovered by equal-weights analysis
     of the dataset under the revised method of Smith (submitted)}
 }
+}
 \source{
 Sigwart and Sutton (2007); modified per Smith (submitted)
 }
 \references{
-Sigwart, J. D., & Sutton, M. D. (2007). Deep molluscan phylogeny: synthesis of palaeontological and neontological data. Proceedings of the Royal Society B: Biological Sciences, 274, 2413–2419. doi:10.1098/rspb.2007.0701
+Sigwart, J. D., & Sutton, M. D. (2007). Deep molluscan phylogeny: synthesis of palaeontological and neontological data. Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
 M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \examples{
-data('SigSut.RData')
+data('SigSut')
 contrast3 <- matrix(data=c(1,0,0, 0,1,0, 0,0,1, 1,1,0, 1,1,1), ncol=3, byrow=TRUE)
 dimnames(contrast3) <- list(c(0:1, "x", '+', '?'), c(0:1, '-'))
 as.phyDat(SigSut.data, type="USER", contrast = contrast3)

@@ -16,8 +16,6 @@ set.outgroup(tree, outgroup)
   \item{tree}{A tree, in phyDat format, with all nodes resolved.}
   \item{outgroup}{A vector of mode numeric or character specifying the new outgroup.}
 }
-\details{
-}
 \value{A rooted tree with the new outgroup}
 \author{
 Martin R. Smith

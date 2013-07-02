@@ -25,14 +25,9 @@ Modified from ape:::extract.clade.  Added support for extracting tips.  Removed 
 \value{
 Returns a phylogenetic tree that represents a clade extracted from \code{phy}
 }
-\references{
-%% ~put references to the literature/web site here ~
-}
 \author{
 Martin R. Smith
 }
-
-
 \seealso{
 \code{\link{extract.clade}}
 }

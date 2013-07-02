@@ -14,6 +14,6 @@
 \author{Martin R. Smith}
 \seealso{\code{\link{parsimony.inapp}}}
 \examples{
-load('SigSut.RData')
+data('SigSut')
 prepare.data(SigSut.phy)
 }

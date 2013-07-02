@@ -13,7 +13,7 @@ sectorial.inapp(start.tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k
 }
 \arguments{
   \item{start.tree}{A rooted, resolved tree in phyDat format from which to start the search}
-  \item{data}{a dataset, in the format produced by \link{\code{prepare.data}} (or in phyDat format)}
+  \item{data}{a dataset, in the format produced by \code{\link{prepare.data}} (or in phyDat format)}
   \item{outgroup}{ a vector listing the taxa that form the outgroup}
   \item{maxit}{maximum sectorial iterations to perform}
   \item{maxiter}{maximum NNI or SPR iterations to perform}
@@ -38,7 +38,7 @@ of tree rearrangement, returning a tree whose pscore is no worse than that of \c
 A rooted tree of class phyDat.
 }
 \references{
-Goloboff, P. (1999). Analyzing Large Data Sets in Reasonable Times: Solutions for Composite Optima. Cladistics, 15(4), 415–428. doi:10.1006/clad.1999.0122
+Goloboff, P. (1999). Analyzing Large Data Sets in Reasonable Times: Solutions for Composite Optima. Cladistics, 15(4), 415-428. doi:10.1006/clad.1999.0122
 }
 \author{
 Martin R. Smith
@@ -50,7 +50,7 @@ Martin R. Smith
 }
 
 \examples{
-load('SigSut.RData')
+data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)

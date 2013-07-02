@@ -1,16 +1,4 @@
 rearrange.tree <- function (tree, data, rearrange, return.single=TRUE, iter='«unknown»', cores=4, trace=0) {
-## Perform one «method» rearrangement on «tree»
-# ARGUMENTS:
-#   «tree», a rooted bifurcating phylogenetic tree with the desired outgroup, with the attributes:
-#           : pscore, tree's parsimony score
-#           : hits, the number of times the best score has been hit in the calling function
-#   «data», output from optimize.data
-#   «rearrange», a function to produce rearrangements
-#   «return.single», returns all trees if FALSE or a randomly selected tree if TRUE
-#   «iter», number of the iteration that called this function, for screen output only
-#   «cores», number of separate rearrangements to evaluate
-# RETURN:
-#   A the most parsimonious of the «cores» trees generated, with attributes 'hits' and 'pscore'
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   candidates <- mclapply(1:cores, function (i) {rearrange(tree)})
@@ -167,7 +155,4 @@ tbr <- function(tree, edge.to.break=NULL) {
   renumber(ret)
 }
 
-set.outgroup <- function (tree, outgroup) {
-  root.robust(tree, outgroup)
-  #root(root(tree, setdiff(tree$tip, outgroup), resolve.root=TRUE), outgroup, resolve.root=TRUE)
-}
+set.outgroup <- root.robust

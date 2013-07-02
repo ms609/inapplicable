@@ -29,6 +29,7 @@ A tree, in phyDat format.
 }
 \author{
 Martin R. Smith
+rooted.nni is abridged from phangorn:::nnin
 }
 
 \seealso{

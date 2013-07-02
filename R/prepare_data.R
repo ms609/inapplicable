@@ -1,12 +1,4 @@
 prepare.data <- function (data) {
-## Prepares a phyDat object for analysis with modified Fitch algorithm
-# ARGUMENTS:
-#   «data», a phydat object
-# RETURN:
-#   A list, with each list item representing a tip and housing a matrix.
-#     Each column of the matrix corresponds to a transformation series 'pattern'
-#     Each row of the matrix corresponds to a token
-#     Each cell contains a logical denoting whether the character could take the value indicated by the row
   at <- attributes(data)
   cont <- at$contrast
   nLevel <- length(at$level)

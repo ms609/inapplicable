@@ -30,10 +30,10 @@ using the modified Fitch algorithm proposed in Smith (submitted).
 The possible states of the each node are represented in a vector.  If the transformation series in 
 a dataset can take the values \{0, 1, 2, -\}, then each transformation series will be represented at 
 each node by a vector such as:
-  node token is 0 ... \code{c(TRUE, FALSE, FALSE, FALSE)}}
-  node token is 1 ... \code{c(FALSE, TRUE, FALSE, FALSE)}}
-  node token is 0 or 2 ... \code{c(TRUE, FALSE, TRUE, FALSE)}}
-  node token is - ... code{c(FALSE, FALSE, FALSE, TRUE)}}
+  node token is 0 ... \code{c(TRUE, FALSE, FALSE, FALSE)}
+  node token is 1 ... \code{c(FALSE, TRUE, FALSE, FALSE)}
+  node token is 0 or 2 ... \code{c(TRUE, FALSE, TRUE, FALSE)}
+  node token is - ... code{c(FALSE, FALSE, FALSE, TRUE)}
 
 }
 \value{

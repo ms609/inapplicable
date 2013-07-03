@@ -9,7 +9,7 @@ sectorial.inapp(start.tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k
   trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
 }
 \arguments{
-  \item{start.tree}{a rooted, resolved tree in \code{\link{phyDat}} format from which to start the search;}
+  \item{start.tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}
   \item{data}{a dataset, in the format produced by \code{\link{prepare.data}} (or in \code{phyDat} format);}
   \item{outgroup}{a vector listing the taxa that form the outgroup;}
   \item{maxit}{maximum number of sectorial iterations to perform;}
@@ -34,7 +34,7 @@ that of the original tree.
 of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
 }
 \value{
-These functions return a rooted tree of class phyDat.
+These functions return a rooted tree of class \code{phylo}.
 }
 \references{
 Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:10.1006/clad.1999.0122

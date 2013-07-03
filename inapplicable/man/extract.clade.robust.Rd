@@ -16,7 +16,7 @@ The function is intended for use with the function \code{\link{tbr}}, and featur
 this function supports the extraction of 'clades' that constitute a single tip.
 }
 \value{
-Returns a phylogenetic tree that represents a clade extracted from the original tree.
+This function returns a phylogenetic tree that represents a clade extracted from the original tree.
 }
 \author{
 Martin R. Smith

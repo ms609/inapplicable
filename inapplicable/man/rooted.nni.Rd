@@ -2,7 +2,7 @@
 \alias{rooted.nni}
 \alias{rooted.spr}
 \alias{rooted.tbr}
-\title{Tree rearrangement}
+\title{Rearrange a rooted tree}
 \description{This function performs a rearrangement iteration on a tree, retaining the position of the root.}
 \usage{
 rooted.nni(tree)
@@ -18,7 +18,7 @@ no taxon may be moved to the opposite side of the root node.
 Branch lengths are not (yet) supported.
 }
 \value{
-A tree, in \code{phyDat} format.
+This function returns a tree, in \code{phyDat} format.
 }
 \author{
 Martin R. Smith

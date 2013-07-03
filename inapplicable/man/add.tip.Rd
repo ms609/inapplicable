@@ -6,15 +6,15 @@
 add.tip(tree, where, label)
 }
 \arguments{
-  \item{tree}{A phylogenetic tree of class phyDat;}
+  \item{tree}{A phylogenetic tree of class \code{\link{phylo}};}
   \item{where}{The node or tip that should form the sister taxon to the new node.  To add a new tip at the root, use "where = 0";}
   \item{label}{A character string providing the label the new tip.}
 }
 \details{
-Extends \code{ape:::\link{bind.tree}}, which cannot handle single-taxon trees.
+Extends \code{\link{bind.tree}}, which cannot handle single-taxon trees.
 }
 \value{
-A tree of class phyDat with an additional tip at the desired location.
+This function returns a tree of class \code{phylo} with an additional tip at the desired location.
 }
 \author{Martin R. Smith}
 

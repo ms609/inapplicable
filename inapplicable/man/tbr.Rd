@@ -1,12 +1,8 @@
 \name{tbr}
 \alias{tbr}
 
-\title{
-Tree bisection and reconnection 
-}
-\description{
-This function performs a single random Tree Bisection and Reconnection iteration
-}
+\title{Tree bisection and reconnection}
+\description{This function performs a single random \acronym{TBR} iteration.}
 \usage{
 tbr(tree, edge.to.break = NULL)
 }

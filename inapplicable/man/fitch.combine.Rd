@@ -4,88 +4,75 @@
 
 \title{Modified Fitch downpass}
 \description{
-Generates the addition to parsimony score implied at a node where the child nodes have character 
-states given by \code{'a'} and \code{'b'}.  fitch.combine.single calculates a single 
-transformation series; fitch.combine calculates a matrix of multiple transformation series.
+Given two nodes, this function generates the tokens implied for the parent node by the Fitch 
+algorithm as modified in Smith (submitted).  It also determines the addition to parsimony score
+implied at this node.
+
+\code{fitch.combine.single} should be provided with the values of a single transformation series;
+\code{fitch.combine} handles multiple transformation series simeltaneously.
 }
 \usage{
-fitch.combine(a, b, inapplicable.level)
+fitch.combine(a, b, inapplicable.token.index)
+fitch.combine.single(a, b, inapplicable.token.index)
 }
 
 \arguments{
   \item{a}{
-In fitch.combine.single, a logical vector describing the possible character states present at the left child node.
-In fitch.combine, a matrix where each row lists the possible character states present at the left child node.
+\code{fitch.combine.single}: a logical vector describing the permissable tokens for the left child node;
+
+\code{fitch.combine}: a matrix describing the permissable tokens for the left child node (see Details);
 }
-  \item{b}{
-As \code{a}, for the right child node
-}
-  \item{inapplicable.level}{
-The level that represents the inapplicable token.
-}
+  \item{b}{As \code{a}, for the right child node;}
+  \item{inapplicable.token.index}{Which token is the inapplicable token?}
 }
 \details{
 Calculates each character's contribution to the parsimony score of a tree at a specified node 
 using the modified Fitch algorithm proposed in Smith (submitted).
-The possible states of the each node are represented in a vector.  If the transformation series in 
-a dataset can take the values \{0, 1, 2, -\}, then each transformation series will be represented at 
-each node by a vector such as:
-  node token is 0 ... \code{c(TRUE, FALSE, FALSE, FALSE)}
-  node token is 1 ... \code{c(FALSE, TRUE, FALSE, FALSE)}
-  node token is 0 or 2 ... \code{c(TRUE, FALSE, TRUE, FALSE)}
-  node token is - ... code{c(FALSE, FALSE, FALSE, TRUE)}
+
+In \code{fitch.combine.single}, the possible tokens present at each node are represented by a 
+logical vector.  Say that a transformation series can take a token from \preformatted{{0, 1, 2, -}}.
+This transformation series will be represented at each node by a vector such as:
+\tabular{ll}{
+\tab  node token is 0       \tab \code{c(TRUE, FALSE, FALSE, FALSE)}\cr
+\tab  node token is 1       \tab \code{c(FALSE, TRUE, FALSE, FALSE)}\cr
+\tab  node token is 0 or 2  \tab \code{c(TRUE, FALSE, TRUE, FALSE)} \cr
+\tab  node token is -       \tab \code{c(FALSE, FALSE, FALSE, TRUE)}\cr
+}
+
+\code{fitch.combine} can handle multiple transformation series at once, and should be fed a 
+matrix where each column represents a separate transformation series.
 
 }
 \value{
-  \item{comp1 }{Possible tokens at specified node}
-  \item{comp2 }{Addition to parsimony score associated with each transformation series}
+Returns a list with the values:
+  \item{ 1 }{Possible tokens at specified node;}
+  \item{ 2 }{Addition to parsimony score associated with each transformation series.}
 }
 \references{
-M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+\cite{M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX}
 }
-\author{
-Martin R. Smith
-}
+\author{Martin R. Smith}
 \examples{
-## Child nodes have tokens '-' and '0'
+## Child nodes have tokens '-' and '0'; transformation series can take values {0, 1, -}
 fitch.combine.single(c(FALSE, FALSE, TRUE), c(TRUE, FALSE, FALSE), 3)
-## Child nodes have tokens '1' and '+' (ambiuguous applicable); fourth token represents inapplicable state
+## Child nodes have tokens 'B' and '+' (ambiuguous but applicable)
+## Transformation series can take values {A, B, C, -}
 fitch.combine.single(c(FALSE, TRUE, FALSE, FALSE), c(TRUE, TRUE, TRUE, FALSE), 4)
 
-## Reconstruct the possible token states in a node whose children are the terminals 'Wiwaxia' and 'Halkieria'
+## Reconstruct the possible token states in a node whose children 
+## are the terminals 'Wiwaxia' and 'Halkieria'
 data('SigSut')
 fitch.combine(SigSut.preparedata$Wiwaxia, SigSut.preparedata$Halkieria, 3)
 
-## The function is currently defined as
-function (a, b, inapplicable.level) 
-{
-    shared <- a & b
-    unions <- as.logical(colSums(shared))
-    al <- a[-inapplicable.level, ]
-    bl <- b[-inapplicable.level, ]
-    one.child.inapp.only <- !colSums(al) | !colSums(bl)
-    intersects <- !unions
-    ret <- matrix(FALSE, nrow(a), nCol <- ncol(a))
-    ret[, unions] <- shared[, unions]
-    ret[, intersects] <- a[, intersects] | b[, intersects]
-    ret[inapplicable.level, !one.child.inapp.only] <- FALSE
-    col.score <- rep(TRUE, nCol)
-    col.score[unions] <- FALSE
-    col.score[one.child.inapp.only] <- FALSE
-    return(list(ret, col.score))
-  }
-
 ## Fitch.combine.single is currently defined as  
-function (a, b, inapplicable.level) 
+function (a, b, inapplicable.token.index) 
 {
   shared <- a & b
   if (any(shared)) return (list(shared, 0))
-  if (!any(a[-inapplicable.level]) || !any(b[-inapplicable.level])) return (list(a|b, 0))
+  if (!any(a[-inapplicable.token.index]) || !any(b[-inapplicable.token.index]))
+    return (list(a|b, 0))
   ret <- a|b
-  ret[inapplicable.level] <- FALSE
+  ret[inapplicable.token.index] <- FALSE
   return (list(ret, 1))
 }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-%\keyword{ tre }

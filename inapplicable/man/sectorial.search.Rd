@@ -1,12 +1,8 @@
 \name{sectorial.search}
 \alias{sectorial.search}
 \alias{sectorial.inapp}
-\title{
-Sectorial searching
-}
-\description{
-Performs a sectorial search on a tree, preserving the position of the root
-}
+\title{Sectorial searching}
+\description{Performs a sectorial search on a tree, preserving the position of the root.}
 \usage{
 sectorial.search(start.tree, data, outgroup, rearrangements = "NNI")
 sectorial.inapp(start.tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k = 5, trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)

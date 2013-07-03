@@ -1,8 +1,8 @@
 \name{parsimony.inapp}
 \alias{parsimony.inapp}
 \alias{fitch.inapp}
-\title{Calculate Parsimony Score}
-\description{Determines the true parsimony score for a rooted tree.}
+\title{Calculate parsimony score}
+\description{Accurately determines the parsimony score for a rooted tree, correctly handling the inapplicable token.}
 \usage{
   parsimony.inapp(tree, data)
   fitch.inapp(tree, data)

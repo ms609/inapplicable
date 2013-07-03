@@ -1,7 +1,7 @@
 \name{tree.search}
 \alias{tree.search}
 \title{Search for Most Parsimonious Trees}
-\description{Run standard search algorithms (NNI, SPR or TBR) to search for a more parsimonious tree}
+\description{Run standard search algorithms (NNI, SPR or TBR) to search for a more parsimonious tree.}
 \usage{
 tree.search(start.tree, data, outgroup, method = "NNI", maxiter = 100, maxhits = 20, forest.size = 1, cores = 4, trace = 1, ...)
 }

@@ -33,7 +33,8 @@ rearrange.tree(tree, data, rearrange, return.single = TRUE, iter = "<unknown>", 
 }
 \examples{
 data('SigSut')
-rearrange.tree(SigSut.parstree, SigSut.preparedata, rooted.nni)
+random.tree <- rtree(34, tip.label=names(SigSut.data), br=NULL)
+rearrange.tree(random.tree, SigSut.preparedata, rooted.nni)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

@@ -16,9 +16,7 @@ fitch.inapp <- function (tree, data) {
   root.node.index <- min(node)
   # Workspace: matrix of possible states
   na.matrix <- matrix(NA, ncol=nChar, nrow=32)
-  charlist <- NULL 
   charlist <<- mclapply(1:(length(tip.label)+nTip-1), function (tl) {if (tl <= nTip) data[[tip.label[tl]]] else na.matrix} )
-  local.pscore <- NULL
   local.pscore <<- rep(0, nChar)
   nLevel <- length(attr(data, 'levels'))
   left.child   <- c(rep(0,nTip), children[1,])

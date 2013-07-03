@@ -1,5 +1,4 @@
 \name{SuttonEtAl}
-\alias{SuttonEtAl}
 \alias{SuttonEtAl.data}
 \alias{SuttonEtAl.phy}
 \alias{SuttonEtAl.preparedata}
@@ -10,7 +9,7 @@
 \description{
 Phylogenetic matrix from Sutton et al. (2012), modified per Smith (submitted)
 }
-\usage{data('SuttonEtAl.RData')}
+\usage{data('SuttonEtAl')}
 \format{
   The format is:
  chr "SuttonEtAl"
@@ -53,7 +52,7 @@ M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. 
 }
 \examples{
 data('SuttonEtAl')
-SuttonEtAl.phydat
+SuttonEtAl.phy
 plot(SuttonEtAl.parstree)
 dev.new()
 plot(SuttonEtAl.besttree)

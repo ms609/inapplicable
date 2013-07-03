@@ -169,7 +169,6 @@ descendants <- function (tree, node, just.tips = FALSE) {
   edge <- tree$edge
   edge1 <- edge[,1]
   edge2 <- edge[,2]
-  is.descendant = NULL # pass CMD check
   is.descendant <<- logical(nTip * 2L + 1L)
   node.children <- function (oNode) {
     nc <- edge2[edge1==oNode]

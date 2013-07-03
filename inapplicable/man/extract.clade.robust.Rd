@@ -10,7 +10,7 @@ extract.clade.robust(phy, node)
   \item{node}{The number of the node at the base of the clade to be extracted.}
 }
 \details{
-Modified from \code{\pkg{ape}:::\link{extract.clade}}, which sometimes behaves erratically.  
+Modified from \code{ape:::\link{extract.clade}}, which sometimes behaves erratically.  
 The function is intended for use with the function \code{\link{tbr}}, and features present in 
 \code{extract.clade} but unnecessary for this goal have been removed. Unlike extract.clade, 
 this function supports the extraction of 'clades' that constitute a single tip.

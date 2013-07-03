@@ -11,7 +11,7 @@ add.tip(tree, where, label)
   \item{label}{A character string providing the label the new tip.}
 }
 \details{
-Extends \code{\pkg{ape}:::\link{bind.tree}}, which cannot handle single-taxon trees.
+Extends \code{ape:::\link{bind.tree}}, which cannot handle single-taxon trees.
 }
 \value{
 A tree of class phyDat with an additional tip at the desired location.

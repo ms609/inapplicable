@@ -33,10 +33,10 @@ In \code{fitch.combine.single}, the possible tokens present at each node are rep
 logical vector.  Say that a transformation series can take a token from \preformatted{{0, 1, 2, -}}.
 This transformation series will be represented at each node by a vector such as:
 \tabular{ll}{
-\tab  node token is 0       \tab \code{c(TRUE, FALSE, FALSE, FALSE)}\cr
-\tab  node token is 1       \tab \code{c(FALSE, TRUE, FALSE, FALSE)}\cr
-\tab  node token is 0 or 2  \tab \code{c(TRUE, FALSE, TRUE, FALSE)} \cr
-\tab  node token is -       \tab \code{c(FALSE, FALSE, FALSE, TRUE)}\cr
+node token is 0       \tab \code{c(TRUE, FALSE, FALSE, FALSE)}\cr
+node token is 1       \tab \code{c(FALSE, TRUE, FALSE, FALSE)}\cr
+node token is 0 or 2  \tab \code{c(TRUE, FALSE, TRUE, FALSE)} \cr
+node token is -       \tab \code{c(FALSE, FALSE, FALSE, TRUE)}
 }
 
 \code{fitch.combine} can handle multiple transformation series at once, and should be fed a 

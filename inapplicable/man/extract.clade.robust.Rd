@@ -6,7 +6,7 @@
 extract.clade.robust(phy, node)
 }
 \arguments{
-  \item{phy}{A phylogenetic tree in phyDat format;}
+  \item{phy}{A phylogenetic tree in \code{phylo} format;}
   \item{node}{The number of the node at the base of the clade to be extracted.}
 }
 \details{

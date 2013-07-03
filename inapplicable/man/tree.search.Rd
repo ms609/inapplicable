@@ -7,17 +7,17 @@ tree.search(start.tree, data, outgroup, method = "NNI", maxiter = 100, maxhits =
  forest.size = 1, cores = 4, trace = 1, ...)
 }
 \arguments{
-  \item{start.tree}{a fully-resolved tree in phyDat format, with the desired outgroup; edge lengths are not supported and will be deleted;}
+  \item{start.tree}{a fully-resolved tree in \code{\link{{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
   \item{data}{a matrix, ideally in the format produced by \code{\link{prepare.data}}, 
-  alternatively as a phyDat object.  may contain inapplicable data;}
+  alternatively as a \code{\link{phyDat}} object.  may contain inapplicable data;}
   \item{outgroup}{a vector listing the taxa in the outgroup;}
   \item{method}{rearrangements to perform; one of \kbd{NNI}, \kbd{SPR}, or \kbd{TBR};}
   \item{maxiter}{the maximum number of iterations to perform before abandoning the search;}
   \item{maxhits}{the maximum times to hit the best pscore before abandoning the search;}
   \item{forest.size}{the maximum number of trees to return - useful in concert with \code{\link{consensus}};}
-  \item{cores}      {number of trees to examine in parallel on each iteration; may speed up search on multicore machines;}
-  \item{trace}      {higher values provide more verbose user feedback in stdout;}
-  \item{\dots}      {other arguments to pass to subsequent functions.}
+  \item{cores}{number of trees to examine in parallel on each iteration; may speed up search on multicore machines;}
+  \item{trace}{higher values provide more verbose user feedback in stdout;}
+  \item{\dots}{other arguments to pass to subsequent functions.}
 }
 
 \value{

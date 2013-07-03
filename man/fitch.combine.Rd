@@ -30,10 +30,9 @@ Calculates each character's contribution to the parsimony score of a tree at a s
 using the modified Fitch algorithm proposed in Smith (submitted).
 
 In \code{fitch.combine.single}, the possible tokens present at each node are represented by a 
-logical vector.  Say that a transformation series can take a token from \preformatted{{0, 1, 2, -}}.
+logical vector.  Say that a transformation series can take a token from \code{{0, 1, 2, -}}.
 This transformation series will be represented at each node by a vector such as:
-\tabular{ll}{
-node token is 0       \tab \code{c(TRUE, FALSE, FALSE, FALSE)}\cr
+\tabular{ll}{node token is 0       \tab \code{c(TRUE, FALSE, FALSE, FALSE)}\cr
 node token is 1       \tab \code{c(FALSE, TRUE, FALSE, FALSE)}\cr
 node token is 0 or 2  \tab \code{c(TRUE, FALSE, TRUE, FALSE)} \cr
 node token is -       \tab \code{c(FALSE, FALSE, FALSE, TRUE)}
@@ -49,7 +48,7 @@ Returns a list with the values:
   \item{ 2 }{Addition to parsimony score associated with each transformation series.}
 }
 \references{
-\cite{M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX}
+M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \author{Martin R. Smith}
 \examples{

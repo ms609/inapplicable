@@ -44,9 +44,9 @@ The dataset contains:
 Original source, Sigwart and Sutton (2007); updated by Sutton et al. (2012); modified per Smith (submitted)
 }
 \references{
-Sigwart, J. D., & Sutton, M. D. (2007). Deep molluscan phylogeny: synthesis of palaeontological and neontological data. Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
-Sutton, M. D., Briggs, D. E. G., Siveter, D. J., Siveter, D. J., & Sigwart, J. D. (2012). A Silurian armoured aplacophoran and implications for molluscan phylogeny. Nature, 490(7418), 94-97. doi:10.1038/nature11328
-M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
+Sutton, M. D., Briggs, D. E. G., Siveter, D. J., Siveter, D. J., & Sigwart, J. D. (2012). \cite{A Silurian armoured aplacophoran and implications for molluscan phylogeny.} Nature, 490(7418), 94-97. doi:10.1038/nature11328
+M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \examples{
 data('SuttonEtAl')

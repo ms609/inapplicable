@@ -45,6 +45,4 @@ tree.search(njtree, SigSut.preparedata, outgroup, maxiter=20, method='SPR')
 tree.search(njtree, SigSut.preparedata, outgroup, maxiter=20, method='TBR')}
 }
 
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{ tree }

@@ -37,7 +37,7 @@ of tree rearrangement, returning a tree whose \var{pscore} is no worse than that
 These functions return a rooted tree of class \code{phylo}.
 }
 \references{
-Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:10.1006/clad.1999.0122
+Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:\href{http://dx.doi.org/10.1006/clad.1999.0122}{10.1006/clad.1999.0122}
 }
 \author{
 Martin R. Smith

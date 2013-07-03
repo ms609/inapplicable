@@ -1,7 +1,7 @@
 \name{pratchet.inapp}
 \alias{pratchet.inapp}
 \title{Parsimony ratchet}
-\description{This function uses the Parsimony Ratchet to search for a more parsimonious tree.}
+\description{This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.}
 \usage{
 pratchet.inapp(start.tree, data, outgroup = NULL, maxit = 5000, maxiter = 500,
   maxhits = 20, k = 10, trace = 0, rearrangements = "NNI", ...)
@@ -20,11 +20,11 @@ pratchet.inapp(start.tree, data, outgroup = NULL, maxit = 5000, maxiter = 500,
   \item{\dots}{other arguments to pass to subsequent functions.}
 }
 \value{This function returns a tree modified by parsimony ratchet iteration, retaining the position of the root.}
-\references{Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:10.1111/j.1096-0031.1999.tb00277.x}
+\references{Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}}
 \author{
 Martin R. Smith
 
-Adapted from \code{\link{pratchet}}
+Adapted from \code{\link{pratchet}} in the \pkg{phangorn} package, which does not preserve the position of the root.
 }
 \seealso{
 \itemize{

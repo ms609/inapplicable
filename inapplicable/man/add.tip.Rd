@@ -19,9 +19,10 @@ This function returns a tree of class \code{phylo} with an additional tip at the
 \author{Martin R. Smith}
 
 \seealso{
-\code{\link{bind.tree}}
-
-\code{\link{nodelabels}}
+\itemize{
+\item \code{\link{bind.tree}}
+\item \code{\link{nodelabels}}
+}
 }
 \examples{
   plot(tree <- rtree(10, br=NULL)); nodelabels(); nodelabels(15, 15, bg='green'); dev.new()

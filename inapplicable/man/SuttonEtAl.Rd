@@ -1,12 +1,15 @@
 \name{SuttonEtAl}
+\alias{SuttonEtAl}
 \alias{SuttonEtAl.data}
 \alias{SuttonEtAl.phy}
 \alias{SuttonEtAl.preparedata}
 \alias{SuttonEtAl.parstree}
 \alias{SuttonEtAl.besttree}
 \docType{data}
-\title{Phylogenetic data from Sutton et al. 2012}
-\description{Phylogenetic matrix from Sutton et al. (2012), modified per Smith (submitted).}
+\title{Data from Sutton et al. 2012}
+\description{Phylogenetic matrix from Sutton et al. (2012), modified per Smith (submitted),
+and the strict consensus of the most parsimonious trees generated under traditional parsimony
+and under the method proposed by Smith (submitted).}
 \usage{data('SuttonEtAl')
 SuttonElAl.data
 SuttonElAl.phy
@@ -18,7 +21,7 @@ SuttonElAl.besttree}
   \tabular{ll}{
     \code{SuttonEtAl.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
     \code{SuttonEtAl.phy        }  \tab \code{\link{phyDat}} \cr
-    \code{SuttonEtAl.preparedata}  \tab \code{\link[prepare.data]{*phyDat}} \cr
+    \code{SuttonEtAl.preparedata}  \tab \code{\link[=prepare.data]{*phyDat}} \cr
     \code{SuttonEtAl.parstree   }  \tab \code{\link{phylo}} \cr
     \code{SuttonEtAl.besttree   }  \tab \code{\link{phylo}} \cr
   }
@@ -39,7 +42,7 @@ Some coding errors in the matrix were corrected:
     \item \emph{Babinka, Fordilla, Pojetaia}: Character 12, 0->x (inapplicable)
     \item \emph{Babinka}: Character 24, 0->x (inapplicable)
     \item \emph{Chaetoderma}: Character 47, 1->x (inapplicable), to be consistent with character 22
-    \item \emph{Pedanochiton}: Character 42, ?>1, to be consistent with character 48
+    \item \emph{Pedanochiton}: Character 42, ?->1, to be consistent with character 48
   }
 The dataset contains:
 \tabular{ll}{\code{SuttonEtAl.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('SuttonEtAl-fold.nex')}\cr
@@ -56,9 +59,9 @@ Original source, Sigwart and Sutton (2007); updated by Sutton et al. (2012); mod
 }
 \references{
 \itemize{
-\item Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
-\item Sutton, M. D., Briggs, D. E. G., Siveter, D. J., Siveter, D. J., & Sigwart, J. D. (2012). \cite{A Silurian armoured aplacophoran and implications for molluscan phylogeny.} Nature, 490(7418), 94-97. doi:10.1038/nature11328
-\item M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+\item Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:\href{http://dx.doi.org/10.1098/rspb.2007.0701}{10.1098/rspb.2007.0701}
+\item Sutton, M. D., Briggs, D. E. G., Siveter, D. J., Siveter, D. J., & Sigwart, J. D. (2012). \cite{A Silurian armoured aplacophoran and implications for molluscan phylogeny.} Nature, 490(7418), 94-97. doi:\href{http://dx.doi.org/10.1038/nature11328}{10.1038/nature11328}
+\item M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi:\href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}
 }
 }
 \examples{

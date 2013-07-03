@@ -21,15 +21,17 @@ License: \tab CC-0\cr
 Martin R. Smith
 }
 \references{
-M. R. Smith (submitted) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX.
-This R package is deposited at Data Dryad, doi: 10.5061/dryad.n2k53/3
+M. R. Smith (submitted). \cite{Inapplicable data in parsimony analysis.} Systematic Biology XXX, doi: \href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}.
+
+This R package is deposited at Data Dryad, doi:\href{http://dx.doi.org/10.5061/dryad.n2k53/3}{10.5061/dryad.n2k53/3}
 }
 \keyword{ package }
 \keyword{ tree }
 \seealso{
-\code{\link[ape:ape-package]{ape}}
-\code{\link[phangorn:phangorn-package]{phangorn}}
-}
+\itemize{
+\item \code{\link[ape:ape-package]{ape}}
+\item \code{\link[phangorn:phangorn-package]{phangorn}}
+}}
 \examples{
 ## Load data and generate some example trees:
 data('SigSut')

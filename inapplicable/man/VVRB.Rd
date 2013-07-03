@@ -1,12 +1,14 @@
 \name{VVRB}
 \alias{VVRB.data}
+\alias{VVRB.phy}
+\alias{VVRB.preparedata}
 \alias{VVRB.besttree}
 \docType{data}
 \title{Phylogenetic data from Vinther et al. 2008}
 \description{
 Phylogenetic matrix from Vinther, Van Roy and Briggs, modified per Smith (submitted)
 }
-\usage{data('VVRB.RData')}
+\usage{data('VVRB')}
 \format{
   The format is:
  chr "VVRB"
@@ -14,9 +16,11 @@ Phylogenetic matrix from Vinther, Van Roy and Briggs, modified per Smith (submit
 \details{
 The ambiguous token ('?') was replaced with an 'ambiguous but applicable' token ('+') where appropriate.
 
-The dataset contains two items:
+The dataset contains four items:
   \itemize{
     \item{VVRB.data}{The dataset, in the format produced by read.nexus.data('VVRB.nex')}
+    \item{VVRB.phy}{The dataset, in phyDat format}
+    \item{VVRB.preparedata}{The dataset, in the format prepare.data(VVRB.phy)}
     \item{VVRB.besttree}{The phylogenetic tree (in phylo format) recovered by equal-weights analysis
       of the dataset under the revised method of Smith (submitted)}
   }
@@ -41,8 +45,8 @@ contrast5 <- matrix(data=c(
  1,1,1,1,0,
  1,1,1,1,1), ncol=5, byrow=TRUE);
  dimnames(contrast5) <- list(c(0:3, '-', "*", '&', '+', '?'), c(0:3, '-'))
-vvrb.phy <- phyDat(vvrb.dat, type="USER", contrast=contrast5);
-prepare.data(vvrb.phy)
+identical(VVRB.phy, phyDat(VVRB.data, type="USER", contrast=contrast5))
+VVRB.preparedata # <- prepare.data(VVRB.phy)
 outgroup <- c('Nemertean')
 plot(VVRB.besttree)
 }

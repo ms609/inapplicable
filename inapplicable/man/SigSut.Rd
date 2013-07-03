@@ -1,5 +1,4 @@
 \name{SigSut}
-\alias{SigSut}
 \alias{SigSut.data}
 \alias{SigSut.phy}
 \alias{SigSut.preparedata}
@@ -10,7 +9,7 @@
 \description{
 Phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith (submitted)
 }
-\usage{data('SigSut.RData')}
+\usage{data('SigSut')}
 \format{
   The format is:
  chr "SigSut"
@@ -47,7 +46,7 @@ M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. 
 data('SigSut')
 contrast3 <- matrix(data=c(1,0,0, 0,1,0, 0,0,1, 1,1,0, 1,1,1), ncol=3, byrow=TRUE)
 dimnames(contrast3) <- list(c(0:1, "x", '+', '?'), c(0:1, '-'))
-as.phyDat(SigSut.data, type="USER", contrast = contrast3)
+phyDat(SigSut.data, type="USER", contrast = contrast3)
 plot(SigSut.parstree)
 dev.new()
 plot(SigSut.besttree)

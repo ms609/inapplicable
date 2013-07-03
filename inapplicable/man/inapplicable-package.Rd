@@ -35,10 +35,15 @@ M. R. Smith (submitted) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 \code{\link[phangorn:phangorn-package]{phangorn}} ~~
 }
 \examples{
+# Set up examples:
 data('SigSut')
-data <- SigSut.preparedata; tree <- SigSut.parstree; outgroup<-c('Lingula', 'Mickwitzia', 'Neocrania')
-parsimony.inapp(tree, data)
+data <- SigSut.preparedata; outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
+njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)
+
+parsimony.inapp(njtree, data)
 \dontrun{tree.search(tree, data, outgroup, method='NNI')
-pratchet.inapp(tree, data, outgroup)
-sectorial.search(tree, data, outgroup)}
+sectorial.inapp(njtree, data, outgroup, maxit=1, maxiter=50, largest.sector=7)
+sectorial.search(njtree, data, outgroup)
+pratchet.inapp(njtree, data, outgroup)}
 }

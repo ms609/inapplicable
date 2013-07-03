@@ -4,7 +4,7 @@
 Parsimony ratchet
 }
 \description{
-This function uses the Parsimony Ratchet to search for a more parsimonious tree
+This function uses the Parsimony Ratchet to search for a more parsimonious tree.
 }
 \usage{
 pratchet.inapp(start.tree, data, outgroup = NULL, maxit = 5000, maxiter = 500, maxhits = 20, k = 10, trace = 0, rearrangements = "NNI", ...)
@@ -12,7 +12,7 @@ pratchet.inapp(start.tree, data, outgroup = NULL, maxit = 5000, maxiter = 500, m
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{start.tree}{A phyDat object denoting the topology to begin the search from}
-  \item{data}{The output of \code{\link{prepare.data}} (or a matrix in phyDat format)}
+  \item{data}{The output of \code{\link{prepare.data}}, or a matrix in phyDat format (which the function will pass through \code{prepare.data})}
   \item{outgroup}{A vector specifying all tips in the outgroup, if \code{start.tree} is not rooted appropriately}
   \item{maxit}{Maximum pratchet iterations to perform}
   \item{maxiter}{Maximum pratchet iterations to perform}

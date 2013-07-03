@@ -42,17 +42,17 @@ fitch.inapp <- function (tree, data) {
   return (list(sum(pvec), pvec))
 }
 
-fitch.combine <- function (a, b, inapplicable.level) {
+fitch.combine <- function (a, b, inapplicable.token.index) {
   shared <- a & b
   unions <- as.logical(colSums(shared))
-  al<-a[-inapplicable.level,]; bl<-b[-inapplicable.level,]
+  al<-a[-inapplicable.token.index,]; bl<-b[-inapplicable.token.index,]
   one.child.inapp.only <- !colSums(al) | !colSums(bl)
   intersects <- !unions
   
   ret <- matrix(FALSE, nrow(a), nCol <- ncol(a))
   ret[,unions] <- shared[,unions]
   ret[,intersects] <- a[,intersects] | b[,intersects]
-  ret[inapplicable.level, !one.child.inapp.only] <- FALSE
+  ret[inapplicable.token.index, !one.child.inapp.only] <- FALSE
   
   col.score <- rep(TRUE, nCol)
   col.score[unions] <- FALSE
@@ -61,19 +61,19 @@ fitch.combine <- function (a, b, inapplicable.level) {
   return (list(ret, col.score))
 }
 
-fitch.combine.single <- function (a, b, inapplicable.level) {
-## data$levels[inapplicable.level] must be the inapplicable token
+fitch.combine.single <- function (a, b, inapplicable.token.index) {
+## data$levels[inapplicable.token.index] must be the inapplicable token
 # REQUIRE
 #   "a", states that the left node could take - a vector comprising TRUE or FALSE statements
-#        for tokens 1:(inapplicable.level-1), with a[inapplicable.level] representing the inapplicable token
+#        for tokens 1:(inapplicable.token.index-1), with a[inapplicable.token.index] representing the inapplicable token
 #   "b", as "a", for the right node
-#   "inapplicable.level" <- length("data"$level)
+#   "inapplicable.token.index" <- length("data"$level)
 # RETURN
 #   A list comprising: [[1]], state at node, in format of "a"; [[2]], unweighted addition to pscore
   shared <- a & b
   if (any(shared)) return (list(shared, 0))
-  if (!any(a[-inapplicable.level]) || !any(b[-inapplicable.level])) return (list(a|b, 0))
+  if (!any(a[-inapplicable.token.index]) || !any(b[-inapplicable.token.index])) return (list(a|b, 0))
   ret <- a|b
-  ret[inapplicable.level] <- FALSE
+  ret[inapplicable.token.index] <- FALSE
   return (list(ret, 1))
 }

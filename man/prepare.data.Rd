@@ -1,7 +1,7 @@
 \name{prepare.data}
 \alias{prepare.data}
 \title{Prepare phyDat object}
-\description{Prepares a phyDat object for analysis with modified Fitch algorithm}
+\description{Prepares a phyDat object for analysis with modified Fitch algorithm.}
 \usage{prepare.data(data)}
 \arguments{\item{data}{A phyDat object}}
 \details{Optimizes the phyDat object provided for faster processing.}

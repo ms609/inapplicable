@@ -2,13 +2,8 @@
 \alias{rooted.nni}
 \alias{rooted.spr}
 \alias{rooted.tbr}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{
-Tree rearrangement
-}
-\description{
-This function performs a rearrangement iteration on a tree, retaining the position of the root.
-}
+\title{Tree rearrangement}
+\description{This function performs a rearrangement iteration on a tree, retaining the position of the root.}
 \usage{
 rooted.nni(tree)
 rooted.spr(tree)

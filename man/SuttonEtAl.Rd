@@ -6,9 +6,7 @@
 \alias{SuttonEtAl.besttree}
 \docType{data}
 \title{Phylogenetic data from Sutton et al. 2012}
-\description{
-Phylogenetic matrix from Sutton et al. (2012), modified per Smith (submitted)
-}
+\description{Phylogenetic matrix from Sutton et al. (2012), modified per Smith (submitted).}
 \usage{data('SuttonEtAl')}
 \format{
   The format is:

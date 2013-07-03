@@ -1,13 +1,8 @@
 \name{set.outgroup}
 \alias{set.outgroup}
 \alias{root.robust}
-
-\title{
-Root a phylogenetic tree
-}
-\description{
-Sets the root of a phylogenetic tree, such that one child of the root node is \code{outgroup}.
-}
+\title{Root a phylogenetic tree}
+\description{Sets the root of a phylogenetic tree, such that one child of the root node is \code{outgroup}.}
 \usage{
 set.outgroup(tree, outgroup)
 }

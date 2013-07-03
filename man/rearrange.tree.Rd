@@ -1,12 +1,7 @@
 \name{rearrange.tree}
 \alias{rearrange.tree}
-
-\title{
-Rearrange phylogenetic tree
-}
-\description{
-Performs one rearrangement of the specified method on the tree provided.
-}
+\title{Rearrange phylogenetic tree}
+\description{Performs one rearrangement of the specified method on the tree provided.}
 \usage{
 rearrange.tree(tree, data, rearrange, return.single = TRUE, iter = "<unknown>", cores = 4, trace = 0)
 }

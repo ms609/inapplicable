@@ -6,9 +6,7 @@
 \alias{SigSut.besttree}
 \docType{data}
 \title{Phylogenetic data from Sigwart and Sutton 2007}
-\description{
-Phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith (submitted)
-}
+\description{Phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith (submitted).}
 \usage{data('SigSut')}
 \format{
   The format is:

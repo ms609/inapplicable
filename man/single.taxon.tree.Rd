@@ -1,12 +1,7 @@
 \name{single.taxon.tree}
 \alias{single.taxon.tree}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{
-Create a phylogenetic 'tree' that comprises a single taxon
-}
-\description{
-This function returns a phyDat object containing a single tip.
-}
+\title{Create a phylogenetic 'tree' that comprises a single taxon}
+\description{This function returns a phyDat object containing a single tip.}
 \usage{
 single.taxon.tree(label)
 }

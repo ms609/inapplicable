@@ -1,29 +1,22 @@
 \name{extract.clade.robust}
 \alias{extract.clade.robust}
-
-\title{
-Extract clade
-}
-\description{
-Extracts a clade from a phylogenetic tree
-}
+\title{Extract a clade}
+\description{Safely extracts a clade from a phylogenetic tree.}
 \usage{
 extract.clade.robust(phy, node)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{phy}{
-A phylogenetic tree in phyDat format
-}
-  \item{node}{
-The number of the node at the base of the clade to be extracted
-}
+  \item{phy}{A phylogenetic tree in phyDat format;}
+  \item{node}{The number of the node at the base of the clade to be extracted.}
 }
 \details{
-Modified from ape:::extract.clade.  Added support for extracting tips.  Removed features unneccesary for TBR.
+Modified from \code{\pkg{ape}:::\link{extract.clade}}, which sometimes behaves erratically.  
+The function is intended for use with the function \code{\link{tbr}}, and features present in 
+\code{extract.clade} but unnecessary for this goal have been removed. Unlike extract.clade, 
+this function supports the extraction of 'clades' that constitute a single tip.
 }
 \value{
-Returns a phylogenetic tree that represents a clade extracted from \code{phy}
+Returns a phylogenetic tree that represents a clade extracted from the original tree.
 }
 \author{
 Martin R. Smith

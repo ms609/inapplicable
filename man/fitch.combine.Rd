@@ -48,7 +48,7 @@ This function returns a list with the values:
   \item{ 2 }{Addition to parsimony score associated with each transformation series.}
 }
 \references{
-M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi:\href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}
 }
 \author{Martin R. Smith}
 \examples{

@@ -1,4 +1,5 @@
 \name{SigSut}
+\alias{SigSut}
 \alias{SigSut.data}
 \alias{SigSut.phy}
 \alias{SigSut.preparedata}
@@ -21,13 +22,14 @@ SigSut.besttree
   \tabular{ll}{
     \code{SigSut.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
     \code{SigSut.phy        }  \tab \code{\link{phyDat}} \cr
-    \code{SigSut.preparedata}  \tab \code{\link[prepare.data]{*phyDat}} \cr
+    \code{SigSut.preparedata}  \tab \code{\link[=prepare.data]{*phyDat}} \cr
     \code{SigSut.parstree   }  \tab \code{\link{phylo}} \cr
     \code{SigSut.besttree   }  \tab \code{\link{phylo}} \cr
   }
 }
 \details{
-The original Sigwart & Sutton dataset contained ordered transformation series (which are not natively supported in R).
+Following Sigwart & Sutton (2007), I have used the dataset that follows the Brachiopod Fold Hypothesis.
+The original dataset contained ordered transformation series (which are not natively supported in R).
 In this dataset I manually recoded the original ordered characters as a serial unordered transformation series following the formula:
 \tabular{llll}{a.\tab Original transformation series state:\tab (0), greater than zero;\tab (1), otherwise\cr
 b.\tab Original transformation series state:\tab (0), greater than one; \tab (1), otherwise \cr
@@ -52,8 +54,8 @@ Sigwart and Sutton (2007); modified per Smith (submitted)
 }
 \references{
 \itemize{
-\item Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
-\item M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+\item Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:\href{http://dx.doi.org/10.1098/rspb.2007.0701}{10.1098/rspb.2007.0701}
+\item M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: \href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}
 }
 }
 \examples{

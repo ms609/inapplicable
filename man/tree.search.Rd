@@ -7,7 +7,7 @@ tree.search(start.tree, data, outgroup, method = "NNI", maxiter = 100, maxhits =
  forest.size = 1, cores = 4, trace = 1, ...)
 }
 \arguments{
-  \item{start.tree}{a fully-resolved tree in \code{\link{{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
+  \item{start.tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
   \item{data}{a matrix, ideally in the format produced by \code{\link{prepare.data}}, 
   alternatively as a \code{\link{phyDat}} object.  may contain inapplicable data;}
   \item{outgroup}{a vector listing the taxa in the outgroup;}

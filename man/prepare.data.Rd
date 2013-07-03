@@ -1,7 +1,7 @@
 \name{prepare.data}
 \alias{prepare.data}
 \title{Prepare phyDat object}
-\description{Prepares a phyDat object for analysis with the modified Fitch algorithm.}
+\description{Prepares a \code{phyDat} object for analysis with \code{\link{fitch.inapp}}.}
 \usage{prepare.data(data)}
 \arguments{\item{data}{An object of class \code{\link{phyDat}}}}
 \details{Optimizes the \code{data} for efficient processing.}

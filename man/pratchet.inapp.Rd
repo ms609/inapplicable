@@ -19,7 +19,7 @@ pratchet.inapp(start.tree, data, outgroup = NULL, maxit = 5000, maxiter = 500,
   \item{rearrangements}{method to use when rearranging trees: NNI, SPR or TBR;}
   \item{\dots}{other arguments to pass to subsequent functions.}
 }
-\value{Returns a tree modified by parsimony ratchet iteration, retaining the position of the root.}
+\value{This function returns a tree modified by parsimony ratchet iteration, retaining the position of the root.}
 \references{Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:10.1111/j.1096-0031.1999.tb00277.x}
 \author{
 Martin R. Smith

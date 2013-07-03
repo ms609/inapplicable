@@ -5,40 +5,56 @@
 \alias{SigSut.parstree}
 \alias{SigSut.besttree}
 \docType{data}
-\title{Phylogenetic data from Sigwart and Sutton 2007}
-\description{Phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith (submitted).}
-\usage{data('SigSut')}
+\title{Data from Sigwart and Sutton 2007}
+\description{Contains the phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith (submitted),
+and the strict consensus of the most parsimonious trees generated under traditional parsimony
+and under the method proposed by Smith (submitted).}
+\usage{data('SigSut')
+SigSut.data
+SigSut.phy
+SigSut.preparedata
+SigSut.parstree
+SigSut.besttree
+}
 \format{
   The format is:
- chr "SigSut"
+  \tabular{ll}{
+    \code{SigSut.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
+    \code{SigSut.phy        }  \tab \code{\link{phyDat}} \cr
+    \code{SigSut.preparedata}  \tab \code{\link[prepare.data]{*phyDat}} \cr
+    \code{SigSut.parstree   }  \tab \code{\link{phylo}} \cr
+    \code{SigSut.besttree   }  \tab \code{\link{phylo}} \cr
+  }
 }
 \details{
 The original Sigwart & Sutton dataset contained ordered transformation series (which are not natively supported in R).
 In this dataset I manually recoded the original ordered characters as a serial unordered transformation series following the formula:
-a.  Original transformation series state: (0), greater than zero; (1), otherwise
-b.  Original transformation series state: (0), greater than one; (1), otherwise
-c.  Original transformation series state: (0), greater than two; (1), otherwise
+\tabular{llll}{a.\tab Original transformation series state:\tab (0), greater than zero;\tab (1), otherwise\cr
+b.\tab Original transformation series state:\tab (0), greater than one; \tab (1), otherwise \cr
+c.\tab Original transformation series state:\tab (0), greater than two; \tab (1), otherwise\cr
+}
 The parsimony scores generated using this method are identical to those produced using a single ordered transformation series.
 
 I have also replaced the ambiguous token ('?') with an 'ambiguous but applicable' token ('+') where appropriate.
 
 The dataset contains:
-\itemize{
-  \item{SigSut.data}{The dataset, in the format produced by read.nexus.data('SigSut-fold.nex')}
-  \item{SigSut.phy}{The dataset, in phyDat format}
-  \item{SigSut.preparedata}{The dataset, in the format produced by prepare.data(SigSut.data)}
-  \item{SigSut.parstree}{The phylogenetic tree (in phylo format) recovered by equal-weights analysis
-    of the dataset under the standard parsimony method}
-  \item{SigSut.besttree}{The phylogenetic tree (in phylo format) recovered by equal-weights analysis
-    of the dataset under the revised method of Smith (submitted)}
+\tabular{ll}{\code{SigSut.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('SigSut-fold.nex')}\cr
+  \code{SigSut.phy}   \tab      The dataset, in phyDat format\cr
+  \code{SigSut.preparedata}\tab The dataset, in the format produced by \code{prepare.data(SigSut.data)}\cr
+  \code{SigSut.parstree}\tab    The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr
+  \tab  of the dataset under the standard parsimony method\cr
+  \code{SigSut.besttree}\tab     The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr
+  \tab of the dataset under the revised method of Smith (submitted)\cr
 }
 }
 \source{
 Sigwart and Sutton (2007); modified per Smith (submitted)
 }
 \references{
-Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
-M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+\itemize{
+\item Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
+\item M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+}
 }
 \examples{
 data('SigSut')

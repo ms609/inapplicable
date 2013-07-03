@@ -1,21 +1,10 @@
 \name{single.taxon.tree}
 \alias{single.taxon.tree}
-\title{Create a phylogenetic 'tree' that comprises a single taxon}
-\description{This function returns a phyDat object containing a single tip.}
-\usage{
-single.taxon.tree(label)
-}
-%- maybe also 'usage' for other objects documented here.
-\arguments{
-  \item{label}{A character vector specifying the label of the tip}
-}
-\value{
-A phyDat object containing a single tip with the specified label
-}
-\seealso{
-\code{\link{two.tip.tree}}
-}
-\examples{
-single.taxon.tree('Homo_sapiens')
-}
+\title{Single taxon tree}
+\description{Create a phylogenetic 'tree' that comprises a single taxon.}
+\usage{single.taxon.tree(label)}
+\arguments{  \item{label}{a character vector specifying the label of the tip.}}
+\value{This function returns a phyDat object containing a single tip with the specified label.}
+\seealso{\code{\link{two.tip.tree}}}
+\examples{single.taxon.tree('Homo_sapiens')}
 \keyword{ tree }

@@ -1,7 +1,7 @@
 \name{sectorial.search}
 \alias{sectorial.search}
 \alias{sectorial.inapp}
-\title{Sectorial searching}
+\title{Sectorial search}
 \description{Performs a sectorial search on a tree, preserving the position of the root.}
 \usage{
 sectorial.search(start.tree, data, outgroup, rearrangements = "NNI")
@@ -22,28 +22,32 @@ sectorial.inapp(start.tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k
   \item{\dots}{other arguments to pass to subsequent functions.}
 }
 \details{
-\code{sectorial.inapp} performs a sectorial search on the tree specified. A sectorial search detaches 
-a random part of the tree, performs rearrangments on this subtree, then reattaches it to the main tree.
-The improvement to local pscore hopefully improves the overall pscore, although this may not be the case.
-As such, the output of sectorial.inapp should be treated by further TBR (/SPR/NNI) rearrangements and 
-only retained if the ultimate parsimony score is better than that of the original tree.
+\code{sectorial.inapp} performs a sectorial search on the tree specified. A sectorial search 
+detaches a random part of the tree, performs rearrangments on this subtree, then reattaches it 
+to the main tree (Goloboff, 1999).
+The improvement to local \var{pscore} hopefully (but not necessarily) improves the overall \var{pscore}.
+As such, the output of \code{sectorial.inapp} should be treated by further \acronym{TBR (/SPR/NNI)}
+rearrangements and only retained if the ultimate parsimony score is better than 
+that of the original tree.
 
 \code{sectorial.search} is a basic recipe that runs \code{sectorial.inapp} followed by a few rounds
-of tree rearrangement, returning a tree whose pscore is no worse than that of \code{start.tree}.
+of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
 }
 \value{
-A rooted tree of class phyDat.
+These functions return a rooted tree of class phyDat.
 }
 \references{
-Goloboff, P. (1999). \cite{Analyzing Large Data Sets in Reasonable Times: Solutions for Composite Optima.} Cladistics, 15(4), 415-428. doi:10.1006/clad.1999.0122
+Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:10.1006/clad.1999.0122
 }
 \author{
 Martin R. Smith
 }
 
 \seealso{
-\code{\link{tree.search}}
-\code{\link{pratchet.inapp}}
+\itemize{ 
+\item \code{\link{tree.search}}
+\item \code{\link{pratchet.inapp}}
+}
 }
 
 \examples{

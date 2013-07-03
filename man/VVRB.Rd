@@ -8,30 +8,39 @@
 \description{
 Phylogenetic matrix from Vinther, Van Roy and Briggs, modified per Smith (submitted)
 }
-\usage{data('VVRB')}
+\usage{data('VVRB')
+VVRB.data
+VVRB.phy
+VVRB.preparedata
+VVRB.besttree}
 \format{
   The format is:
- chr "VVRB"
+  \tabular{ll}{
+    \code{VVRB.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
+    \code{VVRB.phy        }  \tab \code{\link{phyDat}} \cr
+    \code{VVRB.preparedata}  \tab \code{\link[prepare.data]{*phyDat}} \cr
+    \code{VVRB.besttree   }  \tab \code{\link{phylo}} \cr
+  }
 }
 \details{
 The ambiguous token ('?') was replaced with an 'ambiguous but applicable' token ('+') where appropriate.
 
-The dataset contains four items:
-  \itemize{
-    \item{VVRB.data}{The dataset, in the format produced by read.nexus.data('VVRB.nex')}
-    \item{VVRB.phy}{The dataset, in phyDat format}
-    \item{VVRB.preparedata}{The dataset, in the format prepare.data(VVRB.phy)}
-    \item{VVRB.besttree}{The phylogenetic tree (in phylo format) recovered by equal-weights analysis
-      of the dataset under the revised method of Smith (submitted)}
-  }
+The dataset contains:
+\tabular{ll}{\code{VVRB.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('VVRB-fold.nex')}\cr
+  \code{VVRB.phy}   \tab      The dataset, in phyDat format\cr
+  \code{VVRB.preparedata}\tab The dataset, in the format produced by \code{prepare.data(VVRB.data)}\cr
+  \code{VVRB.besttree}\tab     The phylogenetic tree recovered by equal-weights analysis\cr
+  \tab of the dataset under the revised method of Smith (submitted)\cr
+}
 }
 \source{
 Vinther, Van Roy & Briggs (2008) modified per Smith (submitted)
 }
 \references{
-Vinther, J., Van Roy, P., & Briggs, D. E. G. (2008). \cite{Machaeridians are Palaeozoic armoured annelids.} Nature, 451(7175), 185-188. doi:10.1038/nature06474
-M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
-}
+\itemize{
+\item Vinther, J., Van Roy, P., & Briggs, D. E. G. (2008). \cite{Machaeridians are Palaeozoic armoured annelids.} Nature, 451(7175), 185-188. doi:10.1038/nature06474
+\item M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+}}
 \examples{
 data('VVRB')
 contrast5 <- matrix(data=c(

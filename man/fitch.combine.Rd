@@ -43,7 +43,7 @@ matrix where each column represents a separate transformation series.
 
 }
 \value{
-Returns a list with the values:
+This function returns a list with the values:
   \item{ 1 }{Possible tokens at specified node;}
   \item{ 2 }{Addition to parsimony score associated with each transformation series.}
 }

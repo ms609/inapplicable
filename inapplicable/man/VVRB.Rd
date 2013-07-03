@@ -29,8 +29,8 @@ The dataset contains four items:
 Vinther, Van Roy & Briggs (2008) modified per Smith (submitted)
 }
 \references{
-Vinther, J., Van Roy, P., & Briggs, D. E. G. (2008). Machaeridians are Palaeozoic armoured annelids. Nature, 451(7175), 185-188. doi:10.1038/nature06474
-M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+Vinther, J., Van Roy, P., & Briggs, D. E. G. (2008). \cite{Machaeridians are Palaeozoic armoured annelids.} Nature, 451(7175), 185-188. doi:10.1038/nature06474
+M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \examples{
 data('VVRB')

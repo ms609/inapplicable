@@ -9,28 +9,29 @@ rooted.nni(tree)
 rooted.spr(tree)
 rooted.tbr(tree)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{tree}{
-A phyDat object, with all nodes resolved.
-}
+  \item{tree}{An object of class \code{\link{phyDat}}, with all nodes resolved.}
 }
 \details{
-A single NNI, SPR or TBR rearrangement is performed, subject to the constrain that no taxon may be moved to the opposite side of the root node.
+A single \acronym{NNI}, \acronym{SPR} or \acronym{TBR} rearrangement is performed, subject to the constraint that 
+no taxon may be moved to the opposite side of the root node.
 Branch lengths are not (yet) supported.
 }
 \value{
-A tree, in phyDat format.
+A tree, in \code{phyDat} format.
 }
 \author{
 Martin R. Smith
-rooted.nni is abridged from phangorn:::nnin
+
+\code{rooted.nni} is abridged from \pkg{phangorn}\code{:::nnin}
 }
 
 \seealso{
-\code{\link{set.outgroup}}, set the outgroup of the phylogenetic tree
-\code{\link{nni}}, unrooted NNI and SPR
-\code{\link{tbr}}, unrooted TBR
+\itemize{
+\item \code{\link{set.outgroup}}, set the outgroup of the phylogenetic tree
+\item \code{\link{nni}}, unrooted NNI and SPR
+\item \code{\link{tbr}}, unrooted TBR
+}
 }
 \examples{
   tree <- read.tree(text='(((a,b),c),(d,(e,f)));')

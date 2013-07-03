@@ -37,8 +37,8 @@ The dataset contains:
 Sigwart and Sutton (2007); modified per Smith (submitted)
 }
 \references{
-Sigwart, J. D., & Sutton, M. D. (2007). Deep molluscan phylogeny: synthesis of palaeontological and neontological data. Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
-M. R. Smith (submitted). Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:10.1098/rspb.2007.0701
+M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \examples{
 data('SigSut')

@@ -21,7 +21,7 @@ fitch.inapp returns a list comprising two elements:
              for each transformation series in \code{data}}
 }
 \references{
-M. R. Smith (submitted) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \author{Martin R. Smith}
 \seealso{

@@ -19,7 +19,7 @@ Branch lengths are not (yet) supported.
 \value{a phyDat object}
 \references{
 The TBR algorithm is summarized in
-Felsenstein, J. 2004. Inferring Phylogenies. Sinauer Associates, Sunderland, Massachusetts.
+Felsenstein, J. 2004. \cite{Inferring Phylogenies.} Sinauer Associates, Sunderland, Massachusetts.
 }
 \author{
 Martin R. Smith

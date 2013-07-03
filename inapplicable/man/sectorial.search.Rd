@@ -5,20 +5,21 @@
 \description{Performs a sectorial search on a tree, preserving the position of the root.}
 \usage{
 sectorial.search(start.tree, data, outgroup, rearrangements = "NNI")
-sectorial.inapp(start.tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k = 5, trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
+sectorial.inapp(start.tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k = 5,
+  trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
 }
 \arguments{
-  \item{start.tree}{A rooted, resolved tree in phyDat format from which to start the search}
-  \item{data}{a dataset, in the format produced by \code{\link{prepare.data}} (or in phyDat format)}
-  \item{outgroup}{ a vector listing the taxa that form the outgroup}
-  \item{maxit}{maximum sectorial iterations to perform}
-  \item{maxiter}{maximum NNI or SPR iterations to perform}
-  \item{k}{ stop when \code{k} searches have improved their sectorial score}
-  \item{trace}{Larger values of \code{trace} report more detail to stdout}
-  \item{smallest.sector}{sectors with fewer than \code{smallest.sector} taxa will not be selected; 4 is the smallest sensible value}
-  \item{largest.sector}{sectors with more than \code{largest.sector} taxa will not be selected}
-  \item{rearrangements}{method to use when rearranging subtrees: NNI, SPR or TBR}
-  \item{\dots}{Other arguments to pass to subsequent functions}
+  \item{start.tree}{a rooted, resolved tree in \code{\link{phyDat}} format from which to start the search;}
+  \item{data}{a dataset, in the format produced by \code{\link{prepare.data}} (or in \code{phyDat} format);}
+  \item{outgroup}{a vector listing the taxa that form the outgroup;}
+  \item{maxit}{maximum number of sectorial iterations to perform;}
+  \item{maxiter}{maximum number of rearrangements to perform on each sectorial iteration;}
+  \item{k}{stop when \code{k} searches have improved their sectorial score;}
+  \item{trace}{integer determining how verbose the reporting to stdout will be;}
+  \item{smallest.sector}{sectors with fewer than \code{smallest.sector} taxa will not be selected; \kbd{4} is the smallest sensible value;}
+  \item{largest.sector}{sectors with more than \code{largest.sector} taxa will not be selected;}
+  \item{rearrangements}{method to use when rearranging subtrees: NNI, SPR or TBR;}
+  \item{\dots}{other arguments to pass to subsequent functions.}
 }
 \details{
 \code{sectorial.inapp} performs a sectorial search on the tree specified. A sectorial search detaches 
@@ -34,7 +35,7 @@ of tree rearrangement, returning a tree whose pscore is no worse than that of \c
 A rooted tree of class phyDat.
 }
 \references{
-Goloboff, P. (1999). Analyzing Large Data Sets in Reasonable Times: Solutions for Composite Optima. Cladistics, 15(4), 415-428. doi:10.1006/clad.1999.0122
+Goloboff, P. (1999). \cite{Analyzing Large Data Sets in Reasonable Times: Solutions for Composite Optima.} Cladistics, 15(4), 415-428. doi:10.1006/clad.1999.0122
 }
 \author{
 Martin R. Smith

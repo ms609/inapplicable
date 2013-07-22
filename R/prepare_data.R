@@ -15,11 +15,22 @@ prepare.data <- function (data) {
 }
 
 prepare.data.c <- function (data) {
-  data <- phangorn:::prepareDataFitch(data)
-  d <- attributes(data)
-  data <- as.integer(data)
-  attributes(data) <- d
-  attr(data, 'inapp.level') <- 2^(which(attr(data, 'levels') == "-")-1)
-  class(data) <- '*phyDat'
-  data
+# Modified from phangorn:::prepareDataFitch
+  at <- attributes(data)
+  cont <- attr(data, "contrast")
+  nLevel <- length(at$level)
+  nTip <- length(data)
+  nChar <- attr(data, "nr")
+  tmp = contrast %*% 2L^c(0L:(l - 1L))
+  tmp = as.integer(tmp)
+  data = unlist(data, FALSE, FALSE)
+  ret = tmp[data] 
+  ret <- as.integer(ret)
+  attributes(ret) <- at
+  attr(ret, 'inapp.level') <- 2^(which(at$levels == "-") - 1)
+  attr(ret, 'dim') <- c(nChar, nTip)
+  names(ret) <- names(data)
+  #dimnames(X) <- list(NULL, at$names)
+  class(ret) <- '*phyDat'
+  ret
 }

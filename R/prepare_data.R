@@ -13,3 +13,13 @@ prepare.data <- function (data) {
   class(ret) <- '*phyDat'
   ret
 }
+
+prepare.data.c <- function (data) {
+  data <- phangorn:::prepareDataFitch(data)
+  d <- attributes(data)
+  data <- as.integer(data)
+  attributes(data) <- d
+  attr(data, 'inapp.level') <- 2^(which(attr(data, 'levels') == "-")-1)
+  class(data) <- '*phyDat'
+  data
+}

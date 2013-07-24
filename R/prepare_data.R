@@ -23,7 +23,7 @@ prepare.data.c <- function (data) {
   cont <- attr(data, "contrast")
   nTip <- length(data)
   at$names <- NULL
-  tmp = contrast %*% 2L^c(0L:(nLevel - 1L))
+  tmp = cont %*% 2L^c(0L:(nLevel - 1L))
   tmp = as.integer(tmp)
   data = unlist(data, FALSE, FALSE)
   ret = tmp[data] 

@@ -1,4 +1,4 @@
-prepare.data <- function (data) {
+prepare.data.noC <- function (data) {
   at <- attributes(data)
   cont <- at$contrast
   nLevel <- length(at$level)
@@ -14,7 +14,7 @@ prepare.data <- function (data) {
   ret
 }
 
-prepare.data.c <- function (data) {
+prepare.data <- function (data) {
 # Written with reference to phangorn:::prepareDataFitch
   at <- attributes(data)
   nam <- at$names

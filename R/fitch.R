@@ -1,6 +1,6 @@
 parsimony.inapp <- function (tree, data) return (fitch.inapp(tree, data)[[1]])
 
-fitch.inapp <- function (tree, data) {
+fitch.inapp.noC <- function (tree, data) {
   # Data
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
@@ -42,9 +42,9 @@ fitch.inapp <- function (tree, data) {
   return (list(sum(pvec), pvec))
 }
 
-fitch.inapp.c <- function (tree, data) {
+fitch.inapp <- function (tree, data) {
   # Data
-  if (class(data) == 'phyDat') data <- prepare.data.c(data)
+  if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
 
   nChar <- attr(data, 'nr') # strictly, transformation series patterns; these'll be upweighted later

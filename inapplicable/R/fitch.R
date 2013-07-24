@@ -2,7 +2,7 @@ parsimony.inapp <- function (tree, data) return (fitch.inapp(tree, data)[[1]])
 
 fitch.inapp.noC <- function (tree, data) {
   # Data
-  if (class(data) == 'phyDat') data <- prepare.data(data)
+  if (class(data) == 'phyDat') data <- prepare.data.noC(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
   weight <- attr(data, 'weight')
   nChar <- attr(data, 'nr') # strictly, transformation series patterns; these'll be upweighted later

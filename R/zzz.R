@@ -1,6 +1,4 @@
-.packageName <- "inapplicable"
-
 .onLoad <- function(libname, pkgname) {
-    library.dynam("fitch", pkgname, libname)
+    library.dynam("inapplicable", pkgname, libname)
 }
 

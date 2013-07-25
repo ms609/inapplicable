@@ -130,23 +130,14 @@ pratchet.inapp <- function (start.tree, data, outgroup=NULL, maxit=5000, maxiter
 
 bootstrap.inapp <- function (phy, x, outgroup, maxiter, trace=0, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
-# ARGUMENTS: 
-#   "phy", a starting tree in phydat format
-#   "x", data, in the format produced by optimize.data()
-#   "FUN", a function of the form METHOD.inapp() to be used to generate a new candidate tree from the bootstrapped dataset
-# RETURN:
-#   a tree with a better pscore under re-weighted characters
-  # Begin with "normal" characters, x[[1]]
   at <- attributes(x)
   weight <- at$weight
   v <- rep(1:length(weight), weight)
   BS <- tabulate(sample(v, replace=TRUE),length(weight)) 
   ind <- which(BS > 0)
-  x <- mclapply(names(x), function (i) {x[[i]] <- x[[i]][,ind]})
-  names(x) <- at$names
+  x <- x[ind,]
   attr(x, "weight") <- BS[ind]
   attr(x, "nr") <- length(ind)
-  attr(x, "levels") <- at$levels
   attr(phy, 'pscore') <- NULL
   class(x) <- '*phyDat'
   res <- tree.search(phy, x, outgroup, maxiter, method='NNI', trace=trace, ...)

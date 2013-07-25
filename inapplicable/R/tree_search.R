@@ -9,21 +9,27 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter
   # REQUIRE
   ##  "data", the output of prepare.data()   
     at <- attributes(data)
-    state.union <- data[[tips[1]]]
-    for (tip in tips[2:length(tips)]) {
-      state.union <- data[[tip]] & state.union
+    dec <- data[,tips]
+    nBits <- floor(log2(max(data))) + 1L
+    bin <- array(FALSE, dim=c(nrow(dec), ncol(dec), nBits))
+    for (i in 0:(nBits-1)) {
+      bin[, , nBits-i] <- as.logical(dec %% 2)
+      dec <- (dec %/% 2)
     }
-    parsimony.informative <- which(colSums(state.union) == 0)
-    if (length(parsimony.informative) == 0) return (NULL)
-    data <- mclapply(tips, function (tip) {data[[tip]][,parsimony.informative]})
-    names(data) <- tips
-    attr(data, 'nr') <- length(parsimony.informative)
+    state.union <- apply(bin, c(1,3), all)
+    parsimony.informative <- !as.logical(rowSums(state.union))
+    if (!any(parsimony.informative)) return (NULL)
+    data[parsimony.informative, tips]
+    informative.chars <- length(parsimony.informative)
+    SECTOR_ROOT <- rep(2^nBits-1, informative.chars)
+    data <- cbind(data, SECTOR_ROOT)
+    attr(data, 'nr') <- informative.chars
     attr(data, 'levels') <- at$levels
     attr(data, 'weight') <- at$weight[parsimony.informative]
     class(data) <- '*phyDat'
-    data$SECTOR_ROOT <- matrix(TRUE, nrow=nrow(data[[1]]), ncol=ncol(data[[1]]))
     data
   }
+  
   eps <- 1e-08
   kmax <- 1
   for (i in 1:maxit) {

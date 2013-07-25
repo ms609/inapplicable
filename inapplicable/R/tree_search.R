@@ -88,7 +88,7 @@ pratchet.inapp <- function (start.tree, data, outgroup=NULL, maxit=5000, maxiter
   kmax <- 1
   for (i in 1:maxit) {
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset:")
-    bstree <- bootstrap.inapp(phy=tree, x=data, outgroup=outgroup, maxiter=maxiter, trace=trace-1, ...)
+    bstree <- bootstrap.inapp(phy=tree, x=data, outgroup=outgroup, maxiter=maxiter, trace=trace-2, ...)
     
     if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new candidate tree:")
     if (rearrangements == "TBR") {

@@ -38,6 +38,6 @@ data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)
-\dontrun{pratchet.inapp(njtree, SigSut.preparedata, outgroup, maxit=1, maxiter=50)}
+pratchet.inapp(njtree, SigSut.preparedata, outgroup, maxit=1, maxiter=50)
 }
 \keyword{ tree }

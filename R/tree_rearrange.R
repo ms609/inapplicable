@@ -50,27 +50,27 @@ rooted.nni <- function (tree) {
 rooted.spr <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
   nTips <- length(tree$tip.label)
-  root <- nTips + 1L
+  edge <- tree$edge
+  parent <- edge[,1]
+  child <- edge[,2]
+  root <- nTips + 1L # Assumes fully-resolved bifurcating tree
   root.children <- Children(tree, root)
-  size <- c(length(Descendants(tree, root.children[1], "all")),
-            length(Descendants(tree, root.children[2], "all")))
-  if (min(size) == 1) {
-    spr.tree <- phangorn:::kSPR(tree, k=1)
-    spr.tree <- renumber(spr.tree)
-    tree <- root.robust(spr.tree, tree$tip.label[root.children[which(size==1)]])
-    return (tree)
-  }
+  children <- Descendants(tree, root.children[1:2], "all")
+  size <- c(length(children[[1]]), length(children[[2]]))
   moves <- (size-2L) * (size-1L)
   chosen.subtree <- 1L + (runif(1, min=0, max=sum(moves)) >= moves[1])
-  outgroup.root <- root.children[3L-chosen.subtree]
-  outgroup.tips <- Descendants(tree, outgroup.root, type='tips')[[1]]
-  subtree.root <- root.children[chosen.subtree]
-  subtree.tips <- setdiff(1:nTips, outgroup.tips) 
-  stump <- drop.tip(tree, subtree.tips, subtree=FALSE)
-  stump$root.edge <- 1
-  crown <- phangorn:::kSPR(extract.clade.robust(tree, subtree.root), k=1)
-  crown$root.edge <- 1
-  root.robust(stump + crown, tree$tip.label[outgroup.tips])
+  candidate.nodes <- children[[chosen.subtree]]
+  singletons <- candidate.nodes[1:2] < root
+  if (any(singletons)) candidate.nodes <- candidate.nodes[-which(!singletons)]
+  prune.node <- sample(candidate.nodes, 1)
+  prune.tips <- Descendants(tree, prune.node)[[1]]
+  pruning <- extract.clade.robust(tree, prune.node); pruning$root.edge <- 1
+  tree$tip.label[prune.tips] <- 'PRUNED_TIP'
+  affected.nodes <- c(parent[child==prune.node], prune.node, Descendants(tree, prune.node, 'all'))
+  candidate.nodes <- c(root.children[chosen.subtree], candidate.nodes[!candidate.nodes %in% affected.nodes])
+  tree <- bind.tree(tree, pruning, where=sample(candidate.nodes, 1), position=1)
+  tree <- drop.tip(tree, 'PRUNED_TIP')
+  tree
 }
 
 rooted.tbr <- function(tree) {

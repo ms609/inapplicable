@@ -68,8 +68,9 @@ rooted.spr <- function(tree) {
   tree$tip.label[prune.tips] <- 'PRUNED_TIP'
   affected.nodes <- c(parent[child==prune.node], prune.node, Descendants(tree, prune.node, 'all'))
   candidate.nodes <- c(root.children[chosen.subtree], candidate.nodes[!candidate.nodes %in% affected.nodes])
-  tree <- bind.tree(tree, pruning, where=sample(candidate.nodes, 1), position=1)
+  tree <- bind.tree(tree, pruning, where=graft.site <- sample(candidate.nodes, 1), position=1)
   tree <- drop.tip(tree, 'PRUNED_TIP')
+  tree <- renumber(phangorn:::reorderPruning(tree))  
   tree
 }
 

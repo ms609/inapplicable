@@ -19,8 +19,8 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter
     state.union <- apply(bin, c(1,3), all)
     parsimony.informative <- !as.logical(rowSums(state.union))
     if (!any(parsimony.informative)) return (NULL)
-    data[parsimony.informative, tips]
-    informative.chars <- length(parsimony.informative)
+    data <- data[parsimony.informative, tips]
+    informative.chars <- sum(parsimony.informative)
     SECTOR_ROOT <- rep(2^nBits-1, informative.chars)
     data <- cbind(data, SECTOR_ROOT)
     attr(data, 'nr') <- informative.chars
@@ -41,9 +41,10 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter
     repeat {
       sector <- sample(candidate.nodes, 1)
       crown <- extract.clade.robust(tree, sector)
-      sector.size <- length(crown$tip.label)
+      crown.tips <- crown$tip.label
+      sector.size <- length(crown.tips)
       cat(sector, 'size', sector.size, '...')
-      crown.data <- sector.data(data, crown$tip.label)
+      crown.data <- sector.data(data, crown.tips)
       if (!is.null(crown.data)) break else cat('unsuitable (no data); trying')
       candidate.nodes <- candidate.nodes[-which(candidate.nodes==sector)]
       if (length(candidate.nodes == 0)) stop('No selectable sectors contain parsimony information! Either "largest.sector" is close to "smallest.sector" or your dataset is short of parsimony information.')

@@ -12,8 +12,8 @@ pratchet.inapp(start.tree, data, outgroup = NULL, maxit = 5000, maxiter = 500,
     (which the function will itself pass through \code{prepare.data});}
   \item{outgroup}{a vector specifying all tips in the outgroup, used if \code{start.tree} is not rooted appropriately;}
   \item{maxit}{maximum ratchet iterations to perform;}
-  \item{maxiter}{maximum rearrangements to perform on each ratchet iteration;}
-  \item{maxhits}{maximum times to hit best score before terminating each pratchet iteration;}
+  \item{maxiter}{maximum rearrangements to perform on each bootstrap or ratchet iteration;}
+  \item{maxhits}{maximum times to hit best score before terminating a tree search within a pratchet iteration;}
   \item{k}{stop when k ratchet iterations have found the same best score;}
   \item{trace}{larger numbers provides more verbose feedback to the user;}
   \item{rearrangements}{method to use when rearranging trees: NNI, SPR or TBR;}

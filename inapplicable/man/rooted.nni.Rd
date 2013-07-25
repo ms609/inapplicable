@@ -10,7 +10,7 @@ rooted.spr(tree)
 rooted.tbr(tree)
 }
 \arguments{
-  \item{tree}{An object of class \code{\link{phylo}}, with all nodes resolved.}
+  \item{tree}{An object of class \code{\link{phylo}}, with all nodes resolved (bifurcating).}
 }
 \details{
 A single \acronym{NNI}, \acronym{SPR} or \acronym{TBR} rearrangement is performed, subject to the constraint that 

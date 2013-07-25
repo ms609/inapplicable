@@ -195,6 +195,7 @@ tree.search <- function (start.tree, data, outgroup, method='NNI', maxiter=100, 
 sectorial.search <- function (start.tree, data, outgroup, rearrangements='NNI') {
   best.score <- attr(start.tree, 'pscore')
   if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data)
+  if (length(outgroup) == 0) warning('"outgroup" parameter not specified')
   sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
   sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=20, trace=3)
   sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=2000, maxhits=25, trace=3)

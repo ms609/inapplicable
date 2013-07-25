@@ -6,12 +6,16 @@
 \arguments{\item{data}{An object of class \code{\link{phyDat}}}}
 \details{Optimizes the \code{data} for efficient processing.}
 \value{
-   This function returns a list of class \code{*phyDat}, with each list item representing a tip and housing a matrix.
+   This function returns a matrix of class \code{*phyDat}.
    \itemize{
-\item     Each column of the matrix corresponds to a transformation series;
-\item     Each row of the matrix corresponds to a token, as specified by colnames(attr(data, 'contrast'));
-\item     Each cell contains a logical denoting whether the transformation series could take the value indicated by the row.
-}
+\item     Each column of the matrix corresponds to an operational taxonomic unit;
+\item     Each row of the matrix represents a transformation series;
+\item     Each cell in the matrix contains an integer that denotes the possible tokens.
+          This integer is the decimal representation of the binary figure represented by a row
+          in the contrast matrix (in reverse order), after
+          phangorn:::prepareFitchData.
+          
+  }
 }
 \author{Martin R. Smith}
 \seealso{\code{\link{parsimony.inapp}}}

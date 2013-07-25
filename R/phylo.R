@@ -185,7 +185,7 @@ descendants <- function (tree, node, just.tips = FALSE) {
 two.tip.tree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))
 
 bind.tree.fast <- function(x, y, where = "root", position = 0, interactive = FALSE) {
-## Copied from ape:::bind.tree.fast; the only change is that I use (x|y).edge in place of (x|y)$edge.
+## Copied from ape:::bind.tree; the only change is that I use (x|y).edge in place of (x|y)$edge.
 
     nx <- length(x$tip.label)
     mx <- x$Nnode

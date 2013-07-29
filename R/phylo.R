@@ -127,6 +127,7 @@ root.robust <- function (tree, outgroup) {
   outgroup <- sort(outgroup)
   if (identical(outgroup, descendants(tree, root.children[1L], TRUE))
    || identical(outgroup, descendants(tree, root.children[2L], TRUE))) return (tree)
+  if (any(root.children %in% outgroup)) outgroup <- seq_along(tree$tip)[-outgroup] # outgroup straddles root; root on ingroup instead
   
   ancestry <- Ancestors(tree, outgroup)
   if (length(outgroup) > 1) {

@@ -1,8 +1,8 @@
 Package: inapplicable
 Type: Package
 Title: Inapplicable data in parsimony analysis
-Version: 0.02.203
-Date: 2013-07-25
+Version: 0.02.204
+Date: 2013-07-29
 Author: Martin R. Smith
 Maintainer: Martin R. Smith <martins@gmail.com>
 Description: Correctly calculates tree parsimony scores when datasets contain inapplicable data.

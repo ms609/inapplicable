@@ -69,7 +69,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter
     if (kmax == k) break()
   } # for
   if (trace >= 0)
-    cat ("\nCompleted sectorial search.\n")
+    cat ("\nCompleted sectorial rearrangements.\n")
   if (!is.null(outgroup)) tree <- set.outgroup(tree, outgroup)
   attr(tree, 'pscore') <- NULL
   attr(tree, 'hits') <- NULL

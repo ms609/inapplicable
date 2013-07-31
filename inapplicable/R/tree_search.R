@@ -190,15 +190,15 @@ tree.search <- function (start.tree, data, outgroup, method='NNI', maxiter=100, 
   } else tree
 }
 
-sectorial.search <- function (start.tree, data, outgroup, rearrangements='NNI') {
+sectorial.search <- function (start.tree, data, outgroup, rearrangements='NNI', maxiter=2000, trace=3) {
   best.score <- attr(start.tree, 'pscore')
   if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data)
   if (length(outgroup) == 0) warning('"outgroup" parameter not specified')
-  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
-  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=30, trace=3)
-  sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=2000, maxhits=20, trace=3)
-  sect <- tree.search(sect, data, outgroup, method='SPR', maxiter=2000, maxhits=50, trace=3)
-  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=60, trace=3)
+  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=trace-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2L])*0.25, rearrangements=rearrangements)
+  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=maxiter, maxhits=30, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=maxiter, maxhits=20, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='SPR', maxiter=maxiter, maxhits=50, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=maxiter, maxhits=60, trace=trace)
   if (attr(sect, 'pscore') <= best.score) {
     return (sect)
   } else return (set.outgroup(start.tree, outgroup))

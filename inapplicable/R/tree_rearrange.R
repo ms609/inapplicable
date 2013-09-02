@@ -1,8 +1,8 @@
-rearrange.tree <- function (tree, data, rearrange, return.single=TRUE, iter='<unknown>', cores=4, trace=0) {
+rearrange.tree <- function (tree, data, rearrange, concavity=NULL, return.single=TRUE, iter='<unknown>', cores=4, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   candidates <- mclapply(1:cores, function (i) {rearrange(tree)})
-  scores <- as.integer(mclapply(candidates, function(cand) {parsimony.inapp(cand, data)}))
+  scores <- unlist(mclapply(candidates, function(cand) {parsimony.inapp(cand, data, concavity)}))
   min.score <- min(scores)
   best.trees <- scores == min.score
   trees <- candidates[best.trees]

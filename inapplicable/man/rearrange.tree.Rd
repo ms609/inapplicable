@@ -3,7 +3,7 @@
 \title{Rearrange phylogenetic tree}
 \description{Performs one tree rearrangement of the specified type.}
 \usage{
-rearrange.tree(tree, data, rearrange, return.single = TRUE,
+rearrange.tree(tree, data, rearrange, concavity = NULL, return.single = TRUE,
  iter = "<unknown>", cores = 4, trace = 0)
 }
 \arguments{
@@ -14,6 +14,7 @@ rearrange.tree(tree, data, rearrange, return.single = TRUE,
   \item{data}{a data matrix defined by \code{\link{prepare.data}};}
   \item{rearrange}{a rearrangement function: probably one of 
     \code{\link{rooted.nni}}, \code{\link{rooted.spr}} or \code{\link{rooted.tbr}}}
+  \item{concavity}{concavity constant, if implied weighting is desired; see \code{\link{parsimony.inapp}}.}
   \item{return.single}{returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
   \item{iter}{iteration number of calling function, for reporting to user only;}
   \item{cores}{number of separate rearrangements to evaluate in parallel;}

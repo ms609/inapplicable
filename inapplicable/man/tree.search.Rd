@@ -3,8 +3,8 @@
 \title{Search for most parsimonious trees}
 \description{Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR}) to search for a more parsimonious tree.}
 \usage{
-tree.search(start.tree, data, outgroup, method = "NNI", maxiter = 100, maxhits = 20,
- forest.size = 1, cores = 4, trace = 1, ...)
+tree.search(start.tree, data, outgroup, method = "NNI", concavity = NULL, maxiter = 100, 
+  maxhits = 20, forest.size = 1, cores = 4, trace = 1, ...)
 }
 \arguments{
   \item{start.tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
@@ -12,6 +12,7 @@ tree.search(start.tree, data, outgroup, method = "NNI", maxiter = 100, maxhits =
   alternatively as a \code{\link{phyDat}} object.  may contain inapplicable data;}
   \item{outgroup}{a vector listing the taxa in the outgroup;}
   \item{method}{rearrangements to perform; one of \kbd{NNI}, \kbd{SPR}, or \kbd{TBR};}
+  \item{concavity}{concavity constant, if implied weighting is desired; see \code{\link{parsimony.inapp}}.}
   \item{maxiter}{the maximum number of iterations to perform before abandoning the search;}
   \item{maxhits}{the maximum times to hit the best pscore before abandoning the search;}
   \item{forest.size}{the maximum number of trees to return - useful in concert with \code{\link{consensus}};}

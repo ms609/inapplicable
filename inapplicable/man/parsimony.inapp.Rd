@@ -4,20 +4,19 @@
 \title{Calculate parsimony score}
 \description{Calculates the parsimony score for a rooted tree, correctly handling the inapplicable token.}
 \usage{
-  parsimony.inapp(tree, data) # Equal weights
-  parsimony.inapp(tree, data, k = 3) # Implied weights, concavity constant = 3
+  parsimony.inapp(tree, data, concavity = NULL)
   fitch.inapp(tree, data)
 }
 \arguments{
   \item{tree}{ A rooted tree in \code{phylo} format;}
   \item{data}{ Data to use to score the tree, preferably formatted using \code{\link{prepare.data}}.}
-  \item{k}{ Concavity constant for implied weighting }
+  \item{concavity}{Concavity constant (k) for implied weighting.  \code{concavity = 3} is a typical value.}
 }
 \value{
 \code{parsimony.inapp} returns the parsimony score of the tree, calculated from \code{data} using Algorithm III in Smith (submitted).
-The parsimony score is calculated under equal weights unless a value is provided for \code{k}.  
-If \code{k} is specified, the returned score will be calculated using the method of Goloboff (1993) 
-with a concavity constant of \code{k}.
+The parsimony score is calculated under equal weights unless a value is provided for \code{concavity}.  
+If \code{concavity} is specified, the returned score will be calculated using the method of Goloboff (1993) 
+with a concavity constant of \code{concavity}.
  
 \code{fitch.inapp} returns a list comprising two elements: 
   \item{ 1 }{Number of evolutionary events (i.e. unweighted parsimony score) 

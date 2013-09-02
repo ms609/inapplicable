@@ -1,4 +1,5 @@
-sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter=500, k=5, trace=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", ...) {
+sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, maxit=100, 
+    maxiter=500, k=5, trace=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
   if (is.null(start.tree)) stop("a start.tree must be provided")
@@ -54,7 +55,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, maxit=100, maxiter
     initial.p <- parsimony.inapp(crown, crown.data)
     attr(crown, 'pscore') <- initial.p
     if (trace >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
-    candidate <- tree.search(crown, crown.data, 'SECTOR_ROOT', method=rearrangements, trace=trace-1, maxiter=maxiter, ...)
+    candidate <- tree.search(crown, crown.data, 'SECTOR_ROOT', method=rearrangements, concavity=concavity, trace=trace-1, maxiter=maxiter, ...)
     candidate.p <- attr(candidate, 'pscore')
     
     if((candidate.p+eps) < initial.p) {
@@ -146,17 +147,17 @@ bootstrap.inapp <- function (phy, x, outgroup, maxiter, trace=0, ...) {
   res
 }
 
-tree.search <- function (start.tree, data, outgroup, method='NNI', maxiter=100, maxhits=20, forest.size=1, cores=4, trace=1, ...) {
+tree.search <- function (start.tree, data, outgroup, method='NNI', concavity=NULL, maxiter=100, maxhits=20, forest.size=1, cores=4, trace=1, ...) {
   start.tree$edge.length <- NULL # Edge lengths are not supported
   tree <- set.outgroup(start.tree, outgroup)
   attr(tree, 'hits') <- 1
   if (forest.size > 1) {forest <- empty.forest <- vector('list', forest.size); forest[[1]] <- tree}
-  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- parsimony.inapp(tree, data)
+  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- parsimony.inapp(tree, data, concavity)
   best.pscore <- attr(tree, 'pscore')
   if (trace > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
   rearrange.func <- switch(method, 'TBR' = rooted.tbr, 'SPR' = rooted.spr, 'NNI' = rooted.nni)
   for (iter in 1:maxiter) {
-    trees <- rearrange.tree(tree, data, rearrange.func, forest.size==1, iter, cores, trace)
+    trees <- rearrange.tree(tree, data, rearrange.func, concavity, forest.size==1, iter, cores, trace)
     iter.pscore <- attr(trees, 'pscore')
     if (forest.size > 1) {
       hits <- attr(trees, 'hits')
@@ -190,15 +191,17 @@ tree.search <- function (start.tree, data, outgroup, method='NNI', maxiter=100, 
   } else tree
 }
 
-sectorial.search <- function (start.tree, data, outgroup, rearrangements='NNI', maxiter=2000, trace=3) {
+sectorial.search <- function (start.tree, data, outgroup, concavity = NULL, rearrangements='NNI', maxiter=2000, trace=3) {
   best.score <- attr(start.tree, 'pscore')
-  if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data)
+  if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data, concavity)
   if (length(outgroup) == 0) warning('"outgroup" parameter not specified')
-  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, trace=trace-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2L])*0.25, rearrangements=rearrangements)
-  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=maxiter, maxhits=30, trace=trace)
-  sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=maxiter, maxhits=20, trace=trace)
-  sect <- tree.search(sect, data, outgroup, method='SPR', maxiter=maxiter, maxhits=50, trace=trace)
-  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=maxiter, maxhits=60, trace=trace)
+  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, concavity=concavity,
+    trace=trace-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 
+    largest.sector=length(start.tree$edge[,2L])*0.25, rearrangements=rearrangements)
+  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=maxiter, maxhits=30, concavity=concavity, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=maxiter, maxhits=20, concavity=concavity, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='SPR', maxiter=maxiter, maxhits=50, concavity=concavity, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=maxiter, maxhits=60, concavity=concavity, trace=trace)
   if (attr(sect, 'pscore') <= best.score) {
     return (sect)
   } else return (set.outgroup(start.tree, outgroup))

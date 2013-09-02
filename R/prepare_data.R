@@ -37,7 +37,8 @@ prepare.data <- function (data) {
       sums = colSums(possibles)
       definites[which (sums == max(sums))[1]] = TRUE
     }
-    return (max(0, sum(definites) - 1))
+    inapps = sum(x == 2^(inapp.level-1)) # Two inapps are the minimum necessary to imply an additional origin of the character
+    return (max(0, sum(definites) - 1 - (inapps/2)))
   })
   dimnames(ret) <- list(NULL, nam)
   class(ret) <- '*phyDat'

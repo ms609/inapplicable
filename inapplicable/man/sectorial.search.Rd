@@ -4,7 +4,7 @@
 \title{Sectorial search}
 \description{Performs a sectorial search on a tree, preserving the position of the root.}
 \usage{
-sectorial.search(start.tree, data, outgroup, rearrangements = "NNI")
+sectorial.search(start.tree, data, outgroup, rearrangements = "NNI", maxiter = 2000, trace = 3)
 sectorial.inapp(start.tree, data, outgroup = NULL, maxit = 100, maxiter = 500, k = 5,
   trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
 }

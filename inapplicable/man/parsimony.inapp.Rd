@@ -4,8 +4,8 @@
 \title{Calculate parsimony score}
 \description{Calculates the parsimony score for a rooted tree, correctly handling the inapplicable token.}
 \usage{
-  parsimony.inapp(tree, data)
-  parsimony.inapp(tree, data, k=3)
+  parsimony.inapp(tree, data) # Equal weights
+  parsimony.inapp(tree, data, k = 3) # Implied weights, concavity constant = 3
   fitch.inapp(tree, data)
 }
 \arguments{

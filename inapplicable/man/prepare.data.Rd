@@ -13,9 +13,12 @@
 \item     Each cell in the matrix contains an integer that denotes the possible tokens.
           This integer is the decimal representation of the binary figure represented by a row
           in the contrast matrix (in reverse order), after
-          phangorn:::prepareFitchData.
-          
+          phangorn:::prepareFitchData.          
   }
+  In addition to the standard \link{phyDat} attributes, the returned object bears an attribute
+  \code{inapp.level}, specifying the level that corresponds to the inapplicable token, and 
+  \code{min.steps}, specifying the minimum number of steps necessary to obtain the observed
+  distribution of tokens (necessary when calculating implied weights).
 }
 \author{Martin R. Smith}
 \seealso{\code{\link{parsimony.inapp}}}

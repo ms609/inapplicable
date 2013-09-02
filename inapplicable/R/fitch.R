@@ -1,4 +1,11 @@
-parsimony.inapp <- function (tree, data) return (fitch.inapp(tree, data)[[1]])
+parsimony.inapp <- function (tree, data, k = NULL) {
+  if (is.null(k)) return (fitch.inapp(tree, data)[[1]]) 
+  if (class(data) == 'phyDat') data <- prepare.data(data)
+  if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
+  e <- fitch.inapp(tree, data)[[2]] - attr(data, 'min.steps');
+  weighted.score <- k / (k + e)
+  return (sum(weighted.score))
+}
 
 fitch.inapp <- function (tree, data) {
   # Data

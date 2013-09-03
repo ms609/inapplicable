@@ -4,7 +4,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
   fit <- fitch.inapp(tree, data)
-  e <- fit[[2]] - attr(data, 'min.steps')
+  e <- fit[[2]]
   inapp.level <- attr(data, 'inapp.level')
   inapp.power2 <- log2(inapp.level) + 1
   fit3 <- fit[[3]]
@@ -23,7 +23,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
     this.line  <- fit3[i,]
     nEntries <- length(this.line)
     this.inapp <- fit3.inapp[i,]
-    lists <- vector('list', nNode)
+    lists <- vector('list', nTips - 1)
     current.list <- 1
     lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
     traverse.order <- root.node:nEntries
@@ -39,6 +39,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
     i.min <- unlist(sapply(lists, function (x) {min.steps(x, inapp.power2)}))
     e[i] <- e[i] - sum(i.min)
   }
+  e[!inapp.present] <- e[!inapp.present] - attr(data, 'min.steps')[!inapp.present]
   weighted.fit <- attr(data, 'weight') * e / (concavity + e) # Corresponds to 1 - f = e / (e + k).  f = k / (e + k)
   return (sum(weighted.fit))
 }

@@ -82,14 +82,14 @@ pratchet.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, max
   tree <- start.tree; start.tree <- NULL
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
   eps <- 1e-08
-  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- parsimony.inapp(tree, data)
+  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- parsimony.inapp(tree, data, concavity)
   mp <- attr(tree, "pscore")
   if (trace >= 0) cat("* Initial pscore:", mp)
 
   kmax <- 1
   for (i in 1:maxit) {
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset:")
-    bstree <- bootstrap.inapp(phy=tree, x=data, outgroup=outgroup, maxiter=maxiter, trace=trace-2, ...)
+    bstree <- bootstrap.inapp(phy=tree, x=data, outgroup=outgroup, concavity=concavity, maxiter=maxiter, trace=trace-2, ...)
     
     if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new candidate tree:")
     if (rearrangements == "TBR") {
@@ -129,7 +129,7 @@ pratchet.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, max
   tree
 }
 
-bootstrap.inapp <- function (phy, x, outgroup, maxiter, trace=0, ...) {
+bootstrap.inapp <- function (phy, x, outgroup, concavity, maxiter, trace=0, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   at <- attributes(x)
   weight <- at$weight
@@ -141,13 +141,13 @@ bootstrap.inapp <- function (phy, x, outgroup, maxiter, trace=0, ...) {
   attr(x, "nr") <- length(ind)
   attr(phy, 'pscore') <- NULL
   class(x) <- '*phyDat'
-  res <- tree.search(phy, x, outgroup, maxiter, method='NNI', trace=trace, ...)
+  res <- tree.search(phy, x, outgroup, concavity, method='NNI', maxiter, trace=trace, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   res
 }
 
-tree.search <- function (start.tree, data, outgroup, method='NNI', concavity=NULL, maxiter=100, maxhits=20, forest.size=1, cores=4, trace=1, ...) {
+tree.search <- function (start.tree, data, outgroup, concavity=NULL, method='NNI', maxiter=100, maxhits=20, forest.size=1, cores=4, trace=1, ...) {
   start.tree$edge.length <- NULL # Edge lengths are not supported
   tree <- set.outgroup(start.tree, outgroup)
   attr(tree, 'hits') <- 1

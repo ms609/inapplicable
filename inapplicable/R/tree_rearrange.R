@@ -50,11 +50,9 @@ rooted.nni <- function (tree) {
 rooted.spr <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
   nTips <- length(tree$tip.label)
-  edge <- tree$edge
-  parent <- edge[,1]
-  child <- edge[,2]
+  edge <- tree$edge; parent <- edge[,1]; child <- edge[,2]
   root <- nTips + 1L # Assumes fully-resolved bifurcating tree
-  root.children <- Children(tree, root)
+  root.children <- child[parent==root]
   children <- Descendants(tree, root.children[1:2], "all")
   size <- c(length(children[[1]]), length(children[[2]]))
   moves <- (size-2L) * (size-1L)
@@ -76,8 +74,9 @@ rooted.spr <- function(tree) {
 
 rooted.tbr <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
-  root <- 1 + (nTips <- dim(tree$edge)[1] - tree$Nnode + 1)
-  root.children <- Children(tree, root)
+  edge <- tree$edge; parent <- edge[,1]; child <- edge[,2]
+  root <- 1 + (nTips <- dim(edge)[1] - tree$Nnode + 1)
+  root.children <- child[parent==root]
   size <- c(length(Descendants(tree, root.children[1], "all")),
             length(Descendants(tree, root.children[2], "all")))
   if (min(size) == 1) {

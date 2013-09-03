@@ -7,13 +7,13 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
   e <- fit[[2]]
   inapp.level <- attr(data, 'inapp.level')
   inapp.power2 <- log2(inapp.level) + 1
-  fit3 <- fit[[3]]
-  
+  fit3 <- fit[[3]]  
   fit3.inapp <- fit3 == inapp.level
   inapp.present <- rowSums(fit3.inapp) > 3 # two tips and one node causes no problems.
   if (any(inapp.present)) {
     nTips <- length(tree$tip.label)
     nChar <- length(e)
+    nEntries <- ncol(fit3)
     edge <- tree$edge
     parent <- edge[,1]
     child <- edge[,2]
@@ -22,30 +22,28 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
     
     for (i in which(inapp.present)) {
       this.line <- fit3[i,]
-      nEntries <- length(this.line)
       this.inapp <- fit3.inapp[i,]
-      lists <- vector('list', nTips - 1)
+      lists <- matrix(inapp.level, nTips - 2, nTips)
       current.list <- 1
-      lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
       traverse.order <- root.node
       start.new.list <- rep(FALSE, nEntries)
-      while (any(traverse.order)) {
+      while (length(traverse.order)) {
         node = traverse.order[1]; traverse.order <- traverse.order[-1]
-        if (start.new.list[node] && any(lists[[current.list]] != inapp.level)) {
-          current.list <- current.list + 1
-          lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
-        }
+        if (start.new.list[node]) current.list <- current.list + 1
         node.children <- children(node)
         a.tip <- node.children <= nTips
-        
         child.tips <- node.children[a.tip]
-        lists[[current.list]][child.tips,] <- this.line[child.tips]
-        
+        lists[current.list,child.tips] <- this.line[child.tips]
         child.nodes <- node.children[!a.tip]
-        if (this.inapp[node]) start.new.list[child.nodes] = TRUE
-        traverse.order <- c(traverse.order, child.nodes)
+        if (this.inapp[node]) {
+          start.new.list[child.nodes] = TRUE
+          traverse.order <- c(traverse.order, child.nodes)
+        } else traverse.order <- c(child.nodes, traverse.order)
       }
-      i.min <- unlist(sapply(lists, function (x) {min.steps(x, inapp.power2)}))
+      lists <- lists[apply(lists, 1, function(x) {any(x!=inapp.level)}),] # Probably redundant but helps debugging
+      lists #<- lists[apply(lists, 1, function(x) {any(x!=inapp.level)}),apply(lists, 2, function(x) {any(x!=inapp.level)})] # Probably redundant but helps debugging
+      apply(lists, 1, unique)
+      i.min <- unlist(apply(lists, 1, function (x) {min.steps(x, inapp.power2)}))
       e[i] <- e[i] - sum(i.min)
     }
   }

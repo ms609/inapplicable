@@ -135,10 +135,13 @@ bootstrap.inapp <- function (phy, x, outgroup, concavity, maxiter, trace=0, ...)
   weight <- at$weight
   v <- rep(1:length(weight), weight)
   BS <- tabulate(sample(v, replace=TRUE),length(weight)) 
-  ind <- which(BS > 0)
+  keep <- BS > 0
+  ind <- which(keep)
   x <- x[ind,]
-  attr(x, "weight") <- BS[ind]
-  attr(x, "nr") <- length(ind)
+  attr(x, 'weight') <- BS[ind]
+  attr(x, 'min.steps') <- at$min.steps[keep]
+  attr(x, 'nr') <- length(ind)
+  attr(x, 'inapp.level') <- at$inapp.level
   attr(phy, 'pscore') <- NULL
   class(x) <- '*phyDat'
   res <- tree.search(phy, x, outgroup, concavity, method='NNI', maxiter, trace=trace, ...)

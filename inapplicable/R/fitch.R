@@ -27,15 +27,23 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
       lists <- vector('list', nTips - 1)
       current.list <- 1
       lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
-      traverse.order <- root.node:nEntries
-      for (node in traverse.order) {
-        if (this.inapp[node] && any(lists[[current.list]] != inapp.level)) {
+      traverse.order <- root.node
+      start.new.list <- rep(FALSE, nEntries)
+      while (any(traverse.order)) {
+        node = traverse.order[1]; traverse.order <- traverse.order[-1]
+        if (start.new.list[node] && any(lists[[current.list]] != inapp.level)) {
           current.list <- current.list + 1
           lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
         }
         node.children <- children(node)
-        child.tips <- node.children[node.children <= nTips]
+        a.tip <- node.children <= nTips
+        
+        child.tips <- node.children[a.tip]
         lists[[current.list]][child.tips,] <- this.line[child.tips]
+        
+        child.nodes <- node.children[!a.tip]
+        if (this.inapp[node]) start.new.list[child.nodes] = TRUE
+        traverse.order <- c(traverse.order, child.nodes)
       }
       i.min <- unlist(sapply(lists, function (x) {min.steps(x, inapp.power2)}))
       e[i] <- e[i] - sum(i.min)

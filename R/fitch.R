@@ -8,6 +8,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
   inapp.level <- attr(data, 'inapp.level')
   inapp.power2 <- log2(inapp.level) + 1
   fit3 <- fit[[3]]
+  
   fit3.inapp <- fit3 == inapp.level
   inapp.present <- rowSums(fit3.inapp) > 3 # two tips and one node causes no problems.
   if (any(inapp.present)) {
@@ -18,26 +19,27 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
     child <- edge[,2]
     children <- function (node) {child[parent==node]}
     root.node <- nTips + 1L # Assumes fully-resolved bifurcating tree
-  }
-  for (i in which(inapp.present)) {
-    this.line  <- fit3[i,]
-    nEntries <- length(this.line)
-    this.inapp <- fit3.inapp[i,]
-    lists <- vector('list', nTips - 1)
-    current.list <- 1
-    lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
-    traverse.order <- root.node:nEntries
-    for (node in traverse.order) {
-      if (this.inapp[node] && any(lists[[current.list]] != inapp.level)) {
-        current.list <- current.list + 1
-        lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
+    
+    for (i in which(inapp.present)) {
+      this.line <- fit3[i,]
+      nEntries <- length(this.line)
+      this.inapp <- fit3.inapp[i,]
+      lists <- vector('list', nTips - 1)
+      current.list <- 1
+      lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
+      traverse.order <- root.node:nEntries
+      for (node in traverse.order) {
+        if (this.inapp[node] && any(lists[[current.list]] != inapp.level)) {
+          current.list <- current.list + 1
+          lists[[current.list]] <- matrix(inapp.level, ncol=1, nrow=nTips)
+        }
+        node.children <- children(node)
+        child.tips <- node.children[node.children <= nTips]
+        lists[[current.list]][child.tips,] <- this.line[child.tips]
       }
-      node.children <- children(node)
-      child.tips <- node.children[node.children <= nTips]
-      lists[[current.list]][child.tips,] <- data[i, child.tips]
+      i.min <- unlist(sapply(lists, function (x) {min.steps(x, inapp.power2)}))
+      e[i] <- e[i] - sum(i.min)
     }
-    i.min <- unlist(sapply(lists, function (x) {min.steps(x, inapp.power2)}))
-    e[i] <- e[i] - sum(i.min)
   }
   e[!inapp.present] <- e[!inapp.present] - attr(data, 'min.steps')[!inapp.present]
   weighted.fit <- attr(data, 'weight') * e / (concavity + e) # Corresponds to 1 - f = e / (e + k).  f = k / (e + k)

@@ -6,13 +6,11 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
   tree <- start.tree
   if (trace >= 0) cat('Sectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
-  sector.data <- function (data, tips) {
-  # REQUIRE
-  ##  "data", the output of prepare.data()   
-    at <- attributes(data)
-    dec <- data[,tips]
-    nBits <- floor(log2(max(data))) + 1L
-    bin <- array(FALSE, dim=c(nrow(dec), ncol(dec), nBits))
+  sector.data <- function (X, tips) {
+    at <- attributes(X)
+    dec <- X[,tips]
+    nBits <- floor(log2(max(X))) + 1L
+    bin <- array(FALSE, dim=c(nrow(dec), ncol(dec), nBits))  ## TODO compare with as.binary
     for (i in 0:(nBits-1)) {
       bin[, , nBits-i] <- as.logical(dec %% 2)
       dec <- (dec %/% 2)
@@ -20,15 +18,18 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
     state.union <- apply(bin, c(1,3), all)
     parsimony.informative <- !as.logical(rowSums(state.union))
     if (!any(parsimony.informative)) return (NULL)
-    data <- data[parsimony.informative, tips]
+    X <- X[parsimony.informative, tips]
     informative.chars <- sum(parsimony.informative)
     SECTOR_ROOT <- rep(2^nBits-1, informative.chars)
-    data <- cbind(data, SECTOR_ROOT)
-    attr(data, 'nr') <- informative.chars
-    attr(data, 'levels') <- at$levels
-    attr(data, 'weight') <- at$weight[parsimony.informative]
-    class(data) <- '*phyDat'
-    data
+    X <- cbind(X, SECTOR_ROOT)
+    attr(X, 'nr') <- informative.chars
+    attr(X, 'inapp.level') <- at$inapp.level
+    inapp.power2 <- log2(at$inapp.level) + 1
+    attr(X, 'min.steps') <- apply(X, 1, function(x) min.steps(x, inapp.power2))
+    attr(X, 'levels') <- at$levels
+    attr(X, 'weight') <- at$weight[parsimony.informative]
+    class(X) <- '*phyDat'
+    X
   }
   
   eps <- 1e-08
@@ -52,13 +53,13 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
     } 
     if (trace >= 0) cat(' Sector OK.')
     crown <- root(add.tip(crown, 0, 'SECTOR_ROOT'), length(crown$tip.label) + 1, resolve.root=TRUE)
-    initial.p <- parsimony.inapp(crown, crown.data)
+    initial.p <- parsimony.inapp(crown, crown.data, concavity)
     attr(crown, 'pscore') <- initial.p
     if (trace >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
-    candidate <- tree.search(crown, crown.data, 'SECTOR_ROOT', method=rearrangements, concavity=concavity, trace=trace-1, maxiter=maxiter, ...)
+    candidate <- tree.search(crown, crown.data, 'SECTOR_ROOT', concavity, method=rearrangements, concavity=concavity, trace=trace-1, maxiter=maxiter, ...)
     candidate.p <- attr(candidate, 'pscore')
     
-    if((candidate.p+eps) < initial.p) {
+    if((candidate.p + eps) < initial.p) {
       kmax <- kmax + 1
       stump <- drop.tip.fast(tree, Descendants(tree, sector)[[1]], subtree=TRUE)
       stump.edge <- 1:nrow(stump$edge)
@@ -93,18 +94,18 @@ pratchet.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, max
     
     if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new candidate tree:")
     if (rearrangements == "TBR") {
-      candidate <- tree.search(bstree, data, outgroup, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- tree.search(candidate, data, outgroup, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- tree.search(candidate, data, outgroup, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- tree.search(bstree,    data, outgroup, concavity, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- tree.search(candidate, data, outgroup, concavity, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- tree.search(candidate, data, outgroup, concavity, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     } else if (rearrangements == "TBR only") {
-      candidate <- tree.search(bstree, data, outgroup, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- tree.search(bstree,    data, outgroup, concavity, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     } else if (rearrangements == "SPR") {
-      candidate <- tree.search(bstree, data, outgroup, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- tree.search(candidate, data, outgroup, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- tree.search(bstree,    data, outgroup, concavity, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- tree.search(candidate, data, outgroup, concavity, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     } else if (rearrangements == "SPR only") {
-      candidate <- tree.search(bstree, data, outgroup, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
-    } else {
-      candidate <- tree.search(bstree, data, outgroup, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- tree.search(bstree,    data, outgroup, concavity, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+    } else {                             
+      candidate <- tree.search(bstree,    data, outgroup, concavity, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     }
     #if(class(result)=="phylo") m <- 1
     #else m = length(result)

@@ -1,7 +1,7 @@
 Package: inapplicable
 Type: Package
 Title: Inapplicable data in parsimony analysis
-Version: 0.03.221
+Version: 0.03.222
 Date: 2013-07-29
 Author: Martin R. Smith
 Maintainer: Martin R. Smith <martins@gmail.com>

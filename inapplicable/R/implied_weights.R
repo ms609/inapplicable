@@ -18,7 +18,7 @@ min.steps <- function (x, inapp.power2) {
   while (any(as.logical(possibles))) {
     for (p in 1:i) if (any(possibles[p,] & definites)) possibles[p,] = FALSE
     sums = colSums(possibles)
-    definites[which (sums == max(sums))[1]] = TRUE
+    if (max(sums)) definites[which (sums == max(sums))[1]] = TRUE
   }
   return (max(0, sum(definites) - 1))
 }

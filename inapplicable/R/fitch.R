@@ -10,6 +10,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
   fit3 <- fit[[3]]  
   fit3.inapp <- fit3 == inapp.level
   inapp.present <- rowSums(fit3.inapp) > 3 # two tips and one node causes no problems.
+  min.step <- attr(data, 'min.steps')
   if (any(inapp.present)) {
     nTips <- length(tree$tip.label)
     nChar <- length(e)
@@ -42,12 +43,16 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
       }
       lists <- lists[apply(lists, 1, function(x) {any(x!=inapp.level)}),] # Probably redundant but helps debugging
       lists #<- lists[apply(lists, 1, function(x) {any(x!=inapp.level)}),apply(lists, 2, function(x) {any(x!=inapp.level)})] # Probably redundant but helps debugging
-      apply(lists, 1, unique)
-      i.min <- unlist(apply(lists, 1, function (x) {min.steps(x, inapp.power2)}))
-      e[i] <- e[i] - sum(i.min)
+      #apply(lists, 1, unique)  # TODO delete
+      if (is.null(dim(lists))) {
+        min.step[i] <- sum(min.steps(lists, inapp.power2))
+      } else {
+      # unlist(apply(lists, 1, function (x) {min.steps(x, inapp.power2)})) # TODO delete when debugged
+        min.step[i] <- sum(unlist(apply(lists, 1, function (x) {min.steps(x, inapp.power2)})))
+      }
     }
   }
-  e[!inapp.present] <- e[!inapp.present] - attr(data, 'min.steps')[!inapp.present]
+  e <- e - min.step
   weighted.fit <- attr(data, 'weight') * e / (concavity + e) # Corresponds to 1 - f = e / (e + k).  f = k / (e + k)
   return (sum(weighted.fit))
 }

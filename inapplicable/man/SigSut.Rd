@@ -25,6 +25,7 @@ SigSut.besttree
     \code{SigSut.preparedata}  \tab \code{\link[=prepare.data]{*phyDat}} \cr
     \code{SigSut.parstree   }  \tab \code{\link{phylo}} \cr
     \code{SigSut.besttree   }  \tab \code{\link{phylo}} \cr
+    \code{SigSut.outgroup   }  \tab \code{\link{vector}} \cr
   }
 }
 \details{
@@ -47,6 +48,7 @@ The dataset contains:
   \tab  of the dataset under the standard parsimony method\cr
   \code{SigSut.besttree}\tab     The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr
   \tab of the dataset under the revised method of Smith (submitted)\cr
+  \code{SigSut.outgroup}\tab     The outgroup, \code{c('Lingula', 'Neocrania', 'Mickwitzia')}\cr
 }
 }
 \source{

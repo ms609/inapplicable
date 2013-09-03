@@ -7,7 +7,10 @@
 \alias{SuttonEtAl.besttree}
 \docType{data}
 \title{Data from Sutton et al. 2012}
-\description{Phylogenetic matrix from Sutton et al. (2012), modified per Smith (submitted),
+\description{
+\code{#TODO!  } Re-generate ALL data to avoid typo of PolysacCos.  Re-generate preparedate with new function.
+
+Phylogenetic matrix from Sutton et al. (2012), modified per Smith (submitted),
 and the strict consensus of the most parsimonious trees generated under traditional parsimony
 and under the method proposed by Smith (submitted).}
 \usage{data('SuttonEtAl')
@@ -45,7 +48,7 @@ Some coding errors in the matrix were corrected:
     \item \emph{Pedanochiton}: Character 42, ?->1, to be consistent with character 48
   }
 The dataset contains:
-\tabular{ll}{\code{SuttonEtAl.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('SuttonEtAl-fold.nex')}\cr
+\tabular{ll}{\code{SuttonEtAl.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('SuttonEtAl.nex')}\cr
   \code{SuttonEtAl.phy}   \tab      The dataset, in phyDat format\cr
   \code{SuttonEtAl.preparedata}\tab The dataset, in the format produced by \code{prepare.data(SuttonEtAl.data)}\cr
   \code{SuttonEtAl.parstree}\tab    The phylogenetic tree recovered by equal-weights analysis\cr

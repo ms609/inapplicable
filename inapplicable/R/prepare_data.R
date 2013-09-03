@@ -18,28 +18,7 @@ prepare.data <- function (data) {
   attr(ret, 'inapp.level') <- 2^(inapp.level - 1)
   attr(ret, 'dim') <- c(nChar, nTip)
   
-  attr(ret, 'min.steps') = apply(ret, 1, function (x) {
-    vals = as.binary(unique(x))
-    if (ncol(vals) >= inapp.level) vals[,inapp.level] = 0
-    possibles <- matrix(FALSE, nrow(vals), ncol(vals))
-    definites <- rep(FALSE, ncol(vals))
-    for (i in 1:nrow(vals)) {
-      V = vals[i,]
-      if (any(V & definites)) next
-      if (sum(V) == 1) {
-        definites = definites | V
-        next
-      }
-      possibles[i,] = V
-    }
-    while (any(as.logical(possibles))) {
-      for (p in 1:i) if (any(possibles[p,] & definites)) possibles[p,] = FALSE
-      sums = colSums(possibles)
-      definites[which (sums == max(sums))[1]] = TRUE
-    }
-    inapps = sum(x == 2^(inapp.level-1)) # Two inapps are the minimum necessary to imply an additional origin of the character
-    return (max(0, sum(definites) - 1 - (inapps/2)))
-  })
+  attr(ret, 'min.steps') = min.steps(ret, inapp.level)
   dimnames(ret) <- list(NULL, nam)
   class(ret) <- '*phyDat'
   ret

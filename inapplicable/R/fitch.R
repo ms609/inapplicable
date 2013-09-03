@@ -39,7 +39,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
     i.min <- unlist(sapply(lists, function (x) {min.steps(x, inapp.power2)}))
     e[i] <- e[i] - sum(i.min)
   }
-  weighted.fit <- e / (concavity + e) # Corresponds to 1 - f = e / (e + k).  f = k / (e + k)
+  weighted.fit <- attr(data, 'weight') * e / (concavity + e) # Corresponds to 1 - f = e / (e + k).  f = k / (e + k)
   return (sum(weighted.fit))
 }
 

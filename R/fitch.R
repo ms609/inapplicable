@@ -3,8 +3,6 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
   e <- fitch.inapp(tree, data)[[2]] - attr(data, 'min.steps');
-  cat(fitch.inapp(tree, data)[[2]])
-  cat(which(e < 0))
   weighted.fit <- e / (concavity + e) # Corresponds to 1 - f = e / (e + k).  f = k / (e + k)
   return (sum(weighted.fit))
 }

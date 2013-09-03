@@ -77,7 +77,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
   tree
 }  # sectorial.inapp
 
-pratchet.inapp <- function (start.tree, data, outgroup=NULL, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", ...) {
+pratchet.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   tree <- start.tree; start.tree <- NULL
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
@@ -198,10 +198,10 @@ sectorial.search <- function (start.tree, data, outgroup, concavity = NULL, rear
   sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, concavity=concavity,
     trace=trace-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 
     largest.sector=length(start.tree$edge[,2L])*0.25, rearrangements=rearrangements)
-  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=maxiter, maxhits=30, concavity=concavity, trace=trace)
-  sect <- tree.search(sect, data, outgroup, method='TBR', maxiter=maxiter, maxhits=20, concavity=concavity, trace=trace)
-  sect <- tree.search(sect, data, outgroup, method='SPR', maxiter=maxiter, maxhits=50, concavity=concavity, trace=trace)
-  sect <- tree.search(sect, data, outgroup, method='NNI', maxiter=maxiter, maxhits=60, concavity=concavity, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='NNI', concavity=concavity, maxiter=maxiter, maxhits=30, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='TBR', concavity=concavity, maxiter=maxiter, maxhits=20, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='SPR', concavity=concavity, maxiter=maxiter, maxhits=50, trace=trace)
+  sect <- tree.search(sect, data, outgroup, method='NNI', concavity=concavity, maxiter=maxiter, maxhits=60, trace=trace)
   if (attr(sect, 'pscore') <= best.score) {
     return (sect)
   } else return (set.outgroup(start.tree, outgroup))

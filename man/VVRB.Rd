@@ -29,7 +29,7 @@ VVRB.besttree}
 The ambiguous token ('?') was replaced with an 'ambiguous but applicable' token ('+') where appropriate.
 
 The dataset contains:
-\tabular{ll}{\code{VVRB.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('VVRB-fold.nex')}\cr
+\tabular{ll}{\code{VVRB.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('VVRB.nex')}\cr
   \code{VVRB.phy}   \tab      The dataset, in \code{phyDat} format\cr
   \code{VVRB.preparedata}\tab The dataset, in the format produced by \code{prepare.data(VVRB.data)}\cr
   \code{VVRB.besttree}\tab     The phylogenetic tree recovered by equal-weights analysis\cr

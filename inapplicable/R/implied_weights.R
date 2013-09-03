@@ -1,7 +1,9 @@
 min.steps <- function (x, inapp.power2) {
   if (is.null(x)) return (NULL)
   vals = as.binary(unique(as.integer(x)))
-  if (ncol(vals) >= inapp.power2) vals[,inapp.power2] = 0
+  number.of.vals = ncol(vals)
+  if (is.null(number.of.vals)) return (0) 
+  if (number.of.vals >= inapp.power2) vals[,inapp.power2] = 0
   possibles <- matrix(FALSE, nrow(vals), ncol(vals))
   definites <- rep(FALSE, ncol(vals))
   for (i in 1:nrow(vals)) {

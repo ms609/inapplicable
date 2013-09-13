@@ -163,7 +163,7 @@ root.robust <- function (tree, outgroup) {
   ret
 }
 
-descendants <- function (tree, node, just.tips = FALSE) {
+descendants <- function (tree, node, ...) {
 # ARGUMENTS:
 #   "tree", a phydat object
 #   "node", number of an internal node
@@ -174,10 +174,10 @@ descendants <- function (tree, node, just.tips = FALSE) {
   edge <- tree$edge
   edge1 <- edge[,1]
   edge2 <- edge[,2]
-  do.descendants(edge1, edge2, nTip, node, just.tips)
+  return (which(do.descendants(edge1, edge2, nTip, node, ...)))
 }
 
-do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE) {
+do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, include.ancestor = FALSE) {
   # ARGUMENTS:
   #   "edge1", parent nodes: from tree$edge[,1]
   #   "edge2", parent nodes: from tree$edge[,2]
@@ -186,14 +186,15 @@ do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE) {
   # RETURN:
   #   vector containing descendant nodes in numerical order
   is.descendant <- blank <- logical((nTip * 2) - 1)
+#  if (include.ancestor) is.descendant[node] <- TRUE;
   node.children <- function (node, is.descendant) {
     nc <- edge2[edge1 %in% node]
     is.descendant[nc] <- TRUE
     if (length(nc)) is.descendant <- node.children(nc, is.descendant)
     is.descendant
   }
-  node.children(parents, is.descendant)
-  if (just.tips) return (which(is.descendant[1:nTip])) else return (which(is.descendant))
+  is.descendant <- node.children(node, is.descendant)
+  if (just.tips) return (is.descendant[1:nTip]) else return (is.descendant)
 }
 
 two.tip.tree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))

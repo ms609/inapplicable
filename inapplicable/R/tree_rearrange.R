@@ -6,11 +6,13 @@ rearrange.tree <- function (tree, data, rearrange, concavity=NULL, return.single
     min.score <- parsimony.inapp(trees[[1]], data, concavity)
     best.trees <- c(TRUE)
   } else {
-    candidates <- clusterCall(cluster, function(re, tr) {tree <- re(tr); attr(tree, 'ps') <- parsimony.inapp(tree, data); tree}, rearrange, tree)
-    scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
+    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- parsimony.inapp(ret, cl.data, k); ret}, rearrange, tree, concavity)
+    #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
+    candidates <- clusterCall(cluster, rearrange, tree)
+    scores <- vapply(candidates, parsimony.inapp, 1, data, concavity) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score
-    trees <- lapply(candidates[best.trees], function (x) x[[1]])
+    trees <- candidates[best.trees]
   }
   if (best.score < min.score) {
     if (trace > 3) cat("\n    . Iteration", iter, '- Min score', min.score, ">", best.score)
@@ -86,7 +88,9 @@ rooted.tbr <- function(tree) {
   size <- c(length(Descendants(tree, root.children[1], "all")),
             length(Descendants(tree, root.children[2], "all")))
   if (min(size) == 1) {
-    return(root.robust(tbr(tree), tree$tip.label[root.children[which(size==1)]]))
+    tbr.tree <- tbr(tree)
+    outgroup <- tree$tip.label[root.children[size==1]]
+    return(root.robust(tbr.tree, outgroup))
   } else {
     moves <- (size-2) * (size-1)
     subtree.root <- root.children[1 + (runif(1, min=0, max=sum(moves)) > moves[1])]
@@ -102,16 +106,20 @@ rooted.tbr <- function(tree) {
   }
 }
 
+#lb <- function () {nodelabels(); edgelabels(); tiplabels(adj=c(2, 0.5))}
+
 tbr <- function(tree, edge.to.break=NULL) {
+  tree <- unroot(tree)
   tree.edge <- tree$edge
   tree.parent <- tree.edge[,1]
   tree.child <- tree.edge[,2]
-  nTips <- tree$Nnode + 1
+  nTips <- length(tree.child) - tree$Nnode + 1
   all.nodes <- 1:(2*(nTips-1))
-  root <- nTips + 1
-  edge.to.avoid <- which(tree.parent==root) # This isn't ideal: it always avoids BOTH root edges.  But using one of the root edges can cause an error, and I can't tell whether there's a way to know (a) when this is the case; (b) which one.
-  if (is.null(edge.to.break)) edge.to.break <- sample(setdiff(1:nrow(tree.edge), edge.to.avoid), 1)
+  if (is.null(edge.to.break)) edge.to.break <- sample(seq_along(tree.parent), 1)
   subtree.root <- tree.child[edge.to.break]
+  
+  subtree.nodes <- qdesc(tree.parent, tree.child, nTips, subtree.root)
+  
   subtree.tips <- descendants(tree, subtree.root, TRUE)
   if (!length(subtree.tips)) subtree.tips <- subtree.root
   stump <- drop.tip.fast(tree, subtree.tips, subtree=FALSE)

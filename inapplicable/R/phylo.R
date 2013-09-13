@@ -174,16 +174,25 @@ descendants <- function (tree, node, just.tips = FALSE) {
   edge <- tree$edge
   edge1 <- edge[,1]
   edge2 <- edge[,2]
-  is.descendant <<- logical(nTip * 2L + 1L)
-  node.children <- function (oNode) {
-    nc <- edge2[edge1==oNode]
-    if (length(nc)) {
-      is.descendant[nc] <<- TRUE
-      sapply(nc, node.children)
-      
-    }
+  do.descendants(edge1, edge2, nTip, node, just.tips)
+}
+
+do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE) {
+  # ARGUMENTS:
+  #   "edge1", parent nodes: from tree$edge[,1]
+  #   "edge2", parent nodes: from tree$edge[,2]
+  #   "node", number of an internal node
+  #   "just.tips", should return value include all nodes or just tips?
+  # RETURN:
+  #   vector containing descendant nodes in numerical order
+  is.descendant <- blank <- logical((nTip * 2) - 1)
+  node.children <- function (node, is.descendant) {
+    nc <- edge2[edge1 %in% node]
+    is.descendant[nc] <- TRUE
+    if (length(nc)) is.descendant <- node.children(nc, is.descendant)
+    is.descendant
   }
-  node.children(node)
+  node.children(parents, is.descendant)
   if (just.tips) return (which(is.descendant[1:nTip])) else return (which(is.descendant))
 }
 

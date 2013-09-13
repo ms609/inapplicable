@@ -151,7 +151,7 @@ bootstrap.inapp <- function (phy, x, outgroup, concavity, maxiter, trace=1, ...)
   res
 }
 
-tree.search <- function (start.tree, data, outgroup, concavity=NULL, method='NNI', maxiter=100, maxhits=20, forest.size=1, cores=4, trace=1, ...) {
+tree.search <- function (start.tree, data, outgroup, concavity=NULL, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, ...) {
   start.tree$edge.length <- NULL # Edge lengths are not supported
   tree <- set.outgroup(start.tree, outgroup)
   attr(tree, 'hits') <- 1
@@ -161,7 +161,7 @@ tree.search <- function (start.tree, data, outgroup, concavity=NULL, method='NNI
   if (trace > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
   rearrange.func <- switch(method, 'TBR' = rooted.tbr, 'SPR' = rooted.spr, 'NNI' = rooted.nni)
   for (iter in 1:maxiter) {
-    trees <- rearrange.tree(tree, data, rearrange.func, concavity, forest.size==1, iter, cores, trace)
+    trees <- rearrange.tree(tree, data, rearrange.func, concavity, forest.size==1, iter, cluster, trace)
     iter.pscore <- attr(trees, 'pscore')
     if (forest.size > 1) {
       hits <- attr(trees, 'hits')

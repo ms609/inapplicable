@@ -1,11 +1,17 @@
-rearrange.tree <- function (tree, data, rearrange, concavity=NULL, return.single=TRUE, iter='<unknown>', cores=4, trace=0) {
+rearrange.tree <- function (tree, data, rearrange, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
-  candidates <- mclapply(1:cores, function (i) {rearrange(tree)})
-  scores <- unlist(mclapply(candidates, function(cand) {parsimony.inapp(cand, data, concavity)}))
-  min.score <- min(scores)
-  best.trees <- scores == min.score
-  trees <- candidates[best.trees]
+  if (is.null(cluster)) {
+    trees <- list(rearrange(tree))
+    min.score <- parsimony.inapp(trees[[1]], data, concavity)
+    best.trees <- c(TRUE)
+  } else {
+    candidates <- clusterCall(cluster, function(re, tr) {tree <- re(tr); attr(tree, 'ps') <- parsimony.inapp(tree, data); tree}, rearrange, tree)
+    scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
+    min.score <- min(scores)
+    best.trees <- scores == min.score
+    trees <- lapply(candidates[best.trees], function (x) x[[1]])
+  }
   if (best.score < min.score) {
     if (trace > 3) cat("\n    . Iteration", iter, '- Min score', min.score, ">", best.score)
   } else if (best.score == min.score) {

@@ -58,21 +58,24 @@ rooted.nni <- function (tree) {
 rooted.spr <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
   nTips <- length(tree$tip.label)
-  edge <- tree$edge; parent <- edge[,1]; child <- edge[,2]
+  edge <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
   root <- nTips + 1L # Assumes fully-resolved bifurcating tree
   root.children <- child[parent==root]
-  children <- Descendants(tree, root.children[1:2], "all")
-  size <- c(length(children[[1]]), length(children[[2]]))
-  moves <- (size-2L) * (size-1L)
-  chosen.subtree <- 1L + (runif(1, min=0, max=sum(moves)) >= moves[1])
-  candidate.nodes <- children[[chosen.subtree]]
-  singletons <- candidate.nodes[1:2] < root
-  if (any(singletons)) candidate.nodes <- candidate.nodes[-which(!singletons)]
+  left.nodes <- do.descendants(parent, child, nTips, root.children[1L])
+  right.nodes <- !left.nodes
+  left.nodes[root.children] <- right.nodes[root.children] <- right.nodes[root] <- FALSE
+  size <- c(sum(left.nodes), sum(right.nodes))
+  moves <- (size-2L) * (size-1L) / 2
+  moves[size < 3] <- 0
+  choose.right <- runif(1, min=0, max=sum(moves)) > moves[1]
+  candidate.nodes <- if (choose.right) which(right.nodes) else which(left.nodes)
+#  singletons <- candidate.nodes[1:2] < root #1:2 from Descendants
+#  if (any(singletons)) candidate.nodes <- candidate.nodes[-which(!singletons)]
   prune.node <- sample(candidate.nodes, 1)
-  prune.tips <- Descendants(tree, prune.node)[[1]]
+  prune.tips <- do.descendants(edge1, edge2, nTips, prune.node, just.tips=TRUE, include.ancestor=TRUE)
   pruning <- extract.clade.robust(tree, prune.node); pruning$root.edge <- 1
   tree$tip.label[prune.tips] <- 'PRUNED_TIP'
-  affected.nodes <- c(parent[child==prune.node], prune.node, Descendants(tree, prune.node, 'all'))
+  affected.nodes <- c(prune.parent <- parent[child==prune.node], child[parent==prune.parent], which(do.descendants(edge1, edge2, nTips, prune.node)))
   candidate.nodes <- c(root.children[chosen.subtree], candidate.nodes[!candidate.nodes %in% affected.nodes])
   tree <- bind.tree(tree, pruning, where=graft.site <- sample(candidate.nodes, 1), position=1)
   tree <- drop.tip(tree, 'PRUNED_TIP')
@@ -82,19 +85,19 @@ rooted.spr <- function(tree) {
 
 rooted.tbr <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
-  edge <- tree$edge; parent <- edge[,1]; child <- edge[,2]
-  root <- 1 + (nTips <- dim(edge)[1] - tree$Nnode + 1)
+  edge <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
+  root <- 1 + (nTips <- dim(edge)[1] - tree$Nnode + 1L)
   root.children <- child[parent==root]
-  size <- c(length(Descendants(tree, root.children[1], "all")),
-            length(Descendants(tree, root.children[2], "all")))
-  if (min(size) == 1) {
-    tbr.tree <- tbr(tree)
-    outgroup <- tree$tip.label[root.children[size==1]]
-    return(root.robust(tbr.tree, outgroup))
+  size <- c(left.size <- sum(do.descendants(parent, child, nTips, root.children[1L])) + 1L,
+            (nTips * 2L - 1L) - left.size - 1L)
+  if (min(size) == 1L) {
+    outgroup <- tree$tip.label[root.children[size==1L]]
+    tree <- tbr(tree)
+    return(root.robust(tree, outgroup))
   } else {
-    moves <- (size-2) * (size-1)
-    subtree.root <- root.children[1 + (runif(1, min=0, max=sum(moves)) > moves[1])]
-    subtree.tips <- Descendants(tree, subtree.root, type='tips')[[1]]
+    moves <- (size-3L) * (size-2L) / 2
+    subtree.root <- root.children[1L + (runif(1, min=0, max=sum(moves)) > moves[1L])]
+    subtree.tips <- which(do.descendants(parent, child, nTips, subtree.root, just.tips=TRUE))
 
     stump <- drop.tip.fast(tree, subtree.tips, subtree=FALSE)
     stump$root.edge <- 1
@@ -106,21 +109,27 @@ rooted.tbr <- function(tree) {
   }
 }
 
-#lb <- function () {nodelabels(); edgelabels(); tiplabels(adj=c(2, 0.5))}
+lb <- function () {nodelabels(); edgelabels(); tiplabels(adj=c(2, 0.5))}
 
 tbr <- function(tree, edge.to.break=NULL) {
-  tree <- unroot(tree)
   tree.edge <- tree$edge
   tree.parent <- tree.edge[,1]
   tree.child <- tree.edge[,2]
-  nTips <- length(tree.child) - tree$Nnode + 1
+  nTips <- tree$Nnode + 1
   all.nodes <- 1:(2*(nTips-1))
-  if (is.null(edge.to.break)) edge.to.break <- sample(seq_along(tree.parent), 1)
+  root <- nTips + 1
+  edge.to.avoid <- which(tree.parent==root) # This isn't ideal: it always avoids BOTH root edges.  But using one of the root edges can cause an error, and I can't tell whether there's a way to know (a) when this is the case; (b) which one.
+  if (is.null(edge.to.break)) edge.to.break <- sample(setdiff(1:nrow(tree.edge), edge.to.avoid), 1)
   subtree.root <- tree.child[edge.to.break]
-  
-  subtree.nodes <- qdesc(tree.parent, tree.child, nTips, subtree.root)
-  
   subtree.tips <- descendants(tree, subtree.root, TRUE)
+  #unrooted.tree <- unroot(tree)
+  #tree.edge   <- unrooted.tree$edge
+  #tree.parent <- tree.edge[,1]
+  #tree.child  <- tree.edge[,2]
+  #nTips <- length(tree.child) - unrooted.tree$Nnode + 1
+  #if (is.null(edge.to.break)) edge.to.break <- sample(seq_along(tree.parent), 1)
+  #subtree.root <- tree.child[edge.to.break]
+  #subtree.tips <- descendants(unrooted.tree, subtree.root, TRUE)
   if (!length(subtree.tips)) subtree.tips <- subtree.root
   stump <- drop.tip.fast(tree, subtree.tips, subtree=FALSE)
   stump$root.edge <- 1

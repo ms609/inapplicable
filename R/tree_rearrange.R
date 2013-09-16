@@ -125,12 +125,11 @@ tbr <- function(tree, edge.to.break=NULL) {
   if (is.null(edge.to.break)) edge.to.break <- sample(2L:nrow(tree.edge), 1L) # Only include one root edge
   subtree.root <- tree.child[edge.to.break]
   stump <- if (subtree.root <= nTips) {
-    drop.tip.fast(tree, subtree.root, subtree=FALSE)
+    drop.tip.no.subtree(tree, subtree.root, root.edge=1)
   } else {
     in.crown <- do.descendants(tree.parent, tree.child, nTips, subtree.root, just.tips=TRUE)
-    drop.tip.fast (tree, which(in.crown), subtree=FALSE)
+    drop.tip.no.subtree (tree, which(in.crown), root.edge=1)
   }
-  stump$root.edge <- 1
   stump.len <- dim(stump$edge)[1]
   crown <- extract.clade.robust(tree, subtree.root) # ~ 2x faster than drop.tip.fast
   crown.edge <- crown$edge

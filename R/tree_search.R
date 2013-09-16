@@ -65,7 +65,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
       stump.edge <- 1:nrow(stump$edge)
       stump$root.edge <- 1
       crown <- drop.tip.fast(candidate, 'SECTOR_ROOT')
-      tree <- collapse.singles((bind.tree.fast(stump, crown, where=which(stump$tip.label==paste('[', sector.size, '_tips]', sep="")), position=0)))
+      tree <- collapse.singles.fast((bind.tree.fast(stump, crown, where=which(stump$tip.label==paste('[', sector.size, '_tips]', sep="")), position=0)))
       if (trace > 0) cat(' : improved local pscore, updated tree')
     } else if (trace > 0) cat (' : no improvement to local pscore')
     if (kmax == k) break()

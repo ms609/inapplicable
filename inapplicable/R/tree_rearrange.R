@@ -95,16 +95,19 @@ rooted.tbr <- function(tree) {
     tree <- tbr(tree)
     return(root.robust(tree, outgroup))
   } else {
+    tip.label <- tree$tip.label
     moves <- (size-3L) * (size-2L) / 2
     subtree.root <- root.children[1L + (runif(1, min=0, max=sum(moves)) > moves[1L])]
-    subtree.tips <- which(do.descendants(parent, child, nTips, subtree.root, just.tips=TRUE))
-
-    stump <- drop.tip.fast(tree, subtree.tips, subtree=FALSE)
-    stump$root.edge <- 1
-    crown <- extract.clade.robust(tree, subtree.root)
+    in.crown <- do.descendants(parent, child, nTips, subtree.root)
+    in.crown[subtree.root] <- TRUE
+    crown.edges <- parent %in% which(in.crown)
+    in.stump <- !in.crown
+    in.stump[root] <- FALSE
+    stump.edges <- parent %in% which(in.stump)
+    stump <- keep.edges(edge, tip.label, nTips, stump.edges) # faster than drop.tip.fast
+    crown <- extract.clade.robust(tree, subtree.root) # faster than keep.edges
     new.crown <- tbr(crown)
     new.crown$root.edge <- 1
-
     return (stump + new.crown)
   }
 }
@@ -112,44 +115,49 @@ rooted.tbr <- function(tree) {
 lb <- function () {nodelabels(); edgelabels(); tiplabels(adj=c(2, 0.5))}
 
 tbr <- function(tree, edge.to.break=NULL) {
+# Improvement targets: root.robust; extract.clade.robust; drop.tip.fast
   tree.edge <- tree$edge
   tree.parent <- tree.edge[,1]
   tree.child <- tree.edge[,2]
   nTips <- tree$Nnode + 1
   all.nodes <- 1:(2*(nTips-1))
   root <- nTips + 1
-  edge.to.avoid <- which(tree.parent==root) # This isn't ideal: it always avoids BOTH root edges.  But using one of the root edges can cause an error, and I can't tell whether there's a way to know (a) when this is the case; (b) which one.
-  if (is.null(edge.to.break)) edge.to.break <- sample(setdiff(1:nrow(tree.edge), edge.to.avoid), 1)
+  if (is.null(edge.to.break)) edge.to.break <- sample(2L:nrow(tree.edge), 1L) # Only include one root edge
   subtree.root <- tree.child[edge.to.break]
-  subtree.tips <- descendants(tree, subtree.root, TRUE)
-  #unrooted.tree <- unroot(tree)
-  #tree.edge   <- unrooted.tree$edge
-  #tree.parent <- tree.edge[,1]
-  #tree.child  <- tree.edge[,2]
-  #nTips <- length(tree.child) - unrooted.tree$Nnode + 1
-  #if (is.null(edge.to.break)) edge.to.break <- sample(seq_along(tree.parent), 1)
-  #subtree.root <- tree.child[edge.to.break]
-  #subtree.tips <- descendants(unrooted.tree, subtree.root, TRUE)
-  if (!length(subtree.tips)) subtree.tips <- subtree.root
-  stump <- drop.tip.fast(tree, subtree.tips, subtree=FALSE)
-  stump$root.edge <- 1
-  crown <- extract.clade.robust(tree, subtree.root)
-  
-  if (dim(crown$edge)[1] > 1) {
-    crown.tips <- crown$Nnode + 1L
-    new.root.location <- crown$edge[sample(2L:nrow(crown$edge), 1L), 2L]
-    nrp <- "NEW_ROOT_PLACEHOLDER"
-
-    tip.added <- add.tip(crown, where=new.root.location, nrp)
-    rooted <- root.robust(tip.added, nrp)
-    rooted.crown <- drop.tip.fast(root.robust(add.tip(crown, where=new.root.location, nrp), nrp), nrp)
-
-    rooted.crown <- drop.tip.fast(root.robust(add.tip(crown, where=new.root.location, nrp), nrp), nrp)
-    bind.location <- sample(1L:nrow(stump$edge), 1L)
-    rooted.crown$root.edge <- 1L
-    ret <- bind.tree.fast(stump, rooted.crown, position=1, where=bind.location) #### DELETED collapse.singles as outer func
+  stump <- if (subtree.root <= nTips) {
+    drop.tip.fast(tree, subtree.root, subtree=FALSE)
   } else {
-    bind.location <- stump$edge[sample(seq_len(nrow(stump$edge)), 1L), 2L]
+    in.crown <- do.descendants(tree.parent, tree.child, nTips, subtree.root, just.tips=TRUE)
+    drop.tip.fast (tree, which(in.crown), subtree=FALSE)
+  }
+  stump$root.edge <- 1
+  stump.len <- dim(stump$edge)[1]
+  crown <- extract.clade.robust(tree, subtree.root) # ~ 2x faster than drop.tip.fast
+  crown.edge <- crown$edge
+  crown.len <- dim(crown.edge)[1]  
+  if (crown.len > 1) {
+    if (crown.len == 2) {
+      rerooted.crown <- crown
+    } else {
+      crown.parent <- crown.edge[,1]
+      crown.child <- crown.edge[,2]
+      crown.nNode <- crown$Nnode
+      crown.tips <- crown.nNode + 1L
+      crown.root <- min(crown.parent)
+      new.root.candidates <- crown.child[-1] # Include existing root once only
+      new.root.node <- sample(new.root.candidates, 1L)
+      if (new.root.node <= crown.tips) new.outgroup <- new.root.node else new.outgroup <- which(do.descendants(crown.parent, crown.child, crown.tips, new.root.node, just.tips=TRUE))
+      rerooted.crown <- root.robust(crown, new.outgroup)
+    }
+    rerooted.crown$root.edge <- 1L
+    if (stump.len > 1) {
+      bind.location <- sample(seq_len(stump.len), 1L)
+      ret <- bind.tree.fast(stump, rerooted.crown, position=1, where=bind.location)
+    } else {
+      ret <- add.tip(rerooted.crown, crown.root, stump$tip.label)
+    }
+  } else {
+    bind.location <- stump$edge[sample(2L:stump.len, 1L), 2L]
     ret <- add.tip(stump, bind.location, crown$tip.label)
   }
   renumber(ret)

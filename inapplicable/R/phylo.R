@@ -34,11 +34,12 @@ single.taxon.tree <- function (label) {
 extract.clade.robust <- function (phy, node) {
   phy.tip.label <- phy$tip.label
   phy.edge <- phy$edge
+  phy.child <- phy.edge[,2L]
   nTip <- length(phy.tip.label)
   if (node <= nTip) return(single.taxon.tree(phy.tip.label[node]))
   if (node == nTip + 1L) return(phy)
-  nodes.to.keep <- descendants(phy, node)
-  edges.to.keep <- phy.edge[,2L] %in% nodes.to.keep
+  nodes.to.keep <- do.descendants(phy.edge[,1L], phy.child, nTip, node)
+  edges.to.keep <- phy.child %in% which(nodes.to.keep)
   phy.edge <- phy.edge[edges.to.keep, ]
 
   phy.edge1 <- phy.edge[,1L]
@@ -406,150 +407,217 @@ bind.tree.fast <- function(x, y, where = "root", position = 0, interactive = FAL
 }
 
 drop.tip.fast <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
-# Copied from ape:::drop.dip; edited to avoid excessive calls to $
-    if (!inherits(phy, "phylo"))
-        stop('object "phy" is not of class "phylo"')
-    if (!length(tip)) return(phy)
-    phy.edge <- phy$edge
-      
-    Ntip <- length(phy$tip.label)
-    ## find the tips to drop:
-    if (interactive) {
-        cat("Left-click close to the tips you want to drop; right-click when finished...\n")
-        xy <- locator()
-        nToDrop <- length(xy$x)
-        tip <- integer(nToDrop)
-        lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-        for (i in 1:nToDrop) {
-            d <- sqrt((xy$x[i] - lastPP$xx)^2 + (xy$y[i] - lastPP$yy)^2)
-            tip[i] <- which.min(d)
-        }
-    } else {
-        if (is.character(tip))
-            tip <- which(phy$tip.label %in% tip)
-    }
-    if (!length(tip)) return(phy)
-    if (any(tip > Ntip))
-        warning("some tip numbers were higher than the number of tips")
+# Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.
+# Dropped support for branch lengths.
+  if (!inherits(phy, "phylo"))
+      stop('object "phy" is not of class "phylo"')
+  if (!length(tip)) return(phy)
+  phy.edge <- phy$edge
+  phy.tip <- phy$tip.label
+  Ntip <- length(phy.tip)
+  if (is.character(tip)) tip <- which(phy.tip %in% tip)
+  ntip.to.drop <- length(tip)
+  if (!ntip.to.drop) return(phy)
+  if (ntip.to.drop + 1 == Ntip) 
+    return(single.taxon.tree(phy.tip[setdiff(1:Ntip, tip)]))
+  if (any(tip > Ntip))
+    warning("Some tip numbers were higher than the number of tips")
+  if (!rooted && subtree) {
+    phy <- root(phy, (1:Ntip)[-tip][1])
+    root.edge <- 0
+  }
 
-    if (!rooted && subtree) {
-        phy <- root(phy, (1:Ntip)[-tip][1])
-        root.edge <- 0
+  phy <- reorder(phy)
+  NEWROOT <- ROOT <- Ntip + 1
+  Nnode <- phy$Nnode
+  Nedge <- dim(phy.edge)[1]
+  if (subtree) {
+    trim.internal <- TRUE
+    tr <- reorder(phy, "pruningwise")
+    tr.edge <- tr$edge
+    N <- .C("node_depth", as.integer(Ntip), as.integer(Nnode),
+            as.integer(tr.edge[, 1]), as.integer(tr.edge[, 2]),
+            as.integer(Nedge), double(Ntip + Nnode),
+            DUP = FALSE, PACKAGE = "ape")[[6]]
+  }
+  edge1 <- phy.edge[, 1] # local copies
+  edge2 <- phy.edge[, 2] #
+  keep <- !logical(Nedge)
+  keep[match(tip, edge2)] <- FALSE # Delete the terminal edges given by 'tip'
+  if (trim.internal) {
+    ints <- edge2 > Ntip
+    ## delete the internal edges that no longer have
+    ## descendants (ie, they are in the 2nd col of `edge' but
+    ## not in the 1st one)
+    repeat {
+      sel <- !(edge2 %in% edge1[keep]) & ints & keep
+      if (!any(sel)) break
+      keep[sel] <- FALSE
     }
-
-    phy <- reorder(phy)
-    NEWROOT <- ROOT <- Ntip + 1
-    Nnode <- phy$Nnode
-    Nedge <- dim(phy.edge)[1]
     if (subtree) {
-        trim.internal <- TRUE
-        tr <- reorder(phy, "pruningwise")
-        N <- .C("node_depth", as.integer(Ntip), as.integer(Nnode),
-                as.integer(tr$edge[, 1]), as.integer(tr$edge[, 2]),
-                as.integer(Nedge), double(Ntip + Nnode),
-                DUP = FALSE, PACKAGE = "ape")[[6]]
+      ## keep the subtending edge(s):
+      subt <- edge1 %in% edge1[keep] & edge1 %in% edge1[!keep]
+      keep[subt] <- TRUE
     }
-    wbl <- !is.null(phy$edge.length)
-    edge1 <- phy.edge[, 1] # local copies
-    edge2 <- phy.edge[, 2] #
-    keep <- !logical(Nedge)
+  }
 
-    ## delete the terminal edges given by `tip':
-    keep[match(tip, edge2)] <- FALSE
+  if (!root.edge) phy$root.edge <- NULL
 
-    if (trim.internal) {
-        ints <- edge2 > Ntip
-        ## delete the internal edges that do not have anymore
-        ## descendants (ie, they are in the 2nd col of `edge' but
-        ## not in the 1st one)
-        repeat {
-            sel <- !(edge2 %in% edge1[keep]) & ints & keep
-            if (!sum(sel)) break
-            keep[sel] <- FALSE
-        }
-        if (subtree) {
-            ## keep the subtending edge(s):
-            subt <- edge1 %in% edge1[keep] & edge1 %in% edge1[!keep]
-            keep[subt] <- TRUE
-        }
-        if (root.edge && wbl) {
-            degree <- tabulate(edge1[keep])
-            if (degree[ROOT] == 1) {
-                j <- integer(0) # will store the indices of the edges below the new root
-                repeat {
-                    i <- which(edge1 == NEWROOT & keep)
-                    j <- c(i, j)
-                    NEWROOT <- edge2[i]
-                    degree <- tabulate(edge1[keep])
-                    if (degree[NEWROOT] > 1) break
-                }
-                keep[j] <- FALSE
-                if (length(j) > root.edge) j <- 1:root.edge
-                NewRootEdge <- sum(phy$edge.length[j])
-                if (length(j) < root.edge && !is.null(phy$root.edge))
-                    NewRootEdge <- NewRootEdge + phy$root.edge
-                phy$root.edge <- NewRootEdge
-            }
-        }
+  ## drop the edges
+  phy.edge <- phy.edge[keep, ]
+
+  ## find the new terminal edges (works whatever 'subtree' and 'trim.internal'):
+  TERMS <- !(phy.edge[, 2] %in% phy.edge[, 1])
+
+  ## get the old No. of the nodes and tips that become tips:
+  oldNo.ofNewTips <- phy.edge[TERMS, 2]
+
+  ## in case some tips are dropped but kept because of 'subtree = TRUE':
+  if (subtree) {
+    i <- which(tip %in% oldNo.ofNewTips)
+    if (length(i)) {
+      phy$tip.label[tip[i]] <- "[1_tip]"
+      tip <- tip[-i]
     }
+  }
 
-    if (!root.edge) phy$root.edge <- NULL
+  n <- length(oldNo.ofNewTips) # the new number of tips in the tree
 
-    ## drop the edges
-    phy.edge <- phy.edge[keep, ]
-    if (wbl) phy$edge.length <- phy$edge.length[keep]
+  ## the tips may not be sorted in increasing order in the
+  ## 2nd col of edge, so no need to reorder $tip.label
+  phy.edge[TERMS, 2] <- rank(phy.edge[TERMS, 2])
+  phy$tip.label <- phy$tip.label[-tip]
 
-    ## find the new terminal edges (works whatever 'subtree' and 'trim.internal'):
-    TERMS <- !(phy.edge[, 2] %in% phy.edge[, 1])
-
-    ## get the old No. of the nodes and tips that become tips:
-    oldNo.ofNewTips <- phy.edge[TERMS, 2]
-
-    ## in case some tips are dropped but kept because of 'subtree = TRUE':
-    if (subtree) {
-        i <- which(tip %in% oldNo.ofNewTips)
-        if (length(i)) {
-            phy$tip.label[tip[i]] <- "[1_tip]"
-            tip <- tip[-i]
-        }
-    }
-
-    n <- length(oldNo.ofNewTips) # the new number of tips in the tree
-
-    ## the tips may not be sorted in increasing order in the
-    ## 2nd col of edge, so no need to reorder $tip.label
-    phy.edge[TERMS, 2] <- rank(phy.edge[TERMS, 2])
-    phy$tip.label <- phy$tip.label[-tip]
-
-    ## make new tip labels if necessary:
-    if (subtree || !trim.internal) {
-        ## get the numbers of the nodes that become tips:
-        node2tip <- oldNo.ofNewTips[oldNo.ofNewTips > Ntip]
-        new.tip.label <- if (subtree) {
-            paste("[", N[node2tip], "_tips]", sep = "")
-        } else {
-            if (is.null(phy$node.label)) rep("NA", length(node2tip))
-            else phy$node.label[node2tip - Ntip]
-        }
+  ## make new tip labels if necessary:
+  if (subtree || !trim.internal) {
+      ## get the numbers of the nodes that become tips:
+      node2tip <- oldNo.ofNewTips[oldNo.ofNewTips > Ntip]
+      new.tip.label <- if (subtree) {
+          paste("[", N[node2tip], "_tips]", sep = "")
+      } else {
+          if (is.null(phy$node.label)) rep("NA", length(node2tip))
+          else phy$node.label[node2tip - Ntip]
+      }
 #        if (!is.null(phy$node.label))
 #            phy$node.label <- phy$node.label[-(node2tip - Ntip)]
-        phy$tip.label <- c(phy$tip.label, new.tip.label)
-    }
+      phy$tip.label <- c(phy$tip.label, new.tip.label)
+  }
 
-    phy$Nnode <- dim(phy.edge)[1] - n + 1L # update phy$Nnode
+  phy$Nnode <- dim(phy.edge)[1] - n + 1L # update phy$Nnode
 
-    ## The block below renumbers the nodes so that they conform
-    ## to the "phylo" format, same as in root()
-    newNb <- integer(Ntip + Nnode)
-    newNb[NEWROOT] <- n + 1L
-    sndcol <- phy.edge[, 2] > n
-    ## executed from right to left, so newNb is modified before phy.edge:
-    phy.edge[sndcol, 2] <- newNb[phy.edge[sndcol, 2]] <-
-        (n + 2):(n + phy$Nnode)
-    phy.edge[, 1] <- newNb[phy.edge[, 1]]
-    phy$edge <- phy.edge
-    storage.mode(phy$edge) <- "integer"
-    if (!is.null(phy$node.label)) # update node.label if needed
-        phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
-    collapse.singles(phy)
+  ## The block below renumbers the nodes so that they conform
+  ## to the "phylo" format, same as in root()
+  newNb <- integer(Ntip + Nnode)
+  newNb[NEWROOT] <- n + 1L
+  sndcol <- phy.edge[, 2] > n
+  ## executed from right to left, so newNb is modified before phy.edge:
+  phy.edge[sndcol, 2] <- newNb[phy.edge[sndcol, 2]] <-
+      (n + 2):(n + phy$Nnode)
+  phy.edge[, 1] <- newNb[phy.edge[, 1]]
+  phy$edge <- phy.edge
+  storage.mode(phy$edge) <- "integer"
+  if (!is.null(phy$node.label)) # update node.label if needed
+      phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
+  collapse.singles(phy)
+}
+
+drop.tip.no.subtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
+# Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.
+# Dropped support for branch lengths.
+# Dropped checks and warnings: assumed that data passed to this function is good!
+# Hard-coded subtree = FALSE and trim.internal = TRUE
+  if (!length(tip)) return(phy)
+  phy.edge <- phy$edge
+  phy.tip <- phy$tip.label
+  Ntip <- length(phy.tip)
+  if (is.character(tip)) {
+    tip <- match(tip, phy.tip, nomatch=0)
+    tip <- tip[as.logical(tip)]
+  }
+  ntip.to.drop <- length(tip)
+  if (!ntip.to.drop) return(phy)
+  if (ntip.to.drop + 1 == Ntip) 
+    return(single.taxon.tree(phy.tip[setdiff(1:Ntip, tip)]))
+
+  phy <- reorder(phy)
+  NEWROOT <- ROOT <- Ntip + 1
+  Nnode <- phy$Nnode
+  edge1 <- phy.edge[, 1] # local copies
+  edge2 <- phy.edge[, 2] #
+  nEdge <- length(edge1)
+  keep <- !logical(nEdge)
+  keep[match(tip, edge2)] <- FALSE # Delete the terminal edges given by 'tip'
+  ints <- edge2 > Ntip
+  ## delete the internal edges that no longer have
+  ## descendants (ie, they are in the 2nd col of `edge' but
+  ## not in the 1st one)
+  repeat {
+    sel <- !(edge2 %in% edge1[keep]) & ints & keep
+    if (!any(sel)) break
+    keep[sel] <- FALSE
+  }
+  if (!root.edge) phy$root.edge <- NULL
+  ## drop the edges
+  phy.edge <- phy.edge[keep, ]
+  phy.edge2 <- phy.edge[,2L]
+  phy.edge1 <- phy.edge[,1L]
+  TERMS <- !(phy.edge2 %in% phy.edge1)
+  ## get the old No. of the nodes and tips that become tips:
+  oldNo.ofNewTips <- phy.edge2[TERMS]
+  
+  n <- length(oldNo.ofNewTips) # the new number of tips in the tree
+  ## the tips may not be sorted in increasing order in the
+  ## 2nd col of edge, so no need to reorder $tip.label
+  phy.edge2[TERMS] <- rank(oldNo.ofNewTips)
+  phy$tip.label <- phy$tip.label[-tip]
+  phy$Nnode <- phy.nNode <- length(phy.edge2) - n + 1L # update phy$Nnode
+  ## The block below renumbers the nodes so that they conform
+  ## to the "phylo" format, same as in root()
+  newNb <- integer(Ntip + Nnode)
+  newNb[NEWROOT] <- n + 1L
+  sndcol <- phy.edge2 > n
+  ## executed from right to left, so newNb is modified before phy.edge:
+  phy.edge2[sndcol] <- newNb[phy.edge2[sndcol]] <-
+      (n + 2):(n + phy.nNode)
+  phy.edge1 <- newNb[phy.edge1]
+  phy$edge <- matrix(c(phy.edge1, phy.edge2), ncol=2)
+  storage.mode(phy$edge) <- "integer"
+  if (!is.null(phy$node.label)) # update node.label if needed
+      phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
+  collapse.singles(phy)
+}
+
+collapse.singles.fast <- function (tree) {
+# Copied from ape:::collapse.singles.
+# Removed support for elen & node.label
+  xmat <- tree$edge
+  nnode <- tree$Nnode
+  ntip <- length(tree$tip.label)
+  repeat {
+    tx <- tabulate(xmat[, 1])
+    singles <- match(tx, 1, nomatch=0)
+    if (!any(singles)) break;
+    i <- which.max(singles)
+    prev.node <- which(xmat[, 2] == i)
+    next.node <- which(xmat[, 1] == i)
+    xmat[prev.node, 2] <- xmat[next.node, 2]
+    xmat <- xmat[xmat[, 1] != i, ]            
+    xmat[xmat > i] <- xmat[xmat > i] - 1L
+    nnode <- nnode - 1L
+  }
+  tree$edge <- xmat
+  tree$Nnode <- nnode
+  tree
+}
+
+keep.edges <- function (edge, tip.label, nTips, kept.edges) {
+  kept <- list()
+  class(kept) <- 'phylo'
+  kept$edge <- edge[kept.edges,]
+  kept$tip.label <- tip.label[kept.child[kept.child <= nTips]]
+  kept$root.edge <- 1
+  new.index <- match(unique(kept.edge), unique(sort(kept.edge)))
+  kept$edge <- matrix(new.index, ncol=2)
+  kept$Nnode <- length(unique(kept$edge[,1]))
+  kept <- collapse.singles(kept)
 }

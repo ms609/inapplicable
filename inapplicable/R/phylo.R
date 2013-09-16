@@ -119,22 +119,30 @@ add.tip <- function (tree, where, label) {
 
 root.robust <- function (tree, outgroup) {
   if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
-  if (class(outgroup) == 'character') outgroup <- which(tree$tip.label %in% outgroup)
+  tip <- tree$tip.label
+  if (is.character(outgroup)) {
+    outgroup <- match(outgroup, tip, nomatch=0)
+    outgroup <- outgroup[as.logical(outgroup)]
+  }
   if (length(outgroup) < 1) stop ('"outgroup" not specified')
   if (!is.null(tree$edge.length)) {tree$edge.length <- NULL; warning('Edge lengths are not supported and have been dropped.')}
-  nTips <- length(tree$tip.label)
+  nTips <- length(tip)
   root <- nTips + 1L
-  root.children <- Children(tree, root)
+  edge <- tree$edge
+  e1 <- edge[,1]
+  e2 <- edge[,2]
+  root.children <- e2[e1==root]
   outgroup <- sort(outgroup)
-  left.side <- descendants(tree, root.children[1L], TRUE)
-  right.side <- descendants(tree, root.children[2L], TRUE)
+  left.side <- do.descendants(e1, e2, nTips, root.children[1L], just.tips=TRUE)
+  right.side <- do.descendants(e1, e2, nTips, tree, root.children[2L], just.tips=TRUE)
   if (!any(left.side)) left.side <- root.children[1L]
   if (!any(right.side)) right.side <- root.children[2L]
-  if ((length(outgroup) == length(left.side) && outgroup == left.side)
-  ||   length(outgroup) == length(right.side) && outgroup == right.side) return (tree)
-  if (any(root.children %in% outgroup)) outgroup <- seq_along(tree$tip)[-outgroup] # outgroup straddles root; root on ingroup instead
+  if ((length(outgroup) == sum(left.side) && identical(outgroup, which(left.side)))
+  ||   length(outgroup) == sum(right.side) && identical(outgroup, which(right.side))) return (tree)
+  if (any(root.children %in% outgroup)) outgroup <- seq_along(tip)[-outgroup] # outgroup straddles root; root on ingroup instead
   
-  ancestry <- Ancestors(tree, outgroup)
+  Ancestors(tree, outgroup)
+  ancestry <- ancestors(e1, e2, outgroup)
   if (length(outgroup) > 1) {
     common.ancestors <- Reduce(intersect, ancestry)
     outgroup.root.node <- max(common.ancestors)
@@ -142,7 +150,7 @@ root.robust <- function (tree, outgroup) {
     common.ancestors <- c(outgroup, ancestry)
     outgroup.root.node <- outgroup
   }
-  build.order <- rev(c(outgroup.root.node, Siblings(tree, common.ancestors[-length(common.ancestors)])))
+  build.order <- rev(c(outgroup.root.node, siblings(e1, e2, common.ancestors[-length(common.ancestors)])))
   clades <- mclapply(build.order, function(n) {extract.clade.robust(tree, n)})
   ret <- clades[[1L]]
   if (length(ret$tip.label) == 1) {
@@ -158,10 +166,54 @@ root.robust <- function (tree, outgroup) {
     if (length(oClade$tip.label) > 1L) {
       ret$root.edge <- 1L
       oClade$root.edge <- 1L
-      ret <- collapse.singles(bind.tree.fast(oClade, ret, position=1L))
+      ret <- collapse.singles.fast(bind.tree.fast(oClade, ret, position=1L))
     } else ret <- add.tip(ret, 0, oClade$tip.label)
   }
   ret
+}
+
+siblings <- function (parent, child, node, include.self = FALSE) {
+  l = length(node)
+  if (l == 1) {
+    v <- child[parent==parent[child==node]]
+    if (!include.self) 
+      v <- v[v != node]
+    return(v)
+  } else {
+    ret <- if (include.self) lapply(parent[match(node, child)], function (x) v <- child[parent==x]) else lapply(node, function (x) {
+      v <- child[parent==parent[child==x]]
+      v <- v[v != x]
+    })
+  }
+  ret
+}
+
+ancestors <- function (parent, child, node) {
+  if (length(node) == 1) {
+    pvector <- numeric(max(parent))
+    pvector[child] <- parent
+    anc <- function(pvector, node) {
+      res <- numeric(0)
+      repeat {
+        anc <- pvector[node]
+        if (anc == 0) 
+            break
+        res <- c(res, anc)
+        node <- anc
+      }
+      res
+    }
+    return(anc(pvector, node))
+  } else all.ancestors(e1, e2)[node]
+}
+
+all.ancestors <- function (parent, child) {
+  res <- vector("list", max(parent))
+  for (i in seq_along(parent)) {
+    pa <- parent[i]
+    res[[child[i]]] <- c(pa, res[[pa]])
+  }
+  res
 }
 
 descendants <- function (tree, node, ...) {
@@ -518,7 +570,7 @@ drop.tip.fast <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.
   storage.mode(phy$edge) <- "integer"
   if (!is.null(phy$node.label)) # update node.label if needed
       phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
-  collapse.singles(phy)
+  collapse.singles.fast(phy)
 }
 
 drop.tip.no.subtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
@@ -584,7 +636,7 @@ drop.tip.no.subtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy)
   storage.mode(phy$edge) <- "integer"
   if (!is.null(phy$node.label)) # update node.label if needed
       phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
-  collapse.singles(phy)
+  collapse.singles.fast(phy)
 }
 
 collapse.singles.fast <- function (tree) {
@@ -594,16 +646,16 @@ collapse.singles.fast <- function (tree) {
   nnode <- tree$Nnode
   ntip <- length(tree$tip.label)
   repeat {
-    tx <- tabulate(xmat[, 1])
-    singles <- match(tx, 1, nomatch=0)
+    tx <- tabulate(xmat[, 1L])
+    singles <- match(tx, 1L, nomatch=0)
     if (!any(singles)) break;
-    i <- which.max(singles)
-    prev.node <- which(xmat[, 2] == i)
-    next.node <- which(xmat[, 1] == i)
-    xmat[prev.node, 2] <- xmat[next.node, 2]
-    xmat <- xmat[xmat[, 1] != i, ]            
-    xmat[xmat > i] <- xmat[xmat > i] - 1L
-    nnode <- nnode - 1L
+    first.single <- which.max(singles)
+    next.node <- which.max(match.single <- match(xmat, first.single))
+    match.single[next.node] <- NA
+    prev.node <- which.max(match.single) - (nnode <- nnode - 1L) - ntip
+    xmat[prev.node, 2L] <- xmat[next.node, 2L]
+    xmat <- xmat[-next.node,]
+    xmat[xmat > first.single] <- xmat[xmat > first.single] - 1L
   }
   tree$edge <- xmat
   tree$Nnode <- nnode
@@ -619,5 +671,5 @@ keep.edges <- function (edge, tip.label, nTips, kept.edges) {
   new.index <- match(unique(kept.edge), unique(sort(kept.edge)))
   kept$edge <- matrix(new.index, ncol=2)
   kept$Nnode <- length(unique(kept$edge[,1]))
-  kept <- collapse.singles(kept)
+  kept <- collapse.singles.fast(kept)
 }

@@ -119,30 +119,18 @@ add.tip <- function (tree, where, label) {
 
 root.robust <- function (tree, outgroup) {
   if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
-  tip <- tree$tip.label
-  if (is.character(outgroup)) {
-    outgroup <- match(outgroup, tip, nomatch=0)
-    outgroup <- outgroup[as.logical(outgroup)]
-  }
+    tip <- tree$tip.label
+  if (is.character(outgroup)) {outgroup <- match(outgroup, tip, nomatch=0); outgroup <- outgroup[as.logical(outgroup)]}
   if (length(outgroup) < 1) stop ('"outgroup" not specified')
   if (!is.null(tree$edge.length)) {tree$edge.length <- NULL; warning('Edge lengths are not supported and have been dropped.')}
   nTips <- length(tip)
-  root <- nTips + 1L
   edge <- tree$edge
-  e1 <- edge[,1]
-  e2 <- edge[,2]
-  root.children <- e2[e1==root]
-  outgroup <- sort(outgroup)
-  left.side <- do.descendants(e1, e2, nTips, root.children[1L], just.tips=TRUE)
-  right.side <- do.descendants(e1, e2, nTips, tree, root.children[2L], just.tips=TRUE)
-  if (!any(left.side)) left.side <- root.children[1L]
-  if (!any(right.side)) right.side <- root.children[2L]
-  if ((length(outgroup) == sum(left.side) && identical(outgroup, which(left.side)))
-  ||   length(outgroup) == sum(right.side) && identical(outgroup, which(right.side))) return (tree)
+  parent <- edge[,1]
+  child <- edge[,2]
+  root <- min(parent)
+  root.children <- child[parent==root]
   if (any(root.children %in% outgroup)) outgroup <- seq_along(tip)[-outgroup] # outgroup straddles root; root on ingroup instead
-  
-  Ancestors(tree, outgroup)
-  ancestry <- ancestors(e1, e2, outgroup)
+  ancestry <- ancestors(parent, child, outgroup)
   if (length(outgroup) > 1) {
     common.ancestors <- Reduce(intersect, ancestry)
     outgroup.root.node <- max(common.ancestors)
@@ -150,26 +138,45 @@ root.robust <- function (tree, outgroup) {
     common.ancestors <- c(outgroup, ancestry)
     outgroup.root.node <- outgroup
   }
-  build.order <- rev(c(outgroup.root.node, siblings(e1, e2, common.ancestors[-length(common.ancestors)])))
-  clades <- mclapply(build.order, function(n) {extract.clade.robust(tree, n)})
-  ret <- clades[[1L]]
-  if (length(ret$tip.label) == 1) {
-    clade2 <- clades[[2L]]
-    if (length(clade2$tip.label) == 1) ret <- two.tip.tree(ret$tip.label, clade2$tip.label)
-      else ret <- add.tip(clade2, 0, ret$tip.label)
-    first.to.add <- 3L
-  } else {
-    first.to.add <- 2L
+
+  visit.node.backwards <- function (arrival.edge, last.node.number, new.edges) {
+    previous.node <- child[arrival.edge]
+    this.node <- parent[arrival.edge]
+    forward.node <- child[parent==this.node]
+    forward.node <- forward.node[forward.node != previous.node]
+    blank.edge <- which.min(new.edges)
+    this.node.new.number <- max(c(nTips + 1, new.edges[,2])) + 1
+    if (this.node.new.number < nTips * 2) {
+      new.edges[blank.edge, ] <- c(last.node.number, this.node.new.number)
+      if (forward.node) for (fwd in forward.node)
+        new.edges <- visit.node.forwards(fwd, this.node.new.number, new.edges)
+    } else {
+      new.edges[blank.edge, ] <- c(last.node.number, forward.node)
+    }
+    backward.edge <- match(this.node, child)
+    if (!is.na(backward.edge)) new.edges <- visit.node.backwards(backward.edge, this.node.new.number, new.edges)
+    new.edges
   }
-  for (i in first.to.add:length(clades)) {
-    oClade <- clades[[i]]
-    if (length(oClade$tip.label) > 1L) {
-      ret$root.edge <- 1L
-      oClade$root.edge <- 1L
-      ret <- collapse.singles.fast(bind.tree.fast(oClade, ret, position=1L))
-    } else ret <- add.tip(ret, 0, oClade$tip.label)
+  visit.node.forwards <- function (old.tree.node, number, new.edges) {
+    blank.edge <- which.min(new.edges)
+    if (old.tree.node < nTips) {
+      new.edges[blank.edge, ] <- c(number, old.tree.node)
+    } else {
+      this.node.new.number <- max(c(nTips + 1, new.edges[,2])) + 1
+      new.edges[blank.edge, ] <- c(number, this.node.new.number)
+      these.children <- child[parent==old.tree.node]
+      new.edges <- visit.node.forwards(these.children[1], this.node.new.number, new.edges)
+      new.edges <- visit.node.forwards(these.children[2], this.node.new.number, new.edges)
+    }
+    new.edges
   }
-  ret
+  
+  last.edge <- length(parent)
+  new.edges <- matrix(-1, last.edge, 2)
+  new.edges <- visit.node.forwards(outgroup.root.node, root, new.edges)
+  new.edges <- visit.node.backwards(match(outgroup.root.node, child), root, new.edges)
+  tree$edge <- new.edges
+  tree
 }
 
 siblings <- function (parent, child, node, include.self = FALSE) {

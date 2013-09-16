@@ -145,25 +145,28 @@ root.robust <- function (tree, outgroup) {
     forward.node <- child[parent==this.node]
     forward.node <- forward.node[forward.node != previous.node]
     blank.edge <- which.min(new.edges)
-    this.node.new.number <- max(c(nTips + 1, new.edges[,2])) + 1
-    if (this.node.new.number < nTips * 2) {
+    this.node.new.number <- max(c(nTips + 1L, new.edges[,2L])) + 1L
+    if (this.node != root) {
       new.edges[blank.edge, ] <- c(last.node.number, this.node.new.number)
       if (forward.node) for (fwd in forward.node)
         new.edges <- visit.node.forwards(fwd, this.node.new.number, new.edges)
-    } else {
-      new.edges[blank.edge, ] <- c(last.node.number, forward.node)
+    } else { # Root edge; don't create a new node
+      if (forward.node) for (fwd in forward.node) {
+        new.edges <- visit.node.forwards(fwd, root, new.edges)
+      }
     }
     backward.edge <- match(this.node, child)
+    arrival.edge <- backward.edge; last.node.number <- this.node.new.number
     if (!is.na(backward.edge)) new.edges <- visit.node.backwards(backward.edge, this.node.new.number, new.edges)
     new.edges
   }
-  visit.node.forwards <- function (old.tree.node, number, new.edges) {
+  visit.node.forwards <- function (old.tree.node, parent.number, new.edges) {
     blank.edge <- which.min(new.edges)
-    if (old.tree.node < nTips) {
-      new.edges[blank.edge, ] <- c(number, old.tree.node)
-    } else {
+    if (old.tree.node <= nTips) { # Adding a tip
+      new.edges[blank.edge, ] <- c(parent.number, old.tree.node)
+    } else { # Adding a node
       this.node.new.number <- max(c(nTips + 1, new.edges[,2])) + 1
-      new.edges[blank.edge, ] <- c(number, this.node.new.number)
+      new.edges[blank.edge, ] <- c(parent.number, this.node.new.number)    
       these.children <- child[parent==old.tree.node]
       new.edges <- visit.node.forwards(these.children[1], this.node.new.number, new.edges)
       new.edges <- visit.node.forwards(these.children[2], this.node.new.number, new.edges)
@@ -211,7 +214,7 @@ ancestors <- function (parent, child, node) {
       res
     }
     return(anc(pvector, node))
-  } else all.ancestors(e1, e2)[node]
+  } else all.ancestors(parent, child)[node]
 }
 
 all.ancestors <- function (parent, child) {

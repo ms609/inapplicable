@@ -1,3 +1,24 @@
+renumber.edge <- function (edge) {
+## Numbers the nodes and tips in a tree to conform with the phylo standards.
+  edge <- tree$edge
+  parent <- edge[,1L]
+  child  <- edge[,2L]
+  root <- min(parent)
+  nTips <- root - 1L
+  nNode <- max(parent) - nTips
+  NODES <- child > nTips
+  TIPS <- !NODES
+  # Deleted tip renumbering; is it a breaking change or an aesthetic choice?  Good if tip numbers don't change.
+  
+  old.node.number <- unique(parent)
+  new.node.number <- (nTips + nNode):(nTips + 1L)
+  child[NODES] <- new.node.number[match(child[NODES], old.node.number)]
+  nodeseq <- (1L:nNode) * 2L
+  parent[c(nodeseq, nodeseq-1L)] <- new.node.number
+  edge[,1] <- parent; edge[,2] <- child
+  edge
+}
+
 renumber <- function (tree) {
 ## Numbers the nodes and tips in a tree to conform with the phylo standards.
   tree <- reorder(tree, 'postorder')
@@ -188,7 +209,7 @@ root.robust <- function (tree, outgroup) {
   }
   
   last.edge <- length(parent)
-  child.index <- order(c(child , root))
+  child.index <- order(c(child, root))
   child.index[root] <- NA
   new.edges <- matrix(0, last.edge, 2)
   new.edges <- visit.node.forwards(outgroup.root.node, root, new.edges)
@@ -255,7 +276,7 @@ descendants <- function (tree, node, ...) {
   return (which(do.descendants(edge1, edge2, nTip, node, ...)))
 }
 
-do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, include.ancestor = FALSE) {
+do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.internal=FALSE, include.ancestor = FALSE) {
   # ARGUMENTS:
   #   "edge1", parent nodes: from tree$edge[,1]
   #   "edge2", parent nodes: from tree$edge[,2]
@@ -264,7 +285,7 @@ do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, include
   # RETURN:
   #   vector containing descendant nodes in numerical order
   is.descendant <- blank <- logical((nTip * 2) - 1)
-#  if (include.ancestor) is.descendant[node] <- TRUE;
+  if (include.ancestor) is.descendant[node] <- TRUE;
   node.children <- function (node, is.descendant) {
     nc <- edge2[edge1 %in% node]
     is.descendant[nc] <- TRUE
@@ -272,7 +293,8 @@ do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, include
     is.descendant
   }
   is.descendant <- node.children(node, is.descendant)
-  if (just.tips) return (is.descendant[1:nTip]) else return (is.descendant)
+  if (just.tips) return (is.descendant[1:nTip]) else if (just.internal) is.descendant[1:nTip] <- FALSE 
+  return (is.descendant)
 }
 
 two.tip.tree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))

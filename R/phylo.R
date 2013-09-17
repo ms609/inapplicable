@@ -87,6 +87,8 @@ add.tip <- function (tree, where, label) {
   tree.edge[nodes] <- -(tree.edge[nodes] - nTip)  # -1, ..., -nTip
   next.node <- -nNode - 1L
   ROOT <- -1L # This may change later
+  dbg<<-tree
+  #cat("\n: ", where, label)
   
   switch(case, { # case = 1 -> y is bound on the root of x
       tree.edge <- rbind(c(next.node, tree.edge[1]), tree.edge, c(next.node, new.tip.number))
@@ -140,10 +142,11 @@ root.robust <- function (tree, outgroup) {
       outgroup.root.node <- outgroup
     }
     if (outgroup.root.node != root) break
-    if (rooted.on.ingroup) stop ('Cannot root tree: is outgroup polyphyletic?')
+    if (rooted.on.ingroup) stop ('Cannot root tree: polyphyletic outgroup straddles root')
     outgroup <- seq_along(tip)[-outgroup] # outgroup straddles root; root on ingroup instead
     rooted.on.ingroup <- TRUE
   }
+  
   visit.node.backwards <- function (arrival.edge, last.node.number, new.edges) {
     previous.node <- child[arrival.edge]
     this.node <- parent[arrival.edge]
@@ -161,26 +164,31 @@ root.robust <- function (tree, outgroup) {
       }
     }
     backward.edge <- match(this.node, child)
-    arrival.edge <- backward.edge; last.node.number <- this.node.new.number
+    #arrival.edge <- backward.edge; last.node.number <- this.node.new.number
     if (!is.na(backward.edge)) new.edges <- visit.node.backwards(backward.edge, this.node.new.number, new.edges)
     new.edges
   }
   visit.node.forwards <- function (old.tree.node, parent.number, new.edges) {
-    blank.edge <- which.min(new.edges)
+    blank.edge <- which.min(new.edges)    
     if (old.tree.node <= nTips) { # Adding a tip
       new.edges[blank.edge, ] <- c(parent.number, old.tree.node)
     } else { # Adding a node
       this.node.new.number <- max(c(nTips + 1, new.edges[,2])) + 1
       new.edges[blank.edge, ] <- c(parent.number, this.node.new.number)    
-      these.children <- child[parent==old.tree.node]
-      new.edges <- visit.node.forwards(these.children[1], this.node.new.number, new.edges)
-      new.edges <- visit.node.forwards(these.children[2], this.node.new.number, new.edges)
+      descendant.nodes <- do.descendants(parent, child, nTips, old.tree.node)
+      n.new.nodes <- sum(descendant.nodes)
+      fill.edge.index <- blank.edge + (1:n.new.nodes)
+      fill.edge <- 0 - edge[child %in% which(descendant.nodes), ]
+      tip.spots <- fill.edge >= -nTips
+      fill.edge[tip.spots] <- -fill.edge[tip.spots]
+      fill.edge[!tip.spots] <- this.node.new.number - old.tree.node - fill.edge[!tip.spots]
+      new.edges[fill.edge.index, ] <- fill.edge
     }
     new.edges
   }
   
   last.edge <- length(parent)
-  new.edges <- matrix(-1, last.edge, 2)
+  new.edges <- matrix(0, last.edge, 2)
   new.edges <- visit.node.forwards(outgroup.root.node, root, new.edges)
   new.edges <- visit.node.backwards(match(outgroup.root.node, child), root, new.edges)
   tree$edge <- new.edges
@@ -680,11 +688,12 @@ collapse.singles.fast <- function (tree) {
 keep.edges <- function (edge, tip.label, nTips, kept.edges) {
   kept <- list()
   class(kept) <- 'phylo'
-  kept$edge <- edge[kept.edges,]
+  kept.edge <- edge[kept.edges,]
+  kept.child <- kept.edge[,2]
   kept$tip.label <- tip.label[kept.child[kept.child <= nTips]]
   kept$root.edge <- 1
   new.index <- match(unique(kept.edge), unique(sort(kept.edge)))
   kept$edge <- matrix(new.index, ncol=2)
-  kept$Nnode <- length(unique(kept$edge[,1]))
+  kept$Nnode <- length(unique(kept.edge[,1]))
   kept <- collapse.singles.fast(kept)
 }

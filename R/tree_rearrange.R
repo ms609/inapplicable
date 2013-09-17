@@ -116,14 +116,17 @@ lb <- function () {nodelabels(); edgelabels(); tiplabels(adj=c(2, 0.5))}
 
 tbr <- function(tree, edge.to.break=NULL) {
 # Improvement targets: root.robust; extract.clade.robust; drop.tip.fast
+  nTips <- tree$Nnode + 1
+  if (nTips < 3) return (tree)
   tree.edge <- tree$edge
   tree.parent <- tree.edge[,1]
   tree.child <- tree.edge[,2]
-  nTips <- tree$Nnode + 1
+  if (nTips == 3) return (root.robust(tree, sample(tree.child[tree.parent==max(tree.parent)], 1L)))
   all.nodes <- 1:(2*(nTips-1))
   root <- nTips + 1
   if (is.null(edge.to.break)) edge.to.break <- sample(2L:nrow(tree.edge), 1L) # Only include one root edge
   subtree.root <- tree.child[edge.to.break]
+  #cat("\n - ", edge.to.break, subtree.root)
   stump <- if (subtree.root <= nTips) {
     drop.tip.no.subtree(tree, subtree.root, root.edge=1)
   } else {

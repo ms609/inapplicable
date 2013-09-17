@@ -163,8 +163,9 @@ root.robust <- function (tree, outgroup) {
         new.edges <- visit.node.forwards(fwd, last.node.number, new.edges)
       }
     }
-    backward.edge <- match(this.node, child)
-    #arrival.edge <- backward.edge; last.node.number <- this.node.new.number
+    backward.edge <- child.index[this.node]
+#    cat("\n, this.node", this.node, "be", backward.edge, "ma", match(this.node, child))
+#    arrival.edge <- backward.edge; last.node.number <- this.node.new.number
     if (!is.na(backward.edge)) new.edges <- visit.node.backwards(backward.edge, this.node.new.number, new.edges)
     new.edges
   }
@@ -178,19 +179,20 @@ root.robust <- function (tree, outgroup) {
       descendant.nodes <- do.descendants(parent, child, nTips, old.tree.node)
       n.new.nodes <- sum(descendant.nodes)
       fill.edge.index <- blank.edge + (1:n.new.nodes)
-      fill.edge <- 0 - edge[child %in% which(descendant.nodes), ]
-      tip.spots <- fill.edge >= -nTips
-      fill.edge[tip.spots] <- -fill.edge[tip.spots]
-      fill.edge[!tip.spots] <- this.node.new.number - old.tree.node - fill.edge[!tip.spots]
+      fill.edge <- edge[child %in% which(descendant.nodes), ]
+      node.spots <- fill.edge > nTips
+      fill.edge[node.spots] <- fill.edge[node.spots] + this.node.new.number - old.tree.node 
       new.edges[fill.edge.index, ] <- fill.edge
     }
     new.edges
   }
   
   last.edge <- length(parent)
+  child.index <- order(c(child , root))
+  child.index[root] <- NA
   new.edges <- matrix(0, last.edge, 2)
   new.edges <- visit.node.forwards(outgroup.root.node, root, new.edges)
-  new.edges <- visit.node.backwards(match(outgroup.root.node, child), root, new.edges)
+  new.edges <- visit.node.backwards(child.index[outgroup.root.node], root, new.edges)
   tree$edge <- new.edges
   tree
 }

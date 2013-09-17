@@ -129,16 +129,21 @@ root.robust <- function (tree, outgroup) {
   child <- edge[,2]
   root <- min(parent)
   root.children <- child[parent==root]
-  if (any(root.children %in% outgroup)) outgroup <- seq_along(tip)[-outgroup] # outgroup straddles root; root on ingroup instead
-  ancestry <- ancestors(parent, child, outgroup)
-  if (length(outgroup) > 1) {
-    common.ancestors <- Reduce(intersect, ancestry)
-    outgroup.root.node <- max(common.ancestors)
-  } else {
-    common.ancestors <- c(outgroup, ancestry)
-    outgroup.root.node <- outgroup
+  rooted.on.ingroup <- FALSE
+  repeat {
+    ancestry <- ancestors(parent, child, outgroup)
+    if (length(outgroup) > 1) {
+      common.ancestors <- Reduce(intersect, ancestry)
+      outgroup.root.node <- max(common.ancestors)
+    } else {
+      common.ancestors <- c(outgroup, ancestry)
+      outgroup.root.node <- outgroup
+    }
+    if (outgroup.root.node != root) break
+    if (rooted.on.ingroup) stop ('Cannot root tree: is outgroup polyphyletic?')
+    outgroup <- seq_along(tip)[-outgroup] # outgroup straddles root; root on ingroup instead
+    rooted.on.ingroup <- TRUE
   }
-
   visit.node.backwards <- function (arrival.edge, last.node.number, new.edges) {
     previous.node <- child[arrival.edge]
     this.node <- parent[arrival.edge]
@@ -152,7 +157,7 @@ root.robust <- function (tree, outgroup) {
         new.edges <- visit.node.forwards(fwd, this.node.new.number, new.edges)
     } else { # Root edge; don't create a new node
       if (forward.node) for (fwd in forward.node) {
-        new.edges <- visit.node.forwards(fwd, root, new.edges)
+        new.edges <- visit.node.forwards(fwd, last.node.number, new.edges)
       }
     }
     backward.edge <- match(this.node, child)

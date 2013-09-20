@@ -1,5 +1,5 @@
-parsimony.inapp <- function (tree, data, concavity = NULL) {
-  if (is.null(concavity)) return (fitch.inapp(tree, data)[[1]]) 
+parsimony.inapp <- function (tree, data, concavity = NULL, target = NULL) {
+  if (is.null(concavity)) return (fitch.inapp(tree, data, target)[[1]]) 
   # Implied weights
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
@@ -57,7 +57,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL) {
   return (sum(weighted.fit))
 }
 
-fitch.inapp <- function (tree, data) {
+fitch.inapp <- function (tree, data, target = NULL) {
   # Data
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
@@ -66,21 +66,21 @@ fitch.inapp <- function (tree, data) {
   weight <- at$weight
   if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")
   tree.edge <- tree$edge
-  node <- tree.edge[,1]
-  edge <- tree.edge[,2]
-  nEdge <- length(edge)
+  parent <- tree.edge[,1]
+  child <- tree.edge[,2]
   tip.label <- tree$tip.label
-  maxNode <- max(node) # m
+  nEdge <- length(parent)
+  maxNode <- max(parent) # m
   nTip <- length(tip.label) # q
+  nNode <- maxNode - nTip
   inapp <- at$inapp.level
   nNode <- tree$Nnode
   
-  ret <- .Call("FITCHI", data[, tip.label], as.integer(nChar), as.integer(node), as.integer(edge), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(rep(inapp, nChar)), PACKAGE='inapplicable')
-  
-  if (any(need.uppass <- ret[[2]] < 0)) {
-    tree<-reorder(tree, 'clade')
-    tree.edge <- tree$edge; parent <- tree.edge[,1]; child <- tree.edge[,2]
-    ups <- .Call("FITCHUP", ret[[3]][need.uppass,], as.integer(sum(need.uppass)), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight[need.uppass,]), as.integer(maxNode), as.integer(nTip), as.integer(rep(inapp, nChar)), PACKAGE='inapplicable')
+  ret <- .Call("FITCHI", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+  if (any(need.uppass <- ret[[2]] < 0) && (is.null(target) || ret[[1]] <= target)) {
+    parentof <- vapply((nTip+2):maxNode, function (x) parent[child==x], double(1))
+    childof  <- vapply((nTip+1):maxNode, function (x) child[parent==x], double(2))
+    ups <- .Call("FITCHUP", ret[[3]][need.uppass,], as.integer(sum(need.uppass)), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
     #// Note different from FITCHI because ret[[3]][nu,] has an opt for each node, not just each tip.
   }
   

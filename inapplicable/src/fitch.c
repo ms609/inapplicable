@@ -9,16 +9,17 @@
 
 void fitchdown(int *dat1, int *dat2, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
   int k, tmp, noin1, noin2;
-  for(k = 0; k < (*n_rows); k++){
+  for (k = 0; k < (*n_rows); k++) {
     tmp = dat1[k] & dat2[k];
     if (tmp // Tokens in Common
       && ((*inapp) & tmp) // && Inapplicable in common 
       && (noin1 = dat1[k] - (*inapp)) && (noin2 = dat2[k] - (*inapp)) // && Apart from inapplicable, tokens
       && !((noin1) & (dat2[k] - (*inapp))) // && Apart from inapplicable, no tokens in common
     ){
-      pars[k] = -32768; // Negative number as flag that we'll need to perform an uppass on transformation series k
-      tmp = dat1[k] | dat2[k];
-    } else if(!tmp){
+      pars[k] = -1; // Flag that we'll need to perform an uppass on transformation series k
+      dat1[k] = dat1[k] | dat2[k];
+      continue;
+    } else if (!tmp){
       tmp = dat1[k] | dat2[k];
       if ((dat1[k] == *inapp) || (dat2[k] == *inapp)) { // Do not increment pscore
       } else {
@@ -75,38 +76,29 @@ SEXP FITCHI(SEXP dat, SEXP nrx, SEXP node, SEXP edge, SEXP l, SEXP weight, SEXP 
   return(RESULT); 
 }
 
-void fitch_uppass(int *dat1, int *dat2, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
-  int k, tmp;
-  for(k = 0; k < (*n_rows); k++) {
-    tmp = dat1[k] & dat2[k]; // Intersect
-    if (tmp != dat2[k])
-    if (tmp // Tokens in Common
-      && ((*inapp) & tmp) // && Inapplicable in common 
-      && (noin1 = dat1[k] - (*inapp)) && (noin2 = dat2[k] - (*inapp)) // && Apart from inapplicable, tokens
-      && !((noin1) & (dat2[k] - (*inapp))) // && Apart from inapplicable, no tokens in common
-    ){
-      pars[k] = -32768; // Negative number as flag that we'll need to perform an uppass on transformation series k
-      tmp = dat1[k] | dat2[k];
-    } else if(!tmp){
-      tmp = dat1[k] | dat2[k];
-      if ((dat1[k] == *inapp) || (dat2[k] == *inapp)) { // Do not increment pscore
+void fitch_uppass(int *this_start, int *this_finish, int *ancestor_finish, int *childq_start, int *childr_start, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
+  int k, tmp_finish;
+  for (k = 0; k < (*n_rows); k++) {
+    tmp_finish = dat1[k] & dat2[k]; // Intersect
+    if (tmp_finish != ancestor_finish[k]) {
+      if (childq_start & childr_start) {
+        tmp_finish <- ((childq_start | childr_start) & ancestor_finish) | this_start
       } else {
-        if ((*inapp) & tmp) { // Only delete inapplicable token if it is present
-          tmp = tmp - (*inapp);
-        }
-        (pars[k])++;
-        (*w) += weight[k];
+        tmp_finish <- this_start | ancestor_finish // Union
       }
     }
-    dat1[k] = tmp;
-  }
+    this_finish[k] = tmp_finish;
 }
 
-void fitchupbridge(int *dat, int *n_rows, int *pars, int *parent, int *child, int *n_edge, double *weight, int *inapp, double *pvec, double *pscore) {
+void fitchupbridge(int *start_state, int *n_rows, int *pars, int *parent_of, int *child_of, int *n_node, double *weight, int *inapp, double *pvec, double *pscore) {
   int i, prev_parent, k;
   prev_parent = 0;
-  for (i = 0; i < *n_edge; i++) {
-    fitch_uppass(&dat[(parent[i]-1L) * (*n_rows)], &dat[(child[i]-1L) * (*n_rows)], nr, pars, weight, inapp, &pvec[(prev_parent-1L)]);
+  &finsh_state[(parent_of[0]-1L * (*n_rows)] = &start_state[(parent_of[0]-1L * (*n_rows)]; //Node 0, i.e. root
+  for (i = 1; i < *n_node; i++) { 
+    // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
+    // child_of  is stored as 0L, 0R, 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR
+    // start_state and finish_state are stored as [0 * n_rows] = states[,1], [1 * n_rows] = states[,2], ....
+    fitch_uppass(&start_state[(*n_node + i + 2L) * (*n_rows)], &finish_state[(*n_node + i + 2L) * (*n_rows)], &start_state[(parent_of[i-1L]-1L) * (*n_rows)], &start_state[(child_of[2L*i-1L]-1L) * (*n_rows)], &start_state[(child_of[2L*i]-1L) * (*n_rows)], nr, pars, weight, inapp, &pvec[(prev_parent-1L)]);
     /*
     if (prev_parent == parent[i]) {
       // pvec[prev_parent-1L] += pvec[child[i]-1L]; // work out what this is doing later
@@ -121,7 +113,7 @@ void fitchupbridge(int *dat, int *n_rows, int *pars, int *parent, int *child, in
   pscore[0]=pvec[ni-1];
 }
 
-SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent, SEXP child, SEXP n_edge, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp) {   
+SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP child_of, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp) {   
   int *data, *n_rows=INTEGER(n_transform_series), m=INTEGER(max_node)[0], i, n=INTEGER(n_tip)[0];   
   double *pvtmp;
   SEXP DAT, pars, pvec, pscore, RESULT;
@@ -132,12 +124,13 @@ SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent, SEXP child, SEXP n_
   PROTECT(pvec = allocVector(REALSXP, m));
   pvtmp = REAL(pvec);
   data = INTEGER(DAT);
+  finish_state = INTEGER(DAT);
   for(i=0; i<m; i++) pvtmp[i] = 0.0;
   for(i=0; i<*n_rows; i++) INTEGER(pars)[i] = 0L;
   REAL(pscore)[0]=0.0;
   for(i=0; i<(*n_rows * n); i++) data[i] = INTEGER(dat)[i];
   
-  fitchupbridge(data, n_rows, INTEGER(pars), INTEGER(parent), INTEGER(child), INTEGER(n_edge), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore));
+  fitchupbridge(data, finish_state, n_rows, INTEGER(pars), INTEGER(parent_of), INTEGER(child_of), INTEGER(n_node), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore));
   
   SET_VECTOR_ELT(RESULT, 0, pscore);
   SET_VECTOR_ELT(RESULT, 1, pars);

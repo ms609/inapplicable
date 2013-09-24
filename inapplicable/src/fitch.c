@@ -57,11 +57,11 @@ SEXP FITCHI(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP weigh
   PROTECT(pvec = allocVector(REALSXP, m));
   PROTECT(need_up = allocVector(INTSXP, *n_rows));
   pvtmp = REAL(pvec);
-  data = INTEGER(DAT);
   need_uppass = INTEGER(need_up);
   for(i=0; i<m; i++) pvtmp[i] = 0.0;
   for(i=0; i<*n_rows; i++) {INTEGER(pars)[i] = 0L; need_uppass[i] = 0L;}
   REAL(pscore)[0]=0.0;
+  data = INTEGER(DAT);
   for(i=0; i<(*n_rows * n); i++) data[i] = INTEGER(dat)[i];
   
   fitch_downpass(data, n_rows, INTEGER(pars), INTEGER(parent), INTEGER(child), INTEGER(n_edge), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore), need_uppass);
@@ -72,37 +72,32 @@ SEXP FITCHI(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP weigh
   SET_VECTOR_ELT(RESULT, 3, pvec);
   SET_VECTOR_ELT(RESULT, 4, need_up);
   UNPROTECT(6);
-  return(RESULT); 
+  return(RESULT);
 }
 
-void fitch_upnode(int *this, int *ancestor, int *childq, int *childr, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
-  int k, final;
+void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
+  int k;
   for (k = 0; k < (*n_rows); k++) { // Next TS
-    final = this[k];
     if (!(ancestor[k] & (*inapp))   // Does parent lack {-}?
       && (this[k] & (*inapp))       // Does this node have {-}?
       && (this[k] - (*inapp))       // Does this node have an applicable token?
     ) {
-      final -= (*inapp);            // Remove {-} from this node's tokens
-      if (childq[k] == (*inapp) || childr[k] == (*inapp)                  // One child's only possible token is {-}
-      || ((childq[k] & childr[k]) && ((childq[k] & childr[k]) != (*inapp))) // Children have tokens in common, excluding {-}
+      this[k] -= (*inapp);            // Remove {-} from this node's tokens
+      if (child_q[k] == (*inapp) || child_r[k] == (*inapp)                  // One child's only possible token is {-}
+      || ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != (*inapp))) // Children have tokens in common, excluding {-}
       ) {} else {
         (pars[k])++;
         (*w) += weight[k];
-        this[k] = (ancestor[k] & childr[k]) | (ancestor[k] & childq[k]) | final;
-        *w = 1;
+        this[k] = this[k] | (ancestor[k] & child_r[k]) | (ancestor[k] & child_q[k]);
         continue;
       }
     }
-    if ((ancestor[k] & final) == ancestor[k]) { // All parent node's tokens among this node's possible tokens
-      *w = ancestor[k] * 1000;
+    if ((ancestor[k] & this[k]) == ancestor[k]) { // All parent node's tokens among this node's possible tokens
       this[k] = ancestor[k];                  // Set this node's tokens to parent's tokens
-    } else if (childq[k] & childr[k]) {       // Children have tokens in common
-      *w = 3;
-      this[k] = final | ancestor[k];          // Add parent's tokens to this node's tokens
+    } else if (child_q[k] & child_r[k]) {       // Children have tokens in common
+      this[k] = this[k] | ancestor[k];          // Add parent's tokens to this node's tokens
     } else {                                  // Add tokens common to parent and either child to this node
-      *w = 5;
-      this[k] = (ancestor[k] & childq[k]) | (ancestor[k] & childr[k]) | final; 
+      this[k] = this[k] | (ancestor[k] & child_q[k]) | (ancestor[k] & child_r[k]); 
     }
   }
 }
@@ -143,24 +138,24 @@ void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int
 SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP children_of, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp) {
   int *state, *n_rows=INTEGER(n_transform_series), m=INTEGER(max_node)[0], i, n=INTEGER(n_tip)[0];   
   double *pvtmp;
-  SEXP DAT, pars, pscore, pvec, RESULT;
+  SEXP DATA, pars, pscore, pvec, RESULT;
   PROTECT(RESULT = allocVector(VECSXP, 4L));
   PROTECT(pars = allocVector(INTSXP, *n_rows));
   PROTECT(pscore = allocVector(REALSXP, 1L));
   PROTECT(pvec = allocVector(REALSXP, m));
-  PROTECT(DAT = allocMatrix(INTSXP, n_rows[0], m));
-  state = INTEGER(DAT);
+  PROTECT(DATA = allocMatrix(INTSXP, n_rows[0], m));
   pvtmp = REAL(pvec);
   for(i=0; i<m; i++) pvtmp[i] = 0.0;
   for(i=0; i<*n_rows; i++) INTEGER(pars)[i] = 0L;
   REAL(pscore)[0] = 0.0;
-  for(i=0; i<(*n_rows * n); i++) state[i] = INTEGER(dat)[i];
+  state = INTEGER(DATA);
+  for(i=0; i<(*n_rows * m); i++) state[i] = INTEGER(dat)[i];
   
   fitch_uppass(state, INTEGER(parent_of), INTEGER(children_of), n_rows, INTEGER(pars), INTEGER(n_node), REAL(weight), pvtmp, INTEGER(inapp), REAL(pscore));
   
   SET_VECTOR_ELT(RESULT, 0, pscore);
   SET_VECTOR_ELT(RESULT, 1, pars);
-  SET_VECTOR_ELT(RESULT, 2, DAT);
+  SET_VECTOR_ELT(RESULT, 2, DATA);
   SET_VECTOR_ELT(RESULT, 3, pvec);
   UNPROTECT(5);
   return(RESULT); 

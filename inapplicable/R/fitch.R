@@ -70,18 +70,20 @@ fitch.inapp <- function (tree, data, target = NULL) {
   child <- tree.edge[,2]
   tip.label <- tree$tip.label
   nEdge <- length(parent)
-  maxNode <- max(parent) # m
-  nTip <- length(tip.label) # q
+  maxNode <- max(parent)
+  nTip <- length(tip.label)
   nNode <- maxNode - nTip
   inapp <- at$inapp.level
   nNode <- tree$Nnode
   
   ret <- .Call("FITCHI", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
-  if (any(need.uppass <- ret[[5]]) && (is.null(target) || ret[[1]] <= target)) {
-    parentof <- vapply((nTip+2L):maxNode, function (x) parent[child==x], double(1))
-    childof  <- vapply((nTip+1L):maxNode, function (x) child[parent==x], double(2))
+  if (any(need.uppass <- as.logical(ret[[5]])) && (is.null(target) || ret[[1]] <= target)) {
+    parentof <- vapply((nTip + 2L):maxNode, function (x) parent[child==x], double(1))
+    childof  <- vapply((nTip + 1L):maxNode, function (x) child[parent==x], double(2))
     ups <- .Call("FITCHUP", ret[[3]][need.uppass,], as.integer(sum(need.uppass)), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
-    #// Note different from FITCHI because ret[[3]][nu,] has an opt for each node, not just each tip.
+    ret[[1]] <- ret[[1]] + ups[[1]]
+    ret[[2]][need.uppass] <- ret[[2]][need.uppass] + ups[[2]]
+    ret[[3]][need.uppass] <- ups[[3]]
   }
   
   return (list(ret[[1]], ret[[2]], ret[[3]]))

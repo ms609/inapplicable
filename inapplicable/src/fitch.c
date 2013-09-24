@@ -7,7 +7,8 @@
 void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight, int *inapp, double *w, int *need_uppass) {
   int k, tmp, noin1, noin2;
   for (k = 0; k < (*n_rows); k++) {
-    if (tmp = dat1[k] & dat2[k]) {// Tokens in Common
+    tmp = dat1[k] & dat2[k];
+    if (tmp) {// Tokens in Common
       if (((*inapp) & tmp) // Do both children have a {-} ...
         && (noin1 = dat1[k] - (*inapp)) && (noin2 = dat2[k] - (*inapp)) // ... and an applicable token?
         && !((noin1) & (dat2[k] - (*inapp))) // Is {-} the only token in common?
@@ -136,7 +137,7 @@ void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int
 }
 
 SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP children_of, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp) {
-  int *state, *n_rows=INTEGER(n_transform_series), m=INTEGER(max_node)[0], i, n=INTEGER(n_tip)[0];   
+  int *state, *n_rows=INTEGER(n_transform_series), m=INTEGER(max_node)[0], i;   
   double *pvtmp;
   SEXP DATA, pars, pscore, pvec, RESULT;
   PROTECT(RESULT = allocVector(VECSXP, 4L));

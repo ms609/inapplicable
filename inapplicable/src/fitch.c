@@ -73,43 +73,56 @@ SEXP FITCHI(SEXP dat, SEXP nrx, SEXP node, SEXP edge, SEXP l, SEXP weight, SEXP 
   return(RESULT); 
 }
 
-void fitch_uppass(int *this_finish, int *this_start, int *ancestor_finish, int *childq_start, int *childr_start, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
-  int k, tmp_finish;
-  for (k = 0; k < (*n_rows); k++) {
-    tmp_finish = this_start[k] & ancestor_finish[k]; // Intersect
-    if (tmp_finish != ancestor_finish[k]) {
-      if (childq_start[k] & childr_start[k]) { // this_start was formed by intersecting childq and childr
-        tmp_finish = (((childq_start[k] | childr_start[k]) & ancestor_finish[k]) | this_start[k]);
+void fitch_upnode(int *this, int *ancestor, int *childq, int *childr, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
+  int k, final;
+  for (k = 0; k < (*n_rows); k++) { // Next TS
+    if (!(ancestor[k] & (*inapp))   // Does parent lack {-}?
+      && (this[k] & (*inapp))       // Does this node have {-}?
+      && (this[k] - (*inapp))       // Does this node have an applicable token?
+    ) {
+      final -= (*inapp);            // Remove {-} from this node's tokens
+      if (childq[k] == (*inapp) || childr[k] == (*inapp)                  // One child's only possible token is {-}
+      || ((childq[k] & childr[k]) && ((childq[k] & childr[k]) != (*inapp))) // Children have tokens in common, excluding {-}
+      ) {} else {
         pars[k] += 1;
-      } else { // this_start was formed by union of childq and childr
-        tmp_finish = (this_start[k] | ancestor_finish[k]); // Union
-        pars[k] += 1000000;
+        this[k] = (ancestor[k] & childr[k]) | (ancestor[k] & childq[k]) | final;
+        continue;
       }
-    } else pars[k] += 1000;
-    this_finish[k] = tmp_finish;
+    }
+    if ((ancestor[k] & final) == ancestor[k]) { // All parent node's tokens among this node's possible tokens
+      this[k] = ancestor[k];                  // Set this node's tokens to parent's tokens
+    } else if (childq[k] & childr[k]) {       // Children have tokens in common
+      this[k] = final | ancestor[k];          // Add parent's tokens to this node's tokens
+    } else {                                  // Add tokens common to parent and either child to this node
+      this[k] = (ancestor[k] & childr[k]) | (ancestor[k] & childq[k]) | final; 
+    }
   }
 }
 
-void fitchupbridge(int *finish_state, int *start_state, int *n_rows, int *pars, int *parent_of, int *child_of, int *n_node, double *weight, int *inapp, double *pvec, double *pscore) {
+void fitch_uppass(int *state, int *n_rows, int *pars, int *parent_of, int *child_of, int *n_node, double *weight, int *inapp, double *pvec, double *pscore) {
   int i;
+  fitch_upnode(&state[(parent_of[0]) * (*n_rows)], // this_start, will become this_finish
+  &state[(parent_of[0]) * (*n_rows)], // ancestor_finish
+  &state[(child_of[0]-1L) * (*n_rows)], &state[(child_of[1L]-1L) * (*n_rows)], // childq_start, childr_start
+  n_rows, pars, weight, inapp, &pvec[0]); // #TODO! checkL pvec 0 or pvec[root]?
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
   for (i = 0; i < (*n_node)-1L; i++) {
     // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
     // child_of  is stored as 0L, 0R, 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR
-    // start_state and finish_state are stored as [0 * n_rows] = states[,1], [1 * n_rows] = states[,2], ....
+    // state and state are stored as [0 * n_rows] = states[,1], [1 * n_rows] = states[,2], ....
     // Worked examples assume that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
-    fitch_uppass(
-    //  The position of node 12 in the finish_state and start_state array is:
+    fitch_upnode(
+    //  The position of node 12 in the state and state array is:
     //    root.number (counting from 1) + i = i.e. position[11], the 12th position
-    &finish_state[(parent_of[0] + i) * (*n_rows)], &start_state[(parent_of[0] + i) * (*n_rows)], // this_finish, this_start
+    &state[(parent_of[0] + i) * (*n_rows)], // this_start, will become this_finish
     //  To find the number of node 12's parent we look in parent_of[node12.index]
     //    parent_of[0] is the parent of node [root + i] = 12th node
-    //    node12.index = i = 0; parent_of[0] = 11; so we need start_state[11-1]
-    &finish_state[(parent_of[i]-1L) * (*n_rows)], // ancestor_finish
+    //    node12.index = i = 0; parent_of[0] = 11; so we need state[11-1]
+    &state[(parent_of[i]-1L) * (*n_rows)], // ancestor_finish
     //  To find the number of node 12's children we look in child_of[node12.index]
     //    child_of[0, 1] are the two children of node [root + i] = 12
     //    node12.index = i = 0; child_of[0*2] = Q; child_of[0*2 + 1] = R
-    &start_state[(child_of[i * 2L]-1L) * (*n_rows)], &start_state[(child_of[(i * 2L) + 1L]-1L) * (*n_rows)], // childq_start, childr_start
+    &state[(child_of[i * 2L]-1L) * (*n_rows)], &state[(child_of[(i * 2L) + 1L]-1L) * (*n_rows)], // childq_start, childr_start
     n_rows, pars, weight, inapp, &pvec[i]);
     // # TODO : Worry about pvec
   }
@@ -117,7 +130,7 @@ void fitchupbridge(int *finish_state, int *start_state, int *n_rows, int *pars, 
 }
 
 SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP child_of, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp) {
-  int *start_state, *finish_state, *n_rows=INTEGER(n_transform_series), m=INTEGER(max_node)[0], i, n=INTEGER(n_tip)[0];   
+  int *state, *n_rows=INTEGER(n_transform_series), m=INTEGER(max_node)[0], i, n=INTEGER(n_tip)[0];   
   double *pvtmp;
   SEXP DAT, pars, pvec, pscore, RESULT;
   PROTECT(RESULT = allocVector(VECSXP, 4L));
@@ -126,14 +139,14 @@ SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP child_of, S
   PROTECT(DAT = allocMatrix(INTSXP, n_rows[0], m));
   PROTECT(pvec = allocVector(REALSXP, m));
   pvtmp = REAL(pvec);
-  start_state = INTEGER(DAT);
+  state = INTEGER(DAT);
   for(i=0; i<m; i++) pvtmp[i] = 0.0;
   for(i=0; i<*n_rows; i++) INTEGER(pars)[i] = 0L;
   REAL(pscore)[0]=0.0;
-  for(i=0; i<(*n_rows * n); i++) start_state[i] = INTEGER(dat)[i];
-  finish_state = start_state;
+  for(i=0; i<(*n_rows * n); i++) state[i] = INTEGER(dat)[i];
+  state = state;
   
-  fitchupbridge(start_state, finish_state, n_rows, INTEGER(pars), INTEGER(parent_of), INTEGER(child_of), INTEGER(n_node), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore));
+  fitch_uppass(state, n_rows, INTEGER(pars), INTEGER(parent_of), INTEGER(child_of), INTEGER(n_node), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore));
   
   SET_VECTOR_ELT(RESULT, 0, pscore);
   SET_VECTOR_ELT(RESULT, 1, pars);

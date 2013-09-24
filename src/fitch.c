@@ -7,17 +7,17 @@
 void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight, int *inapp, double *w, int *need_uppass) {
   int k, tmp, noin1, noin2;
   for (k = 0; k < (*n_rows); k++) {
-    tmp = dat1[k] & dat2[k];
-    if (tmp // Tokens in Common
-      && ((*inapp) & tmp) // Inapplicable in common 
-      && (noin1 = dat1[k] - (*inapp)) && (noin2 = dat2[k] - (*inapp)) // Apart from inapplicable, tokens
-      && !((noin1) & (dat2[k] - (*inapp))) // Apart from inapplicable, no tokens in common
-    ) {
-      need_uppass[k] = 1L;
-      dat1[k] = dat1[k] | dat2[k];
-    } else if (!tmp){
+    if (tmp = dat1[k] & dat2[k]) {// Tokens in Common
+      if (((*inapp) & tmp) // Do both children have a {-} ...
+        && (noin1 = dat1[k] - (*inapp)) && (noin2 = dat2[k] - (*inapp)) // ... and an applicable token?
+        && !((noin1) & (dat2[k] - (*inapp))) // Is {-} the only token in common?
+      ) {
+        need_uppass[k] = 1L;
+        tmp = dat1[k] | dat2[k];
+      }
+    } else {
       tmp = dat1[k] | dat2[k];
-      if ((dat1[k] == *inapp) || (dat2[k] == *inapp)) { // Do not increment pscore
+      if ((dat1[k] == *inapp) || (dat2[k] == *inapp)) { // One child's only possible token {-}
       } else {
         if (tmp & (*inapp)) { // Only delete inapplicable token if it is present
           tmp = tmp - (*inapp);

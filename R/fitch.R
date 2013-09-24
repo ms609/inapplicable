@@ -77,9 +77,9 @@ fitch.inapp <- function (tree, data, target = NULL) {
   nNode <- tree$Nnode
   
   ret <- .Call("FITCHI", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
-  if (any(need.uppass <- ret[[2]] < 0) && (is.null(target) || ret[[1]] <= target)) {
-    parentof <- vapply((nTip+2):maxNode, function (x) parent[child==x], double(1))
-    childof  <- vapply((nTip+1):maxNode, function (x) child[parent==x], double(2))
+  if (any(need.uppass <- ret[[5]]) && (is.null(target) || ret[[1]] <= target)) {
+    parentof <- vapply((nTip+2L):maxNode, function (x) parent[child==x], double(1))
+    childof  <- vapply((nTip+1L):maxNode, function (x) child[parent==x], double(2))
     ups <- .Call("FITCHUP", ret[[3]][need.uppass,], as.integer(sum(need.uppass)), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
     #// Note different from FITCHI because ret[[3]][nu,] has an opt for each node, not just each tip.
   }

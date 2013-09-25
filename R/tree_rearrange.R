@@ -68,15 +68,21 @@ rooted.spr <- function(tree) {
   size <- c(sum(left.nodes), sum(right.nodes))
   moves <- (size-2L) * (size-1L) / 2
   moves[size < 3] <- 0
+  if (!any(moves)) return (tree)
   choose.right <- runif(1, min=0, max=sum(moves)) > moves[1]
   pruning.candidates <- if (choose.right) which(right.nodes) else which(left.nodes)
+  subtree.base <- child[parent==root.children[choose.right + 1L]]
+  subtree.basal.tip <- subtree.base < root
+  if (any(subtree.basal.tip)) pruning.candidates <- pruning.candidates[-match(subtree.base[!subtree.basal.tip], pruning.candidates)]
   prune.node <- sample(pruning.candidates, 1)
+cat("\n pr: ", prune.node)
   moving.subnodes <- c(prune.node, which(do.descendants(parent, child, nTips, prune.node)))
   moving.nodes <- c(prune.parent <- parent[child==prune.node], moving.subnodes)
   dont.graft.here <- c(moving.nodes, child[parent==prune.parent])
   graft.candidates <- c(root.children[choose.right + 1L], pruning.candidates)
   graft.candidates <- c(graft.candidates[!graft.candidates %in% dont.graft.here])
   graft.node <- sample(graft.candidates, 1)
+cat('gr:', graft.node)
   graft.edge <- match(graft.node, child)
   graft.parent <- parent[graft.edge]
   graft.child  <-  child[graft.edge]

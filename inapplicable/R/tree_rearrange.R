@@ -71,16 +71,12 @@ rooted.spr <- function(tree) {
   choose.right <- runif(1, min=0, max=sum(moves)) > moves[1]
   pruning.candidates <- if (choose.right) which(right.nodes) else which(left.nodes)
   prune.node <- sample(pruning.candidates, 1)
-prune.node <- 2
-cat("\n pr: ", prune.node)
   moving.subnodes <- c(prune.node, which(do.descendants(parent, child, nTips, prune.node)))
   moving.nodes <- c(prune.parent <- parent[child==prune.node], moving.subnodes)
   dont.graft.here <- c(moving.nodes, child[parent==prune.parent])
   graft.candidates <- c(root.children[choose.right + 1L], pruning.candidates)
   graft.candidates <- c(graft.candidates[!graft.candidates %in% dont.graft.here])
   graft.node <- sample(graft.candidates, 1)
-graft.node <- 5
-cat('gr:', graft.node)
   graft.edge <- match(graft.node, child)
   graft.parent <- parent[graft.edge]
   graft.child  <-  child[graft.edge]
@@ -92,50 +88,12 @@ cat('gr:', graft.node)
   sister.edge <- match(prune.parent, parent.duplicate)
   edge[c(leading.edge, sister.edge, graft.edge), 2] <- edge[c(sister.edge, graft.edge, leading.edge), 2]
   
-  NODES <- edge > nTips
-  TIPS <- !NODES
   nEdge <- length(child)
-  
-  # Identify nodes
-  moving.internal <- moving.nodes[moving.nodes > nTips]
-  n.moving.internal <- length(moving.internal)
-  node.moving <- edge %in% moving.internal
-  moving.lt.graft <- node.moving & edge < graft.parent
-  moving.gt.graft <- node.moving & edge > graft.parent
-  downstream.of.prune <- edge %in% which(do.descendants(parent, child, nTips, child[sister.edge], just.internal=TRUE, include.ancestor=TRUE))
-  downstream.of.graft <- edge %in% which(do.descendants(parent, child, nTips, graft.child, just.internal=TRUE, include.ancestor=FALSE))
-  affected.side.branches <- edge > graft.parent & downstream.of.prune & !downstream.of.graft
-  
-  # Change numbering of identified nodes
-  edge[moving.lt.graft] <- edge[moving.lt.graft] + graft.parent - prune.parent + 1 - 1 # -1 because not caught by decreasing internal nodes
-  edge[moving.gt.graft] <- edge[moving.gt.graft] - edge[moving.gt.graft][1] + graft.parent + 1  # m.g.g[1] is min(m.g.g)
-  edge[affected.side.branches] <- edge[affected.side.branches] + n.moving.internal # Reduced by 1 later, if downstream of prune
-  edge[downstream.of.prune] <- edge[downstream.of.prune] - 1L
-  edge[downstream.of.graft] <- edge[downstream.of.graft] + 1L
-
-  .C('order_edges', as.integer(edge[,1]), as.integer(edge[,2]), as.integer(nTips-1L), as.integer(nEdge), PACKAGE='inapplicable')
-  
-  sort.edge <- edge[order(edge[,2]),]
-  in. <- sort.edge[,2] > nTips
-  in.edge <-  sort.edge[in.,]
-  out.edge <- sort.edge[!in.,]
-  out.edge <- out.edge[order(out.edge[,1], decreasing=TRUE),]
-  sorted.edge <- rbind(in.edge, out.edge) # don't separate matrices?
-  sorted.edge1 <- sorted.edge[,1]
-  add.edge <- function (new.edge, ordered.edge) {
-    next.edge <- which.min(ordered.edge[,1])
-    ne <- next.edge
-    ordered.edge[next.edge,] <- new.edge
-    if (new.edge[2] > nTips) {
-      more.edges <- sorted.edge[as.logical(match(sorted.edge1, new.edge[2], nomatch=0)),]
-      ordered.edge <- add.edge(more.edges[1,], ordered.edge)
-      ordered.edge <- add.edge(more.edges[2,], ordered.edge)
-    }
-    ordered.edge
-  }
-  ordered.edge <- add.edge (in.edge[1,], matrix(0, 18, 2))
-  ordered.edge <- add.edge (sorted.edge[sorted.edge1 == root,][2,], ordered.edge)
-  tree$edge <- ordered.edge
+  reordered.edge <- .C('order_edges', as.integer(edge[,1]), as.integer(edge[,2]), as.integer(nTips-1L), as.integer(nEdge), PACKAGE='inapplicable')
+  numbered.edge <- .C('number_nodes', as.integer(reordered.edge[[1]]), as.integer(reordered.edge[[2]]), as.integer(root), as.integer(nEdge), PACKAGE='inapplicable')
+  edge[,1] <- numbered.edge[[1]]
+  edge[,2] <- numbered.edge[[2]]
+  tree$edge <- edge
   tree
 }
 

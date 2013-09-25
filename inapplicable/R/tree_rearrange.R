@@ -113,6 +113,8 @@ cat('gr:', graft.node)
   edge[downstream.of.prune] <- edge[downstream.of.prune] - 1L
   edge[downstream.of.graft] <- edge[downstream.of.graft] + 1L
 
+  .C('order_edges', as.integer(edge[,1]), as.integer(edge[,2]), as.integer(nTips-1L), as.integer(nEdge), PACKAGE='inapplicable')
+  
   sort.edge <- edge[order(edge[,2]),]
   in. <- sort.edge[,2] > nTips
   in.edge <-  sort.edge[in.,]

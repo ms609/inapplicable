@@ -68,21 +68,19 @@ rooted.spr <- function(tree) {
   size <- c(sum(left.nodes), sum(right.nodes))
   moves <- (size-2L) * (size-1L) / 2
   moves[size < 3] <- 0
-  if (!any(moves)) return (tree)
+  if (!max(moves)) return (tree)
   choose.right <- runif(1, min=0, max=sum(moves)) > moves[1]
   pruning.candidates <- if (choose.right) which(right.nodes) else which(left.nodes)
   subtree.base <- child[parent==root.children[choose.right + 1L]]
   subtree.basal.tip <- subtree.base < root
   if (any(subtree.basal.tip)) pruning.candidates <- pruning.candidates[-match(subtree.base[!subtree.basal.tip], pruning.candidates)]
   prune.node <- sample(pruning.candidates, 1)
-cat("\n pr: ", prune.node)
   moving.subnodes <- c(prune.node, which(do.descendants(parent, child, nTips, prune.node)))
   moving.nodes <- c(prune.parent <- parent[child==prune.node], moving.subnodes)
   dont.graft.here <- c(moving.nodes, child[parent==prune.parent])
   graft.candidates <- c(root.children[choose.right + 1L], pruning.candidates)
   graft.candidates <- c(graft.candidates[!graft.candidates %in% dont.graft.here])
   graft.node <- sample(graft.candidates, 1)
-cat('gr:', graft.node)
   graft.edge <- match(graft.node, child)
   graft.parent <- parent[graft.edge]
   graft.child  <-  child[graft.edge]
@@ -100,38 +98,6 @@ cat('gr:', graft.node)
   edge[,1] <- numbered.edge[[1]]
   edge[,2] <- numbered.edge[[2]]
   tree$edge <- edge
-  tree
-}
-
-old.rooted.spr <- function(tree) {
-  if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
-  tip.label <- tree$tip.label
-  nTips <- length(tip.label)
-  edge <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
-  root <- nTips + 1L # Assumes fully-resolved bifurcating tree
-  root.children <- child[parent==root]
-  left.nodes <- do.descendants(parent, child, nTips, root.children[1L])
-  right.nodes <- !left.nodes
-  left.nodes[root.children] <- right.nodes[root.children] <- right.nodes[root] <- FALSE
-  size <- c(sum(left.nodes), sum(right.nodes))
-  moves <- (size-2L) * (size-1L) / 2
-  moves[size < 3] <- 0
-  choose.right <- runif(1, min=0, max=sum(moves)) > moves[1]
-  pruning.candidates <- if (choose.right) which(right.nodes) else which(left.nodes)
-  prune.node <- sample(pruning.candidates, 1)
-  affected.nodes <- c(prune.parent <- parent[child==prune.node], child[parent==prune.parent], which(do.descendants(parent, child, nTips, prune.node)))
-  graft.candidates <- c(root.children[choose.right + 1L], pruning.candidates[!pruning.candidates %in% affected.nodes])
-  graft.node <- sample(graft.candidates, 1)
-  if (prune.node <= nTips) {
-    pruning <- single.taxon.tree(tip.label[prune.tips <- prune.node])
-  } else {
-    prune.tips <- do.descendants(parent, child, nTips, prune.node, just.tips=TRUE, include.ancestor=TRUE)
-    pruning <- extract.clade.robust(tree, prune.node); pruning$root.edge <- 1
-  }
-  tree$tip.label[prune.tips] <- 'PRUNED_TIP'
-  tree <- bind.tree.fast(tree, pruning, where=graft.node, position=1)
-  tree <- drop.tip.fast(tree, 'PRUNED_TIP')
-  tree <- renumber(phangorn:::reorderPruning(tree))  
   tree
 }
 

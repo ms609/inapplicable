@@ -60,7 +60,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL, target = NULL) {
 fitch.inapp <- function (tree, data, target = NULL) {
   # Data
   if (class(data) == 'phyDat') data <- prepare.data(data)
-  if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
+  if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
   at <- attributes(data)
   nChar  <- at$nr # strictly, transformation series patterns; these'll be upweighted later
   weight <- at$weight

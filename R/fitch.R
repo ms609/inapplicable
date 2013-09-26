@@ -1,5 +1,5 @@
 parsimony.inapp <- function (tree, data, concavity = NULL, target = NULL) {
-  if (is.null(concavity)) return (fitch.inapp(tree, data, target)[[1]]) 
+  if (is.null(concavity)) return (fitch.inapp(tree, data, target=target)[[1]]) 
   # Implied weights
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')

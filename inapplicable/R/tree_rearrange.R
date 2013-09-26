@@ -1,15 +1,15 @@
-rearrange.tree <- function (tree, data, rearrange, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, trace=0) {
+rearrange.tree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
-    trees <- list(rearrange(tree))
-    min.score <- parsimony.inapp(trees[[1]], data, concavity)
+    trees <- list(re.tree<-rearrange(tree))
+    min.score <- parsimony.inapp(re.tree, data, concavity, target=min.score)
     best.trees <- c(TRUE)
   } else {
     #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- parsimony.inapp(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
     candidates <- clusterCall(cluster, rearrange, tree)
-    scores <- vapply(candidates, parsimony.inapp, 1, data, concavity) # ~3x faster to do this in serial in r233.
+    scores <- vapply(candidates, parsimony.inapp, 1, data, concavity=concavity, target=min.score) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score
     trees <- candidates[best.trees]

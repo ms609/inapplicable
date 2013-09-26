@@ -161,7 +161,7 @@ tree.search <- function (start.tree, data, outgroup, concavity=NULL, method='NNI
   if (trace > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
   rearrange.func <- switch(method, 'TBR' = rooted.tbr, 'SPR' = rooted.spr, 'NNI' = rooted.nni)
   for (iter in 1:maxiter) {
-    trees <- rearrange.tree(tree, data, rearrange.func, concavity, forest.size==1, iter, cluster, trace)
+    trees <- rearrange.tree(tree, data, rearrange.func, min.score=best.pscore, concavity=concavity, return.single=forest.size==1, iter=iter, cluster=cluster, trace=trace)
     iter.pscore <- attr(trees, 'pscore')
     if (forest.size > 1) {
       hits <- attr(trees, 'hits')

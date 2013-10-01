@@ -105,8 +105,9 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
 
 void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int *pars, int *n_node, double *weight, double *pvec, int *inapp, double *pscore) {
   int i;
+  // TODO! Do we need to do this first pass at all?  Or can we just remove the -?
   fitch_upnode(&state[(parent_of[0]-1L) * (*n_rows)], // this_start, will become this_finish
-               &state[(parent_of[0]-1L) * (*n_rows)], // ancestor = this_start
+               &state[(parent_of[0]-1L) * (*n_rows)], // ancestor = this_start, minus inapp if ambiguous
                &state[(children_of[0 ]-1L) * (*n_rows)], // child q
                &state[(children_of[1L]-1L) * (*n_rows)], // child r
     n_rows, pars, weight, inapp, &pvec[parent_of[0]-1L]);

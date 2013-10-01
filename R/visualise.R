@@ -1,8 +1,8 @@
-visualize.character <- visualise.character <- visualize.char <- visualise.char <- function (tree, data, charno, plotfun = plot) {
-  plotfun(tree)
+visualize.character <- visualise.character <- visualize.char <- visualise.char <- function (tree, data, char.no, plot.fun = plot) {
+  plot.fun(tree)
   optimized.states <- fitch.inapp(tree, data)[[3]]
   dat.at <- attributes(data)
-  char.index <- dat.at$index[charno]
+  char.index <- dat.at$index[char.no]
   is.change <- fitch.switch(tree, optimized.states[char.index,])
   tiplabels(possible.tokens(dat.at$levels, optimized.states[char.index,seq_along(tree$tip.label)]), adj=c(1,1), bg='white', frame='no')
   nodelabels(possible.tokens(dat.at$levels, optimized.states[char.index,length(tree$tip.label) + seq(tree$Nnode)]), adj=rep(1.25,2), frame='no', bg='white', font=ifelse(is.change, 2, 1), col=ifelse(is.change, 'red', '#000066'))

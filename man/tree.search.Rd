@@ -9,7 +9,7 @@ tree.search(start.tree, data, outgroup, concavity = NULL, method = "NNI", maxite
 \arguments{
   \item{start.tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
   \item{data}{a matrix, ideally in the format produced by \code{\link{prepare.data}}, 
-  alternatively as a \code{\link{phyDat}} object.  may contain inapplicable data;}
+  alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;}
   \item{outgroup}{a vector listing the taxa in the outgroup;}
   \item{concavity}{concavity constant, if implied weighting is desired; see \code{\link{parsimony.inapp}}.}
   \item{method}{rearrangements to perform; one of \kbd{NNI}, \kbd{SPR}, or \kbd{TBR};}

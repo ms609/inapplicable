@@ -76,6 +76,36 @@ SEXP FITCHI(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP weigh
   return(RESULT);
 }
 
+// TODO? - -> !=
+void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
+  int k, ancestor;
+  for (k = 0; k < (*n_rows); k++) { // Next TS
+    ancestor = this[k];
+    if ((ancestor & (*inapp)) && (ancestor - (*inapp))) ancestor -= (*inapp);  // Remove {-} from parent node: Hennig's Auxiliary Principle
+    if (!(ancestor & (*inapp))
+      && (this[k] & (*inapp))       // Does this node have {-}?
+      && (this[k] - (*inapp))       // Does this node have an applicable token?
+    ) {
+      this[k] -= (*inapp);            // Remove {-} from this node's tokens
+      if (child_q[k] == (*inapp) || child_r[k] == (*inapp)                  // One child's only possible token is {-}
+      || ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != (*inapp))) // Children have tokens in common, excluding {-}
+      ) {} else {
+        (pars[k])++;
+        (*w) += weight[k];
+        this[k] = this[k] | (ancestor & child_r[k]) | (ancestor & child_q[k]);
+        return;
+      }
+    } else 
+    if ((ancestor & this[k]) == ancestor) { // All parent node's tokens among this node's possible tokens
+      this[k] = ancestor;                  // Set this node's tokens to parent's tokens
+    } else if (child_q[k] & child_r[k]) {       // Children have tokens in common
+      this[k] = ancestor;          // Add parent's tokens to this node's tokens
+    } else {                                  // Add tokens common to parent and either child to this node
+      this[k] = ancestor | (ancestor & child_q[k]) | (ancestor & child_r[k]); 
+    }
+  }
+}
+
 void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
   int k;
   for (k = 0; k < (*n_rows); k++) { // Next TS
@@ -105,9 +135,7 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
 
 void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int *pars, int *n_node, double *weight, double *pvec, int *inapp, double *pscore) {
   int i;
-  // TODO! Do we need to do this first pass at all?  Or can we just remove the -?
-  fitch_upnode(&state[(parent_of[0]-1L) * (*n_rows)], // this_start, will become this_finish
-               &state[(parent_of[0]-1L) * (*n_rows)], // ancestor = this_start, minus inapp if ambiguous
+  fitch_uproot(&state[(parent_of[0]-1L) * (*n_rows)], // this_start, will become this_finish
                &state[(children_of[0 ]-1L) * (*n_rows)], // child q
                &state[(children_of[1L]-1L) * (*n_rows)], // child r
     n_rows, pars, weight, inapp, &pvec[parent_of[0]-1L]);

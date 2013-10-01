@@ -80,7 +80,7 @@ fitch.inapp <- function (tree, data, target = NULL) {
   if (any(need.uppass <- as.logical(ret[[5]])) && (is.null(target) || ret[[1]] <= target)) {
     parentof <- vapply((nTip + 2L):maxNode, function (x) parent[child==x], double(1))
     childof  <- vapply((nTip + 1L):maxNode, function (x) child[parent==x], double(2))
-    ups <- .Call("FITCHUP", ret[[3]][need.uppass,], as.integer(sum(need.uppass)), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+    ups <- .Call("FITCHUP", as.integer(ret[[3]][need.uppass,]), as.integer(sum(need.uppass)), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
     ret[[1]] <- ret[[1]] + ups[[1]]
     ret[[2]][need.uppass] <- ret[[2]][need.uppass] + ups[[2]]
     ret[[3]][need.uppass] <- ups[[3]]

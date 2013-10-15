@@ -15,9 +15,11 @@ prepare.data <- function (data) {
   ret <- as.integer(ret)
   attributes(ret) <- at
   inapp.level <- which(at$levels == "-")
+  if (!any(inapp.level)) stop ("No inapplicable tokens detected in data.
+    Use a hyphen ('-', not a dash) to denote taxa in which a transformation series is inapplicable.
+    Does typing attributes(mydataname, 'contrast') return a column labelled '-'?")
   attr(ret, 'inapp.level') <- 2^(inapp.level - 1)
-  attr(ret, 'dim') <- c(nChar, nTip)
-  
+  attr(ret, 'dim') <- c(nChar, nTip)  
   attr(ret, 'min.steps') <- apply(ret, 1, function(x) min.steps(x, inapp.level))
   dimnames(ret) <- list(NULL, nam)
   class(ret) <- '*phyDat'
@@ -25,7 +27,7 @@ prepare.data <- function (data) {
 }
 
 as.binary <- function(x) {
-  # Adapted from code by Spencer Graves, on R mailing list
+  # Adapted from code posted to R mailing list by Spencer Graves
 	N <- length(x)
 	xMax <- max(x)	
 	ndigits <- (floor(logb(xMax, base=2))+1)
@@ -34,5 +36,5 @@ as.binary <- function(x) {
 		Base.b[, i] <- (x %% 2)
 		x <- (x %/% 2)
 	}
-	if(N ==1) Base.b[1, ] else Base.b
+	if(N == 1) Base.b[1, ] else Base.b
 }

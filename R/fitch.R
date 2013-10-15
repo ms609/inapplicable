@@ -6,10 +6,12 @@ parsimony.inapp <- function (tree, data, concavity = NULL, target = NULL) {
   fit <- fitch.inapp(tree, data)
   e <- fit[[2]]
   inapp.level <- attr(data, 'inapp.level')
-  inapp.power2 <- log2(inapp.level) + 1
-  fit3 <- fit[[3]]  
-  fit3.inapp <- fit3 == inapp.level
-  inapp.present <- rowSums(fit3.inapp) > 3 # two tips and one node causes no problems.
+  if (!is.null(inapp.level)) {
+    inapp.power2 <- log2(inapp.level) + 1
+    fit3 <- fit[[3]]  
+    fit3.inapp <- fit3 == inapp.level
+    inapp.present <- rowSums(fit3.inapp) > 3 # two tips and one node causes no problems.
+  } else inapp.present <- FALSE
   min.step <- attr(data, 'min.steps')
   if (any(inapp.present)) {
     nTips <- length(tree$tip.label)

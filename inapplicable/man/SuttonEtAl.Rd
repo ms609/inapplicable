@@ -10,9 +10,9 @@
 \description{
 \code{#TODO!  } Re-generate ALL data to avoid typo of PolysacCos.  Re-generate preparedate with new function.
 
-Phylogenetic matrix from Sutton et al. (2012), modified per Smith (submitted),
+Phylogenetic matrix from Sutton et al. (2012), modified per Smith & Brazeau (submitted),
 and the strict consensus of the most parsimonious trees generated under traditional parsimony
-and under the method proposed by Smith (submitted).}
+and under the method proposed by Smith & Brazeau (submitted).}
 \usage{data('SuttonEtAl')
 SuttonElAl.data
 SuttonElAl.phy
@@ -54,17 +54,17 @@ The dataset contains:
   \code{SuttonEtAl.parstree}\tab    The phylogenetic tree recovered by equal-weights analysis\cr
   \tab  of the dataset under the standard parsimony method\cr
   \code{SuttonEtAl.besttree}\tab     The phylogenetic tree recovered by equal-weights analysis\cr
-  \tab of the dataset under the revised method of Smith (submitted)\cr
+  \tab of the dataset under the revised method of Smith & Brazeau (submitted)\cr
 }
 }
 \source{
-Original source, Sigwart and Sutton (2007); updated by Sutton et al. (2012); modified per Smith (submitted)
+Original source, Sigwart and Sutton (2007); updated by Sutton et al. (2012); modified per Smith & Brazeau (submitted)
 }
 \references{
 \itemize{
 \item Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:\href{http://dx.doi.org/10.1098/rspb.2007.0701}{10.1098/rspb.2007.0701}
 \item Sutton, M. D., Briggs, D. E. G., Siveter, D. J., Siveter, D. J., & Sigwart, J. D. (2012). \cite{A Silurian armoured aplacophoran and implications for molluscan phylogeny.} Nature, 490(7418), 94-97. doi:\href{http://dx.doi.org/10.1038/nature11328}{10.1038/nature11328}
-\item M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi:\href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}
+\item Smith, M. R., & Brazeau, M. D. (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi:\href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}
 }
 }
 \examples{

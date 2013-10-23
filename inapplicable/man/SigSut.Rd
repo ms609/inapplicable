@@ -7,9 +7,9 @@
 \alias{SigSut.besttree}
 \docType{data}
 \title{Data from Sigwart and Sutton 2007}
-\description{Contains the phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith (submitted),
+\description{Contains the phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith & Brazeau (submitted),
 and the strict consensus of the most parsimonious trees generated under traditional parsimony
-and under the method proposed by Smith (submitted).}
+and under the method proposed by Smith & Brazeau (submitted).}
 \usage{data('SigSut')
 SigSut.data
 SigSut.phy
@@ -47,17 +47,17 @@ The dataset contains:
   \code{SigSut.parstree}\tab    The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr
   \tab  of the dataset under the standard parsimony method\cr
   \code{SigSut.besttree}\tab     The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr
-  \tab of the dataset under the revised method of Smith (submitted)\cr
+  \tab of the dataset under the revised method of Smith & Brazeau (submitted)\cr
   \code{SigSut.outgroup}\tab     The outgroup, \code{c('Lingula', 'Neocrania', 'Mickwitzia')}\cr
 }
 }
 \source{
-Sigwart and Sutton (2007); modified per Smith (submitted)
+Sigwart and Sutton (2007); modified per Smith & Brazeau (submitted)
 }
 \references{
 \itemize{
 \item Sigwart, J. D., & Sutton, M. D. (2007). \cite{Deep molluscan phylogeny: synthesis of palaeontological and neontological data.} Proceedings of the Royal Society B: Biological Sciences, 274, 2413-2419. doi:\href{http://dx.doi.org/10.1098/rspb.2007.0701}{10.1098/rspb.2007.0701}
-\item M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: \href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}
+\item Smith, M. R., & Brazeau, M. D. (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: \href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}
 }
 }
 \examples{

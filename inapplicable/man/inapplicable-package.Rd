@@ -17,7 +17,7 @@ the most parsimonious tree.  For usage guidance, see the \emph{Examples} section
 Martin R. Smith
 }
 \references{
-M. R. Smith (submitted). \cite{Inapplicable data in parsimony analysis.} Systematic Biology XXX, doi: \href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}.
+Smith, M. R., & Brazeau, M. D. (submitted). \cite{Inapplicable data in parsimony analysis.} Systematic Biology XXX, doi: \href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}.
 }
 \keyword{ package }
 \keyword{ tree }

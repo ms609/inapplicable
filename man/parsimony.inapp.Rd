@@ -4,16 +4,16 @@
 \title{Calculate parsimony score}
 \description{Calculates the parsimony score for a rooted tree, correctly handling the inapplicable token.}
 \usage{
-  parsimony.inapp(tree, data, concavity = NULL)
+  parsimony.inapp(tree, data)
   fitch.inapp(tree, data)
 }
 \arguments{
   \item{tree}{ A rooted tree in \code{phylo} format;}
   \item{data}{ Data to use to score the tree, preferably formatted using \code{\link{prepare.data}}.}
-  \item{concavity}{Concavity constant (k) for implied weighting.  \code{concavity = 3} is a typical value.}
+  %\item{concavity}{Concavity constant (k) for implied weighting.  \code{concavity = 3} is a typical value.}
 }
 \value{
-\code{parsimony.inapp} returns the parsimony score of the tree, calculated from \code{data} using Algorithm III in Smith (submitted).
+\code{parsimony.inapp} returns the parsimony score of the tree, calculated from \code{data} using Algorithm III in Smith & Brazeau (submitted).
 The parsimony score is calculated under equal weights unless a value is provided for \code{concavity}.  
 If \code{concavity} is specified, the returned score will be calculated using the method of Goloboff (1993) 
 with a concavity constant of \code{concavity}.
@@ -26,7 +26,7 @@ with a concavity constant of \code{concavity}.
 }
 \references{
 Goloboff, P. A. (1993). \cite{Estimating Character Weights During Tree Search.} Cladistics 9: 83-91. doi: 10.1111/j.1096-0031.1993.tb00209.x
-M. R. Smith (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+Smith, M. R., & Brazeau, M. D. (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \author{Martin R. Smith}
 \examples{

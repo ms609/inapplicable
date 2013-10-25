@@ -4,7 +4,7 @@
 \description{Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR}) to search for a more parsimonious tree.}
 \usage{
 tree.search(start.tree, data, outgroup, concavity = NULL, method = "NNI", maxiter = 100, 
-  maxhits = 20, forest.size = 1, cores = 4, trace = 1, ...)
+  maxhits = 20, forest.size = 1, cluster = NULL, trace = 1, ...)
 }
 \arguments{
   \item{start.tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
@@ -16,7 +16,7 @@ tree.search(start.tree, data, outgroup, concavity = NULL, method = "NNI", maxite
   \item{maxiter}{the maximum number of iterations to perform before abandoning the search;}
   \item{maxhits}{the maximum times to hit the best pscore before abandoning the search;}
   \item{forest.size}{the maximum number of trees to return - useful in concert with \code{\link{consensus}};}
-  \item{cores}{number of trees to examine in parallel on each iteration; may speed up search on multicore machines;}
+  \item{cluster}{a cluster prepared using \code{\link{prepare.cluster}}; may speed up search on multicore machines;}
   \item{trace}{higher values provide more verbose user feedback in stdout;}
   \item{\dots}{other arguments to pass to subsequent functions.}
 }

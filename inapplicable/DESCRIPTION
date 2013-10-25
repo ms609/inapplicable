@@ -1,13 +1,14 @@
 Package: inapplicable
 Type: Package
 Title: Inapplicable data in parsimony analysis
-Version: 0.03.270
-Date: 2013-07-29
+Version: 0.03.288
+Date: 2013-10-23
 Author: Martin R. Smith
 Maintainer: Martin R. Smith <martins@gmail.com>
 Description: Correctly calculates tree parsimony scores when datasets contain inapplicable data.
   Also provides tree rearrangement and tree search functions that preserve a tree's outgroup.
-  The algorithm employed herein is described in M. R. Smith (submitted) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX.
-  This R package is deposited at Data Dryad, doi: 10.5061/dryad.d5mf2
+  The algorithm employed herein is described in Smith & Brazeau (201X) Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX.
+  This R package is deposited at Data Dryad, doi: 10.5061/dryad.d5mf2  
+  For an introduction to using the package, please see the manual heading 'inapplicable-package'.
 Depends: ape, phangorn, parallel
 License: Unlimited

@@ -20,7 +20,7 @@ prepare.data <- function (data) {
     Does typing attributes(mydataname, 'contrast') return a column labelled '-'?")
   attr(ret, 'inapp.level') <- 2^(inapp.level - 1)
   attr(ret, 'dim') <- c(nChar, nTip)  
-  attr(ret, 'min.steps') <- apply(ret, 1, function(x) min.steps(x, inapp.level))
+#  attr(ret, 'min.steps') <- apply(ret, 1, function(x) min.steps(x, inapp.level))
   dimnames(ret) <- list(NULL, nam)
   class(ret) <- '*phyDat'
   ret

@@ -1,4 +1,5 @@
 \name{visualise.character}
+\alias{visualise.character}
 \alias{visualise.char}
 \alias{visualize.character}
 \alias{visualize.char}

@@ -1,24 +1,3 @@
-renumber.edge <- function (edge) {
-## Numbers the nodes and tips in a tree to conform with the phylo standards.
-  edge <- tree$edge
-  parent <- edge[,1L]
-  child  <- edge[,2L]
-  root <- min(parent)
-  nTips <- root - 1L
-  nNode <- max(parent) - nTips
-  NODES <- child > nTips
-  TIPS <- !NODES
-  # Deleted tip renumbering; is it a breaking change or an aesthetic choice?  Good if tip numbers don't change.
-  
-  old.node.number <- unique(parent)
-  new.node.number <- (nTips + nNode):(nTips + 1L)
-  child[NODES] <- new.node.number[match(child[NODES], old.node.number)]
-  nodeseq <- (1L:nNode) * 2L
-  parent[c(nodeseq, nodeseq-1L)] <- new.node.number
-  edge[,1] <- parent; edge[,2] <- child
-  edge
-}
-
 renumber <- function (tree) {
 ## Numbers the nodes and tips in a tree to conform with the phylo standards.
   tree <- reorder(tree, 'postorder')
@@ -108,8 +87,6 @@ add.tip <- function (tree, where, label) {
   tree.edge[nodes] <- -(tree.edge[nodes] - nTip)  # -1, ..., -nTip
   next.node <- -nNode - 1L
   ROOT <- -1L # This may change later
-  dbg<<-tree
-  #cat("\n: ", where, label)
   
   switch(case, { # case = 1 -> y is bound on the root of x
       tree.edge <- rbind(c(next.node, tree.edge[1]), tree.edge, c(next.node, new.tip.number))

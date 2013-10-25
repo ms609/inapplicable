@@ -23,7 +23,7 @@ min.steps <- function (x, inapp.power2) {
   return (max(0, sum(definites) - 1))
 }
 
-min.steps.inapp <- function (dat) {
+min.steps.inapp <- function (dat, inapp.level) {
   # This function gives unconventional results; see text.
   apply(dat, 1, function (x) {
     vals = as.binary(unique(x))

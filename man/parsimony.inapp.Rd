@@ -13,7 +13,7 @@
   %\item{concavity}{Concavity constant (k) for implied weighting.  \code{concavity = 3} is a typical value.}
 }
 \value{
-\code{parsimony.inapp} returns the parsimony score of the tree, calculated from \code{data} using Algorithm III in Smith & Brazeau (submitted).
+\code{parsimony.inapp} returns the parsimony score of the tree, calculated from \code{data} using Algorithm III in Smith & Brazeau (201X).
 The parsimony score is calculated under equal weights unless a value is provided for \code{concavity}.  
 If \code{concavity} is specified, the returned score will be calculated using the method of Goloboff (1993) 
 with a concavity constant of \code{concavity}.
@@ -26,7 +26,7 @@ with a concavity constant of \code{concavity}.
 }
 \references{
 Goloboff, P. A. (1993). \cite{Estimating Character Weights During Tree Search.} Cladistics 9: 83-91. doi: 10.1111/j.1096-0031.1993.tb00209.x
-Smith, M. R., & Brazeau, M. D. (submitted). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
+Smith, M. R., & Brazeau, M. D. (201X). \cite{Incorporating inapplicable data in parsimony analyses.} Systematic Biology XXX, doi: 10.1093/sysbio/syXXXX
 }
 \author{Martin R. Smith}
 \examples{

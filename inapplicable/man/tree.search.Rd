@@ -11,7 +11,8 @@ tree.search(start.tree, data, outgroup, concavity = NULL, method = "NNI", maxite
   \item{data}{a matrix, ideally in the format produced by \code{\link{prepare.data}}, 
   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;}
   \item{outgroup}{a vector listing the taxa in the outgroup;}
-  \item{concavity}{concavity constant, if implied weighting is desired; see \code{\link{parsimony.inapp}}.}
+  \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
+    see \code{\link{parsimony.inapp}};}
   \item{method}{rearrangements to perform; one of \kbd{NNI}, \kbd{SPR}, or \kbd{TBR};}
   \item{maxiter}{the maximum number of iterations to perform before abandoning the search;}
   \item{maxhits}{the maximum times to hit the best pscore before abandoning the search;}

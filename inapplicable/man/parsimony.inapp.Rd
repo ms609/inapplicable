@@ -4,13 +4,14 @@
 \title{Calculate parsimony score}
 \description{Calculates the parsimony score for a rooted tree, correctly handling the inapplicable token.}
 \usage{
-  parsimony.inapp(tree, data)
-  fitch.inapp(tree, data)
+  parsimony.inapp(tree, data, concavity = NULL, target = NULL)
+  fitch.inapp(tree, data, target = NULL)
 }
 \arguments{
-  \item{tree}{ A rooted tree in \code{phylo} format;}
-  \item{data}{ Data to use to score the tree, preferably formatted using \code{\link{prepare.data}}.}
-  %\item{concavity}{Concavity constant (k) for implied weighting.  \code{concavity = 3} is a typical value.}
+  \item{tree}{ a rooted tree in \code{phylo} format;}
+  \item{data}{ data to use to score the tree, preferably formatted using \code{\link{prepare.data}};}
+  \item{concavity}{set concavity constant (k) to use Goloboff's implied weighting (not yet implemented); \code{concavity = 3} is a typical value;}
+  \item{target}{abandon search once target parsimony score is exceeded.}
 }
 \value{
 \code{parsimony.inapp} returns the parsimony score of the tree, calculated from \code{data} using Algorithm III in Smith & Brazeau (201X).

@@ -11,7 +11,8 @@ pratchet.inapp(start.tree, data, outgroup = NULL, concavity = NULL, maxit = 5000
   \item{data}{the output of \code{\link{prepare.data}}, or a matrix in phyDat format
     (which the function will itself pass through \code{prepare.data});}
   \item{outgroup}{a vector specifying all tips in the outgroup, used if \code{start.tree} is not rooted appropriately;}
-  \item{concavity}{concavity constant, if implied weighting is desired; see \code{\link{parsimony.inapp}}.}
+  \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
+    see \code{\link{parsimony.inapp}};}
   \item{maxit}{maximum ratchet iterations to perform;}
   \item{maxiter}{maximum rearrangements to perform on each bootstrap or ratchet iteration;}
   \item{maxhits}{maximum times to hit best score before terminating a tree search within a pratchet iteration;}

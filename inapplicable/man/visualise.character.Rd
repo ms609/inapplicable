@@ -7,14 +7,14 @@
 \title{Visualize optimization for a character}
 \description{Determine and depict the possible states for a character on a tree under the most parsimonious conditions}
 \usage{
-visualise.character(tree, data, char.no, plot.fun = \link{plot})
+visualise.character(tree, data, char.no, plot.fun = plot)
 }
 \arguments{
   \item{tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
   \item{data}{a matrix, ideally in the format produced by \code{\link{prepare.data}}, 
   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;}
   \item{char.no}{number of the character to be displayed;}
-  \item{plot.fun}{a function that plots a tree.}
+  \item{plot.fun}{a function that plots a tree, \code{\link{plot}} by default.}
 }
 
 \value{

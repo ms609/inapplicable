@@ -4,7 +4,8 @@
 \title{Sectorial search}
 \description{Performs a sectorial search on a tree, preserving the position of the root.}
 \usage{
-sectorial.search(start.tree, data, outgroup, concavity = NULL, rearrangements = "NNI", maxiter = 2000, trace = 3)
+sectorial.search(start.tree, data, outgroup, concavity = NULL, rearrangements = "NNI",
+  maxiter = 2000, cluster = NULL, trace = 3)
 sectorial.inapp(start.tree, data, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
   trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
 }
@@ -12,9 +13,11 @@ sectorial.inapp(start.tree, data, outgroup = NULL, concavity = NULL, maxit = 100
   \item{start.tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}
   \item{data}{a dataset, in the format produced by \code{\link{prepare.data}} (or in \code{phyDat} format);}
   \item{outgroup}{a vector listing the taxa that form the outgroup;}
-  \item{concavity}{concavity constant, if implied weighting is desired; see \code{\link{parsimony.inapp}}.}
+  \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
+    see \code{\link{parsimony.inapp}};}
   \item{maxit}{maximum number of sectorial iterations to perform;}
   \item{maxiter}{maximum number of rearrangements to perform on each sectorial iteration;}
+  \item{cluster}{a cluster prepared using \code{\link{prepare.cluster}}; may speed up search on multicore machines;}
   \item{k}{stop when \code{k} searches have improved their sectorial score;}
   \item{trace}{integer determining how verbose the reporting to stdout will be;}
   \item{smallest.sector}{sectors with fewer than \code{smallest.sector} taxa will not be selected; \kbd{4} is the smallest sensible value;}

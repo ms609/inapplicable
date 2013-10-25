@@ -1,62 +1,64 @@
 parsimony.inapp <- function (tree, data, concavity = NULL, target = NULL) {
-  if (is.null(concavity)) return (fitch.inapp(tree, data, target=target)[[1]]) 
-  # Implied weights
-  if (class(data) == 'phyDat') data <- prepare.data(data)
-  if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
-  fit <- fitch.inapp(tree, data)
-  e <- fit[[2]]
-  inapp.level <- attr(data, 'inapp.level')
-  if (!is.null(inapp.level)) {
-    inapp.power2 <- log2(inapp.level) + 1
-    fit3 <- fit[[3]]  
-    fit3.inapp <- fit3 == inapp.level
-    inapp.present <- rowSums(fit3.inapp) > 3 # two tips and one node causes no problems.
-  } else inapp.present <- FALSE
-  min.step <- attr(data, 'min.steps')
-  if (any(inapp.present)) {
-    nTips <- length(tree$tip.label)
-    nChar <- length(e)
-    nEntries <- ncol(fit3)
-    edge <- tree$edge
-    parent <- edge[,1]
-    child <- edge[,2]
-    children <- function (node) {child[parent==node]}
-    root.node <- nTips + 1L # Assumes fully-resolved bifurcating tree
-    
-    for (i in which(inapp.present)) {
-      this.line <- fit3[i,]
-      this.inapp <- fit3.inapp[i,]
-      lists <- matrix(inapp.level, nTips - 2, nTips)
-      current.list <- 1
-      traverse.order <- root.node
-      start.new.list <- rep(FALSE, nEntries)
-      while (length(traverse.order)) {
-        node = traverse.order[1]; traverse.order <- traverse.order[-1]
-        if (start.new.list[node]) current.list <- current.list + 1
-        node.children <- children(node)
-        a.tip <- node.children <= nTips
-        child.tips <- node.children[a.tip]
-        lists[current.list,child.tips] <- this.line[child.tips]
-        child.nodes <- node.children[!a.tip]
-        if (this.inapp[node]) {
-          start.new.list[child.nodes] = TRUE
-          traverse.order <- c(traverse.order, child.nodes)
-        } else traverse.order <- c(child.nodes, traverse.order)
-      }
-      lists <- lists[apply(lists, 1, function(x) {any(x!=inapp.level)}),] # Probably redundant but helps debugging
-      lists #<- lists[apply(lists, 1, function(x) {any(x!=inapp.level)}),apply(lists, 2, function(x) {any(x!=inapp.level)})] # Probably redundant but helps debugging
-      #apply(lists, 1, unique)  # TODO delete
-      if (is.null(dim(lists))) {
-        min.step[i] <- sum(min.steps(lists, inapp.power2))
-      } else {
-      # unlist(apply(lists, 1, function (x) {min.steps(x, inapp.power2)})) # TODO delete when debugged
-        min.step[i] <- sum(unlist(apply(lists, 1, function (x) {min.steps(x, inapp.power2)})))
-      }
-    }
-  }
-  e <- e - min.step
-  weighted.fit <- attr(data, 'weight') * e / (concavity + e) # Corresponds to 1 - f = e / (e + k).  f = k / (e + k)
-  return (sum(weighted.fit))
+  return (fitch.inapp(tree, data, target=target)[[1]]) 
+#  
+#  if (is.null(concavity)) return (fitch.inapp(tree, data, target=target)[[1]]) 
+#  # Implied weights
+#  if (class(data) == 'phyDat') data <- prepare.data(data)
+#  if (class(data) != '*phyDat') stop('Invalid data type; try data <- prepare.data(valid.phyDat.object).')
+#  fit <- fitch.inapp(tree, data)
+#  e <- fit[[2]]
+#  inapp.level <- attr(data, 'inapp.level')
+#  if (!is.null(inapp.level)) {
+#    inapp.power2 <- log2(inapp.level) + 1
+#    fit3 <- fit[[3]]  
+#    fit3.inapp <- fit3 == inapp.level
+#    inapp.present <- rowSums(fit3.inapp) > 3 # two tips and one node causes no problems.
+#  } else inapp.present <- FALSE
+#  min.step <- attr(data, 'min.steps')
+#  if (any(inapp.present)) {
+#    nTips <- length(tree$tip.label)
+#    nChar <- length(e)
+#    nEntries <- ncol(fit3)
+#    edge <- tree$edge
+#    parent <- edge[,1]
+#    child <- edge[,2]
+#    children <- function (node) {child[parent==node]}
+#    root.node <- nTips + 1L # Assumes fully-resolved bifurcating tree
+#    
+#    for (i in which(inapp.present)) {
+#      this.line <- fit3[i,]
+#      this.inapp <- fit3.inapp[i,]
+#      lists <- matrix(inapp.level, nTips - 2, nTips)
+#      current.list <- 1
+#      traverse.order <- root.node
+#      start.new.list <- rep(FALSE, nEntries)
+#      while (length(traverse.order)) {
+#        node = traverse.order[1]; traverse.order <- traverse.order[-1]
+#        if (start.new.list[node]) current.list <- current.list + 1
+#        node.children <- children(node)
+#        a.tip <- node.children <= nTips
+#        child.tips <- node.children[a.tip]
+#        lists[current.list,child.tips] <- this.line[child.tips]
+#        child.nodes <- node.children[!a.tip]
+#        if (this.inapp[node]) {
+#          start.new.list[child.nodes] = TRUE
+#          traverse.order <- c(traverse.order, child.nodes)
+#        } else traverse.order <- c(child.nodes, traverse.order)
+#      }
+#      lists <- lists[apply(lists, 1, function(x) {any(x!=inapp.level)}),] # Probably redundant but helps debugging
+#      lists #<- lists[apply(lists, 1, function(x) {any(x!=inapp.level)}),apply(lists, 2, function(x) {any(x!=inapp.level)})] # Probably redundant but helps debugging
+#      #apply(lists, 1, unique)  # TODO delete
+#      if (is.null(dim(lists))) {
+#        min.step[i] <- sum(min.steps(lists, inapp.power2))
+#      } else {
+#      # unlist(apply(lists, 1, function (x) {min.steps(x, inapp.power2)})) # TODO delete when debugged
+#        min.step[i] <- sum(unlist(apply(lists, 1, function (x) {min.steps(x, inapp.power2)})))
+#      }
+#    }
+#  }
+#  e <- e - min.step
+#  weighted.fit <- attr(data, 'weight') * e / (concavity + e) # Corresponds to 1 - f = e / (e + k).  f = k / (e + k)
+#  return (sum(weighted.fit))
 }
 
 fitch.inapp <- function (tree, data, target = NULL) {

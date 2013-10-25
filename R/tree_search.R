@@ -10,7 +10,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
     at <- attributes(X)
     dec <- X[,tips]
     nBits <- floor(log2(max(X))) + 1L
-    bin <- array(FALSE, dim=c(nrow(dec), ncol(dec), nBits))  ## TODO compare with as.binary
+    bin <- array(FALSE, dim=c(nrow(dec), ncol(dec), nBits))
     for (i in 0:(nBits-1)) {
       bin[, , nBits-i] <- as.logical(dec %% 2)
       dec <- (dec %/% 2)
@@ -25,7 +25,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
     attr(X, 'nr') <- informative.chars
     attr(X, 'inapp.level') <- at$inapp.level
     inapp.power2 <- log2(at$inapp.level) + 1
-    attr(X, 'min.steps') <- apply(X, 1, function(x) min.steps(x, inapp.power2))
+    #attr(X, 'min.steps') <- apply(X, 1, function(x) min.steps(x, inapp.power2))
     attr(X, 'levels') <- at$levels
     attr(X, 'weight') <- at$weight[parsimony.informative]
     class(X) <- '*phyDat'
@@ -37,7 +37,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
   for (i in 1:maxit) {
     edge1 <- tree$edge[,1]
     nodes <- unique(edge1)[-1]
-    node.lengths <- sapply(Descendants(tree, nodes), length)
+    node.lengths <- sapply(Descendants(tree, nodes), length) # (10x quicker than do.descendants)
     candidate.nodes <- nodes[node.lengths >= smallest.sector & node.lengths <= largest.sector]
     if (trace >= 0) cat ("\n - Iteration", i, "- attempting sectorial search on node ")
     repeat {
@@ -56,7 +56,7 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
     initial.p <- parsimony.inapp(crown, crown.data, concavity)
     attr(crown, 'pscore') <- initial.p
     if (trace >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
-    candidate <- tree.search(crown, crown.data, 'SECTOR_ROOT', concavity, method=rearrangements, concavity=concavity, trace=trace-1, maxiter=maxiter, ...)
+    candidate <- tree.search(crown, crown.data, 'SECTOR_ROOT', concavity=concavity, method=rearrangements, trace=trace-1, maxiter=maxiter, ...)
     candidate.p <- attr(candidate, 'pscore')
     
     if((candidate.p + eps) < initial.p) {
@@ -195,7 +195,7 @@ tree.search <- function (start.tree, data, outgroup, concavity=NULL, method='NNI
   } else tree
 }
 
-sectorial.search <- function (start.tree, data, outgroup, concavity = NULL, rearrangements='NNI', maxiter=2000, trace=3, cluster=NULL) {
+sectorial.search <- function (start.tree, data, outgroup, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
   best.score <- attr(start.tree, 'pscore')
   if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data, concavity)
   if (length(outgroup) == 0) warning('"outgroup" parameter not specified')

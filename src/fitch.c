@@ -9,12 +9,14 @@ void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight
   for (k = 0; k < (*n_rows); k++) {
     tmp = dat1[k] & dat2[k];
     if (tmp) {// Tokens in Common
-      if (((*inapp) & tmp) // Do both children have a {-} ...
-        && (noin1 = dat1[k] - (*inapp)) && (noin2 = dat2[k] - (*inapp)) // ... and an applicable token?
-        && !((noin1) & (dat2[k] - (*inapp))) // Is {-} the only token in common?
+      if (((*inapp) & tmp) // Do both children have {-} ...
+        && !((noin1) & (dat2[k] - (*inapp))) // Is {-} the only common token?
       ) {
         need_uppass[k] = 1L;
-        tmp = dat1[k] | dat2[k];
+        if ((noin1 = dat1[k] - (*inapp)) && (noin2 = dat2[k] - (*inapp)) // ... and an applicable token?
+        ) {
+          tmp = dat1[k] | dat2[k];
+        }
       }
     } else {
       tmp = dat1[k] | dat2[k];

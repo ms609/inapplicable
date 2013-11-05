@@ -5,15 +5,15 @@
 #include <Rinternals.h>
 
 void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight, int *inapp, double *w, int *need_uppass) {
-  int k, tmp, noin1, noin2;
+  int k, tmp;
   for (k = 0; k < (*n_rows); k++) {
     tmp = dat1[k] & dat2[k];
     if (tmp) {// Tokens in Common
-      if (((*inapp) & tmp) // Do both children have {-} ...
-        && !((noin1) & (dat2[k] - (*inapp))) // Is {-} the only common token?
+      if ((tmp == (*inapp)) // Is - the only common token?
+        && ((dat1[k] | dat2[k]) != (*inapp)) // At least one child has an applicable token        
       ) {
         need_uppass[k] = 1L;
-        if ((noin1 = dat1[k] - (*inapp)) && (noin2 = dat2[k] - (*inapp)) // ... and an applicable token?
+        if ((dat1[k] != (*inapp)) && (dat2[k] != (*inapp)) // ... Do both children have an applicable token?
         ) {
           tmp = dat1[k] | dat2[k];
         }
@@ -49,7 +49,7 @@ void fitch_downpass(int *dat, int *n_rows, int *pars, int *parent, int *child, i
   pscore[0] = pvec[ni-1];
 }
 
-SEXP FITCHI(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP weight, SEXP mx, SEXP q, SEXP inapp) {   
+SEXP FITCHDOWN(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP weight, SEXP mx, SEXP q, SEXP inapp) {   
   int *data, *n_rows=INTEGER(nrx), *need_uppass, m=INTEGER(mx)[0], i, n=INTEGER(q)[0];   
   double *pvtmp;
   SEXP RESULT, pars, pscore, DAT, pvec, need_up;

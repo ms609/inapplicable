@@ -80,7 +80,7 @@ fitch.inapp <- function (tree, data, target = NULL) {
   inapp <- at$inapp.level
   nNode <- tree$Nnode
   
-  ret <- .Call("FITCHI", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+  ret <- .Call("FITCHDOWN", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (0), pscore; (1), pars; (2), DAT; (3), pvec; (4), need_up
   if (any(need.uppass <- as.logical(ret[[5]])) && (is.null(target) || ret[[1]] <= target)) {
     parentof <- vapply((nTip + 2L):maxNode, function (x) parent[child==x], double(1))
     childof  <- vapply((nTip + 1L):maxNode, function (x) child[parent==x], double(2))

@@ -85,17 +85,11 @@ fitch.inapp <- function (tree, data, target = NULL) {
     parentof <- parent[match((nTip + 2L):maxNode, child )]
     allNodes <- (nTip + 1L):maxNode
     childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
-    
-    target  <- vapply((nTip + 1L):maxNode, function (x) child[parent==x], double(2))
     ups <- .Call("FITCHUP", as.integer(ret[[3]][need.uppass,]), as.integer(sum(need.uppass)), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
     ret[[1]] <- ret[[1]] + ups[[1]]
     ret[[2]][need.uppass] <- ret[[2]][need.uppass] + ups[[2]]
     ret[[3]][need.uppass] <- ups[[3]]
   }
   
-  return (list(ret[[1]], ret[[2]], ret[[3]]))
+  return (ret[1:3])
 }
-
-Rprof(); for (i in 1:10000) vapply((nTip + 2L):maxNode, function (x) parent[child==x], double(1)); Rprof(NULL); summaryRprof()
-Rprof(); for (i in 1:10000) parent[match((nTip + 2L):maxNode, child); Rprof(NULL); summaryRprof()
-find(132

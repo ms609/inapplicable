@@ -145,13 +145,13 @@ void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int
   int i;
   fitch_uproot(&state[(parent_of[0]-1L) * (*n_rows)], // this_start, will become this_finish
                &state[(children_of[0 ]-1L) * (*n_rows)], // child q
-               &state[(children_of[1L]-1L) * (*n_rows)], // child r
+               &state[(children_of[*n_node]-1L) * (*n_rows)], // child r
     n_rows, pars, weight, inapp, &pvec[parent_of[0]-1L]);
   pscore[0] += pvec[parent_of[0]];
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
   for (i = 0; i < (*n_node)-1L; i++) {
     // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
-    // children_of  is stored as 0L, 0R, 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR
+    // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // state and state are stored as [0 * n_rows] = states[,1], [1 * n_rows] = states[,2], ....
     
     // Worked example assumes that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
@@ -164,10 +164,10 @@ void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int
     //    node12.index = i = 0; parent_of[0] = 11; so we need state[11-1]
     &state[(parent_of[i]-1L) * (*n_rows)], // ancestor
     //  To find the number of node 12's children we look in children_of[node12.index]
-    //    children_of[0, 1] are the two children of node [root + i] = 12
+    //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
     //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
-    &state[(children_of[(i * 2L) + 2L]-1L) * (*n_rows)], // child q
-    &state[(children_of[(i * 2L) + 3L]-1L) * (*n_rows)], // child r
+    &state[(children_of[i]-1L) * (*n_rows)], // child q
+    &state[(children_of[i + *n_node]-1L) * (*n_rows)], // child r
     n_rows, pars, weight, inapp, &pvec[parent_of[0] /*+1L -1L*/ + i]);
     pscore[0] += pvec[parent_of[0] /*+1L -1L*/ + i];
   }

@@ -74,7 +74,7 @@ fitch.inapp <- function (tree, data, target = NULL) {
   child <- tree.edge[,2]
   tip.label <- tree$tip.label
   nEdge <- length(parent)
-  maxNode <- max(parent)
+  maxNode <- parent[1] #max(parent)
   nTip <- length(tip.label)
   nNode <- maxNode - nTip
   inapp <- at$inapp.level
@@ -82,8 +82,11 @@ fitch.inapp <- function (tree, data, target = NULL) {
   
   ret <- .Call("FITCHDOWN", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (0), pscore; (1), pars; (2), DAT; (3), pvec; (4), need_up
   if (any(need.uppass <- as.logical(ret[[5]])) && (is.null(target) || ret[[1]] <= target)) {
-    parentof <- vapply((nTip + 2L):maxNode, function (x) parent[child==x], double(1))
-    childof  <- vapply((nTip + 1L):maxNode, function (x) child[parent==x], double(2))
+    parentof <- parent[match((nTip + 2L):maxNode, child )]
+    allNodes <- (nTip + 1L):maxNode
+    childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
+    
+    target  <- vapply((nTip + 1L):maxNode, function (x) child[parent==x], double(2))
     ups <- .Call("FITCHUP", as.integer(ret[[3]][need.uppass,]), as.integer(sum(need.uppass)), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
     ret[[1]] <- ret[[1]] + ups[[1]]
     ret[[2]][need.uppass] <- ret[[2]][need.uppass] + ups[[2]]
@@ -92,3 +95,7 @@ fitch.inapp <- function (tree, data, target = NULL) {
   
   return (list(ret[[1]], ret[[2]], ret[[3]]))
 }
+
+Rprof(); for (i in 1:10000) vapply((nTip + 2L):maxNode, function (x) parent[child==x], double(1)); Rprof(NULL); summaryRprof()
+Rprof(); for (i in 1:10000) parent[match((nTip + 2L):maxNode, child); Rprof(NULL); summaryRprof()
+find(132

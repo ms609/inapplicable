@@ -111,8 +111,7 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
   int k;
   for (k = 0; k < (*n_rows); k++) { // Next node in preorder
     if (this[k] & (*inapp)) {       // Node has a - token?
-      if ((this[k] != (*inapp))     // Node has an applicable token?
-      ) {
+      if (this[k] != (*inapp)) {    // Node has an applicable token?
         this[k] -= (*inapp);        // Remove {-} from this node's tokens
         if (child_q[k] == (*inapp) || child_r[k] == (*inapp)                      // One child's only possible token is {-}
         || ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != (*inapp))) // Children have tokens in common, excluding {-}
@@ -126,10 +125,11 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
         if (!(((child_q[k] | child_r[k]) & ancestor[k]) != (*inapp))) { // Parent has no applicable token in common with either child
           (pars[k])++;              // Increase parsimony score by one
           (*w) += weight[k];        // Increase parsimony score by one
-          this[k] = ((child_q[k] | child_r[k] | ancestor[k]) - (*inapp)); // Set this node's tokens to the tokens present in the parent or either child, excluding -
+          this[k] = child_q[k] | child_r[k] | ancestor[k]; // Set this node's tokens to the tokens present in the parent or either child...
         } else {
-          this[k] = ((child_q[k] | child_r[k]) & ancestor[k]) - (*inapp); // Set this node's tokens to those in common, excluding -
+          this[k] = (child_q[k] | child_r[k]) & ancestor[k]; // Set this node's tokens to those in common...
         }
+        if (this[k] & *inapp) this[k] -= *inapp;             // Excluding inapplicable
         continue;                   // Next node
       }
     }
@@ -169,8 +169,8 @@ void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int
     //  To find the number of node 12's children we look in children_of[node12.index]
     //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
     //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
-    &state[(children_of[i]-1L) * (*n_rows)], // child q
-    &state[(children_of[i + *n_node]-1L) * (*n_rows)], // child r
+    &state[(children_of[i + 1L]-1L) * (*n_rows)], // child q
+    &state[(children_of[i + 1L + *n_node]-1L) * (*n_rows)], // child r
     n_rows, pars, weight, inapp, &pvec[parent_of[0] /*+1L -1L*/ + i]);
     pscore[0] += pvec[parent_of[0] /*+1L -1L*/ + i];
   }

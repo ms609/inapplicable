@@ -1,40 +1,49 @@
-#visualize.char(best, data, i <- 7, colplot); text(2,2,paste('i =', i))
-#visualize.char(best, data, i <- i+1, colplot); text(2,2,paste('i =', i))
-
 visualize.character <- visualise.character <- visualize.char <- visualise.char <- function (tree, data, char.no, plot.fun = plot) {
+  if (class(data) == 'phyDat') data <- prepare.data(data)
+  if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
+  at <- attributes(data)
+  char.dat <- data[char.no,]
+  char.index <- at$index[char.no]
+  if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")
+  tree.edge <- tree$edge
+  parent <- tree.edge[,1]
+  child <- tree.edge[,2]
+  tip.label <- tree$tip.label
+  nEdge <- length(parent)
+  maxNode <- parent[1] #max(parent)
+  nTip <- length(tip.label)
+  nNode <- maxNode - nTip
+  inapp <- at$inapp.level
+  allNodes <- (nTip + 1L):maxNode
+  parentof <- parent[match((nTip + 2L):maxNode, child )]
+  childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
+  
+  down <- .Call("FITCHDOWN", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
+  up <- .Call("FITCHUP", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+  
   plot.fun(tree)
-  fitch.out <- fitch.inapp(tree, data)
-  optimized.states <- fitch.out[[3]]
-  dat.at <- attributes(data)
-  char.index <- dat.at$index[char.no]
-  is.change <- fitch.switch(tree, optimized.states[char.index,], dat.at$inapp.level)
-  tiplabels(possible.tokens(dat.at$levels, optimized.states[char.index,seq_along(tree$tip.label)]), adj=c(1,1), bg='white', frame='no')
-  nodelabels(possible.tokens(dat.at$levels, optimized.states[char.index,length(tree$tip.label) + seq(tree$Nnode)]), adj=rep(1.25,2), frame='no', bg='white', font=ifelse(is.change != 1, 2, 1), col=is.change)
-  text(1,1,paste0('+', fitch.out[[2]][char.no], ' of which ', fitch.out[[4]][char.no], ' on uppass'), pos=4, cex=0.8)
+  
+  downpass.states <- down[[3]]
+  down.scorers <- down[[4]]
+  down.no.change <- non.scorer(parent, child, nTip, down.scorers)
+  tiplabels(possible.tokens(at$levels, downpass.states[1,seq_along(tree$tip.label)]), adj=c(0.3,0.5), bg='white', col='#000088', cex=0.75)
+  nodelabels(possible.tokens(at$levels, downpass.states[1,nTip + seq(tree$Nnode)]), adj=rep(1.25,2), frame='no', bg='white', font=ifelse(down.no.change, 1,2) , col=ifelse(down.no.change, '#880000cc', '#cc3333'), cex=ifelse(down.no.change, 0.6,1))
+  
+  uppass.states <- up[[3]]
+  uppass.scorers <- up[[4]]
+  up.no.change <- non.scorer(parent, child, nTip, uppass.scorers)  
+  nodelabels(possible.tokens(at$levels, uppass.states[1,nTip + seq(tree$Nnode)]), adj=c(1.25,-0.75), frame='no', bg='white', font=ifelse(up.no.change, 1,2) , col=ifelse(up.no.change, '#008800cc', '#008800'), cex=ifelse(up.no.change, 0.6,1))
+  text(1,1,paste0('downpass +', down[[2]], '; uppass +', up[[2]], '; total +', down[[2]] + up[[2]]), pos=4, cex=0.8)
 }
 
-fitch.switch <- function (tree, states, inapp) {
-  binary <- as.binary(states)
-  inapp <- log2(inapp) + 1L
-  e <- tree$edge
-  parent <- e[,1]
-  child <- e[,2]
-  tips <- seq_along(tree$tip.label)
-  nodes <- (length(tree$tip.label) + 1):length(states)
+non.scorer <- function (parent, child, nTip, states) {
+  tips <- 1:nTip
+  nodes <- (nTip + 1):length(states)
   sapply(nodes, function(n) {
     children <- child[parent==n]
-    #if (isTRUE(all.equal(binary[children[1],] | binary[children[2],], as.logical(binary[n,])))) return (TRUE)
-    c1 <- binary[children[1],]
-    c2 <- binary[children[2],]
-    if (isTRUE(all.equal(c1, c2))) return (1)
-    if (!any(c1 & c2)) return ('red')
-    c1[inapp] <- FALSE
-    c2[inapp] <- FALSE
-    if ((any(c1 | c2)) && !any(c1 & c2)) return ('#33aa33')
-    return (1)
+    return (states[n] == states[children[1]] ||states[n] == states[children[2]])   
   })
 }
-#visualize.char(best, data, i <- 7, colplot); text(2,2,paste('i =', i))
 
 possible.tokens <- function (lvls, number) {
   nTokens <- length(lvls)

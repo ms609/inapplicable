@@ -123,11 +123,13 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
           continue;                 // Next node
         }
       } else if (ancestor[k] != *inapp && (child_q[k] != (*inapp) || child_r[k] != (*inapp))) { // Parent + one child have applicable token
-        if (((child_q[k] | child_r[k]) & ancestor[k]) != (*inapp)) { // Parent has no applicable token in common with either child
+        if (!(((child_q[k] | child_r[k]) & ancestor[k]) != (*inapp))) { // Parent has no applicable token in common with either child
           (pars[k])++;              // Increase parsimony score by one
           (*w) += weight[k];        // Increase parsimony score by one
+          this[k] = ((child_q[k] | child_r[k] | ancestor[k]) - (*inapp)); // Set this node's tokens to the tokens present in the parent or either child, excluding -
+        } else {
+          this[k] = ((child_q[k] | child_r[k]) & ancestor[k]) - (*inapp); // Set this node's tokens to those in common, excluding -
         }
-        this[k] = ((child_q[k] | child_r[k] | ancestor[k]) - (*inapp)); // Set this nodes' tokens to the tokens present in the parent or either child, excluding -
         continue;                   // Next node
       }
     }
@@ -145,7 +147,7 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
 void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int *pars, int *n_node, double *weight, double *pvec, int *inapp, double *pscore) {
   int i;
   fitch_uproot(&state[(parent_of[0]-1L) * (*n_rows)], // this_start, will become this_finish
-               &state[(children_of[0 ]-1L) * (*n_rows)], // child q
+               &state[(children_of[0      ]-1L) * (*n_rows)], // child q
                &state[(children_of[*n_node]-1L) * (*n_rows)], // child r
     n_rows, pars, weight, inapp, &pvec[parent_of[0]-1L]);
   pscore[0] += pvec[parent_of[0]];

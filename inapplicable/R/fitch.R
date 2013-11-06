@@ -80,7 +80,8 @@ fitch.inapp <- function (tree, data, target = NULL) {
   inapp <- at$inapp.level
   nNode <- tree$Nnode
   
-  ret <- .Call("FITCHDOWN", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (0), pscore; (1), pars; (2), DAT; (3), pvec; (4), need_up
+  ret <- .Call("FITCHDOWN", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
+  ret[[4]] <- rep(0, nChar) ## Hijack to allow visualization of up/downpass gains
   if (any(need.uppass <- as.logical(ret[[5]])) && (is.null(target) || ret[[1]] <= target)) {
     parentof <- parent[match((nTip + 2L):maxNode, child )]
     allNodes <- (nTip + 1L):maxNode
@@ -89,7 +90,8 @@ fitch.inapp <- function (tree, data, target = NULL) {
     ret[[1]] <- ret[[1]] + ups[[1]]
     ret[[2]][need.uppass] <- ret[[2]][need.uppass] + ups[[2]]
     ret[[3]][need.uppass] <- ups[[3]]
+    ret[[4]][need.uppass] <- ups[[2]]
   }
   
-  return (ret[1:3])
+  return (ret[1:4])
 }

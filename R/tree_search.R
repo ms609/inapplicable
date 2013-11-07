@@ -132,9 +132,11 @@ pratchet.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, all.trees
   if (trace >= 0)
     cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
     
-  if (all.trees)
+  if (all.trees) {
+    class(ret) <- 'multiPhylo'
     ret <- unique(forest)
     ret <- ret[!vapply(ret, is.null, logical(1))]
+    class(ret) <- 'multiPhylo'
     cat('Found', length(ret), 'unique MPTs.')
   } else {
     ret <- tree

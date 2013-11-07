@@ -1,9 +1,8 @@
-sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, maxit=100, 
+sectorial.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, maxit=100, 
     maxiter=500, k=5, trace=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
-  if (is.null(start.tree)) stop("a start.tree must be provided")
-  tree <- start.tree
+  if (is.null(tree)) stop("a starting tree must be provided")
   if (trace >= 0) cat('Sectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
   sector.data <- function (X, tips) {
@@ -78,16 +77,16 @@ sectorial.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, ma
   tree
 }  # sectorial.inapp
 
-pratchet.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", ...) {
+pratchet.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, all.trees=FALSE, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
-  tree <- start.tree; start.tree <- NULL
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
   eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- parsimony.inapp(tree, data, concavity)
-  mp <- attr(tree, "pscore")
-  if (trace >= 0) cat("* Initial pscore:", mp)
+  best.pars <- attr(tree, "pscore")
+  if (trace >= 0) cat("* Initial pscore:", best.pars)
+  if (all.trees) forest <- list(maxiter)
 
-  kmax <- 1
+  kmax <- 0
   for (i in 1:maxit) {
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
     bstree <- bootstrap.inapp(phy=tree, x=data, outgroup=outgroup, concavity=concavity, maxiter=maxiter, trace=trace-1, ...) #15% of function time in r233
@@ -111,23 +110,45 @@ pratchet.inapp <- function (start.tree, data, outgroup=NULL, concavity=NULL, max
     #else m = length(result)
     #if(m > 0) trees[2 : (1+m)] = result[1:m]
     #pscores <- sapply(trees, function(data) attr(data, "pscore"))
-    mp1 <- attr(candidate, 'pscore')
-    if((mp1+eps) < mp) {
-      kmax <- 1
+    cand.pars <- attr(candidate, 'pscore')
+    if((cand.pars+eps) < best.pars) {
+      if (all.trees) {
+        forest <- list(maxiter)
+        forest[[i]] <- candidate
+      }
       tree <- candidate
-      mp   <- mp1
+      best.pars <- cand.pars
+      kmax <- 1
     } else {
-      if (mp+eps > mp1) kmax <- kmax + 1
-      if ((sample(2,1) == 1) & (mp1 < (mp+eps))) tree <- candidate
+      if (best.pars+eps > cand.pars) { # i.e. best == cand, allowing for floating point error
+        kmax <- kmax + 1
+        tree <- candidate
+        if (all.trees) forest[[i]] <- candidate
+      }
     }
-    if (trace >= 0) cat("\n* Best pscore after", i, "/", maxit, "pratchet iterations:", mp, "( hit", kmax, "/", k, ")")
-    if (kmax == k) break()
+    if (trace >= 0) cat("\n* Best pscore after", i, "/", maxit, "pratchet iterations:", best.pars, "( hit", kmax, "/", k, ")")
+    if (kmax >= k) break()
   } # for
   if (trace >= 0)
-    cat ("\nCompleted parsimony ratchet with pscore", mp, "\n")
+    cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
     
-  attr(tree, 'hits') <- NULL
-  tree
+  if (all.trees)
+    ret <- unique(forest)
+    ret <- ret[!vapply(ret, is.null, logical(1))]
+    cat('Found', length(ret), 'unique MPTs.')
+  } else {
+    ret <- tree
+    attr(ret, 'hits') <- NULL
+  }
+  return (ret)
+}
+
+pratchet.consensus <- function (tree, data, outgroup=NULL, concavity=NULL, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", nSearch=10, ...) {
+  trees <- lapply(1:nSearch, function (x) pratchet.inapp(tree, data, outgroup, concavity, maxit, maxiter, maxhits, k=1, trace, rearrangements, ...))
+  scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
+  trees <- unique(trees[scores == min(scores)])
+  cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')
+  return (trees)
 }
 
 bootstrap.inapp <- function (phy, x, outgroup, concavity, maxiter, trace=1, ...) {
@@ -151,9 +172,9 @@ bootstrap.inapp <- function (phy, x, outgroup, concavity, maxiter, trace=1, ...)
   res
 }
 
-tree.search <- function (start.tree, data, outgroup, concavity=NULL, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, ...) {
-  start.tree$edge.length <- NULL # Edge lengths are not supported
-  tree <- set.outgroup(start.tree, outgroup)
+tree.search <- function (tree, data, outgroup, concavity=NULL, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, ...) {
+  tree$edge.length <- NULL # Edge lengths are not supported
+  tree <- set.outgroup(tree, outgroup)
   attr(tree, 'hits') <- 1
   if (forest.size > 1) {forest <- empty.forest <- vector('list', forest.size); forest[[1]] <- tree}
   if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- parsimony.inapp(tree, data, concavity)
@@ -195,18 +216,18 @@ tree.search <- function (start.tree, data, outgroup, concavity=NULL, method='NNI
   } else tree
 }
 
-sectorial.search <- function (start.tree, data, outgroup, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
-  best.score <- attr(start.tree, 'pscore')
-  if (length(best.score) == 0) best.score <- parsimony.inapp(start.tree, data, concavity)
+sectorial.search <- function (tree, data, outgroup, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
+  best.score <- attr(tree, 'pscore')
+  if (length(best.score) == 0) best.score <- parsimony.inapp(tree, data, concavity)
   if (length(outgroup) == 0) warning('"outgroup" parameter not specified')
-  sect <- sectorial.inapp(start.tree, data, outgroup=outgroup, concavity=concavity, cluster=cluster,
+  sect <- sectorial.inapp(tree, data, outgroup=outgroup, concavity=concavity, cluster=cluster,
     trace=trace-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 
-    largest.sector=length(start.tree$edge[,2L])*0.25, rearrangements=rearrangements)
+    largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)
   sect <- tree.search(sect, data, outgroup, method='NNI', concavity=concavity, maxiter=maxiter, maxhits=30, cluster=cluster, trace=trace)
   sect <- tree.search(sect, data, outgroup, method='TBR', concavity=concavity, maxiter=maxiter, maxhits=20, cluster=cluster, trace=trace)
   sect <- tree.search(sect, data, outgroup, method='SPR', concavity=concavity, maxiter=maxiter, maxhits=50, cluster=cluster, trace=trace)
   sect <- tree.search(sect, data, outgroup, method='NNI', concavity=concavity, maxiter=maxiter, maxhits=60, cluster=cluster, trace=trace)
   if (attr(sect, 'pscore') <= best.score) {
     return (sect)
-  } else return (set.outgroup(start.tree, outgroup))
+  } else return (set.outgroup(tree, outgroup))
 }

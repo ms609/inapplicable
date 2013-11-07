@@ -3,11 +3,11 @@
 \title{Search for most parsimonious trees}
 \description{Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR}) to search for a more parsimonious tree.}
 \usage{
-tree.search(start.tree, data, outgroup, concavity = NULL, method = "NNI", maxiter = 100, 
+tree.search(tree, data, outgroup, concavity = NULL, method = "NNI", maxiter = 100, 
   maxhits = 20, forest.size = 1, cluster = NULL, trace = 1, ...)
 }
 \arguments{
-  \item{start.tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
+  \item{tree}{a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
   \item{data}{a matrix, ideally in the format produced by \code{\link{prepare.data}}, 
   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;}
   \item{outgroup}{a vector listing the taxa in the outgroup;}

@@ -4,13 +4,13 @@
 \title{Sectorial search}
 \description{Performs a sectorial search on a tree, preserving the position of the root.}
 \usage{
-sectorial.search(start.tree, data, outgroup, concavity = NULL, rearrangements = "NNI",
+sectorial.search(tree, data, outgroup, concavity = NULL, rearrangements = "NNI",
   maxiter = 2000, cluster = NULL, trace = 3)
-sectorial.inapp(start.tree, data, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
+sectorial.inapp(tree, data, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
   trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
 }
 \arguments{
-  \item{start.tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}
+  \item{tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}
   \item{data}{a dataset, in the format produced by \code{\link{prepare.data}} (or in \code{phyDat} format);}
   \item{outgroup}{a vector listing the taxa that form the outgroup;}
   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 

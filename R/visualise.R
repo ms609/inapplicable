@@ -32,8 +32,8 @@ visualize.character <- visualise.character <- visualize.char <- visualise.char <
       return (down.scorers[n] != down.scorers[children[1]] + down.scorers[children[2]])   
     })
   #nodelabels(down.scorers[nodes])
-  tipcols = c('#fafafa', '#fafafa', '#ffbbbb88', '#bbffbb', '#bbbbff', '#bbbbff', '#bbffbb', '#ffbbbb', '#bbddff', '#ffbbdd')
-  names(tipcols) <- c(NA, max(downpass.states[1,]), 2^(0:7))
+  tipcols = c('#fafafa', '#fafafa', '#fafafa', '#ffbbbb88', '#bbffbb', '#bbbbff', '#bbbbff', '#bbffbb', '#ffbbbb', '#bbddff', '#ffbbdd')
+  names(tipcols) <- c(NA, max(downpass.states[1,]), max(downpass.states[1,])-inapp, 2^(0:7))
   tipcols[as.character(inapp)] <- '#999999'
   tiplabels(possible.tokens(at$levels, downpass.states[1,tips]), adj=c(0.3,0.5), bg=tipcols[as.character(downpass.states[1,tips])], col='#000088', cex=0.85)
   nodelabels(possible.tokens(at$levels, downpass.states[1,nodes]), adj=rep(1.25,2), frame='no', bg=ifelse(down.change, 'white', 'yellow'), font=ifelse(down.change, 2, 1) , col=ifelse(down.change, '#cc3333', '#880000cc'), cex=ifelse(down.change,1,0.6))

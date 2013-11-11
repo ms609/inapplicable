@@ -77,19 +77,19 @@ sectorial.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, maxit=10
   tree
 }  # sectorial.inapp
 
-pratchet.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, all.trees=FALSE, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", ...) {
+pratchet.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, all.trees=FALSE, maxit=5000, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
   eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- parsimony.inapp(tree, data, concavity)
   best.pars <- attr(tree, "pscore")
   if (trace >= 0) cat("* Initial pscore:", best.pars)
-  if (all.trees) forest <- list(maxiter)
+  if (all.trees) forest <- vector('list', maxiter)
 
   kmax <- 0
   for (i in 1:maxit) {
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
-    bstree <- bootstrap.inapp(phy=tree, x=data, outgroup=outgroup, concavity=concavity, maxiter=maxiter, trace=trace-1, ...) #15% of function time in r233
+    bstree <- bootstrap.inapp(phy=tree, x=data, outgroup=outgroup, concavity=concavity, maxiter=maxiter, trace=trace-1, ...)
     
     if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new candidate tree:")
     if (rearrangements == "TBR") {
@@ -113,7 +113,7 @@ pratchet.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, all.trees
     cand.pars <- attr(candidate, 'pscore')
     if((cand.pars+eps) < best.pars) {
       if (all.trees) {
-        forest <- list(maxiter)
+        forest <- vector('list', maxiter)
         forest[[i]] <- candidate
       }
       tree <- candidate
@@ -133,10 +133,9 @@ pratchet.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, all.trees
     cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
     
   if (all.trees) {
-    class(ret) <- 'multiPhylo'
+    forest <- forest[!vapply(forest, is.null, logical(1))]
+    class(forest) <- 'multiPhylo'
     ret <- unique(forest)
-    ret <- ret[!vapply(ret, is.null, logical(1))]
-    class(ret) <- 'multiPhylo'
     cat('Found', length(ret), 'unique MPTs.')
   } else {
     ret <- tree

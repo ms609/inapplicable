@@ -23,7 +23,7 @@ visualize.character <- visualise.character <- visualize.char <- visualise.char <
   up <- .Call("FITCHUP", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
   
   plot.fun(tree)
-  text(1,1,paste0('downpass +', down[[2]], '; uppass +', up[[2]], '; total +', down[[2]] + up[[2]]), pos=4, cex=0.8)
+  text(1,1,paste0('TS', char.no, ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[2]]) else paste0('; uppass skipped (+', up[[2]], ')'), '; total +', down[[2]] + up[[2]]), pos=4, cex=0.8)
   
   downpass.states <- down[[3]]
   down.scorers <- down[[4]]
@@ -32,10 +32,13 @@ visualize.character <- visualise.character <- visualize.char <- visualise.char <
       return (down.scorers[n] != down.scorers[children[1]] + down.scorers[children[2]])   
     })
   #nodelabels(down.scorers[nodes])
-  tipcols = c('#fafafa', '#fafafa', '#fafafa', '#ffbbbb88', '#bbffbb', '#bbbbff', '#bbbbff', '#bbffbb', '#ffbbbb', '#bbddff', '#ffbbdd')
+  tipcols = c('#fafafa', '#fafafa', '#fafabb', '#ffbbbb', '#bbffbb', '#bbbbff', '#bbbbff', '#bbffbb', '#ffbbbb', '#bbddff', '#ffbbdd')
   names(tipcols) <- c(NA, max(downpass.states[1,]), max(downpass.states[1,])-inapp, 2^(0:7))
   tipcols[as.character(inapp)] <- '#999999'
-  tiplabels(possible.tokens(at$levels, downpass.states[1,tips]), adj=c(0.3,0.5), bg=tipcols[as.character(downpass.states[1,tips])], col='#000088', cex=0.85)
+  tipcols <- rev(tipcols)
+  bgcols <- tipcols[as.character(downpass.states[1,tips])]
+  bgcols[is.na(bgcols)] <- '#ffffbb'
+  tiplabels(possible.tokens(at$levels, downpass.states[1,tips]), adj=c(0.3,0.5), bg=bgcols, col='#000088', cex=0.85)
   nodelabels(possible.tokens(at$levels, downpass.states[1,nodes]), adj=rep(1.25,2), frame='no', bg=ifelse(down.change, 'white', 'yellow'), font=ifelse(down.change, 2, 1) , col=ifelse(down.change, '#cc3333', '#880000cc'), cex=ifelse(down.change,1,0.6))
   
   uppass.states <- up[[3]]

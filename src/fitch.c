@@ -9,16 +9,15 @@ void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight
   for (k = 0; k < (*n_rows); k++) {
     tmp = dat1[k] & dat2[k];
     if (tmp) {// Tokens in Common
-      if ((tmp == (*inapp)) // Is - the only common token?
-        && ((dat1[k] | dat2[k]) != (*inapp)) // At least one child has an applicable token        
-      ) {
+      if ((tmp == (*inapp))) {  // Is - the only common token?
         need_uppass[k] = 1L;
-        if ((dat1[k] != (*inapp)) && (dat2[k] != (*inapp)) // ... Do both children have an applicable token?
-        ) {
-          tmp = dat1[k] | dat2[k];
+        if ((dat1[k] | dat2[k]) != (*inapp)) { // At least one child has an applicable token        
+          if ((dat1[k] != (*inapp)) && (dat2[k] != (*inapp))) { // ... Do both children have an applicable token?
+            tmp = dat1[k] | dat2[k];
+          }
         }
       }
-    } else { 
+    } else {
       tmp = dat1[k] | dat2[k];
       if ((dat1[k] == *inapp) || (dat2[k] == *inapp)) { // One child's only possible token {-}
       } else {
@@ -121,8 +120,8 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
           this[k] = this[k] | (ancestor[k] & child_r[k]) | (ancestor[k] & child_q[k]);
           continue;                 // Next node
         }
-      } else if (ancestor[k] != *inapp && (child_q[k] != (*inapp) || child_r[k] != (*inapp))) { // Parent + one child have applicable token
-        if (!(((child_q[k] | child_r[k]) & ancestor[k]) != (*inapp))) { // Parent has no applicable token in common with either child
+      } else if (ancestor[k] != (*inapp) && (child_q[k] != (*inapp) || child_r[k] != (*inapp))) { // Parent + one child have applicable token
+        if (!((((child_q[k] | child_r[k]) & ancestor[k]) | (*inapp)) != (*inapp))) { // Parent has no applicable token in common with either child
           (pars[k])++;              // Increase parsimony score by one
           (*w) += weight[k];        // Increase parsimony score by one
           this[k] = child_q[k] | child_r[k] | ancestor[k]; // Set this node's tokens to the tokens present in the parent or either child...

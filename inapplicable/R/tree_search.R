@@ -77,7 +77,7 @@ sectorial.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, maxit=10
   tree
 }  # sectorial.inapp
 
-pratchet.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, all.trees=FALSE, maxit=5000, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", ...) {
+pratchet.inapp <- function (tree, data, outgroup=NULL, concavity=NULL, all.trees=FALSE, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
   eps <- 1e-08

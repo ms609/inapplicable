@@ -112,15 +112,27 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
     if (this[k] & (*inapp)) {       // Node has a - token?
       if (this[k] != (*inapp)) {    // Node has an applicable token?
         this[k] -= (*inapp);        // Remove {-} from this node's tokens
-        if (child_q[k] == (*inapp) || child_r[k] == (*inapp)                      // One child's only possible token is {-}
-        || ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != (*inapp))) // Children have tokens in common, excluding {-}
-        ) {} else {
+        if (child_q[k] == (*inapp) || child_r[k] == (*inapp)) {                   // One child's only possible token is {-}
+          // DUPLICATED BELOW //
+          if (!((((child_q[k] | child_r[k]) & ancestor[k]) | (*inapp)) != (*inapp))) { // Parent has no applicable token in common with either child
+            (pars[k])++;              // Increase parsimony score by one
+            (*w) += weight[k];        // Increase parsimony score by one
+            this[k] = child_q[k] | child_r[k] | ancestor[k]; // Set this node's tokens to the tokens present in the parent or either child...
+          } else {
+            this[k] = (child_q[k] | child_r[k]) & ancestor[k]; // Set this node's tokens to those in common...
+          }
+          if (this[k] & *inapp) this[k] -= *inapp;             // Excluding inapplicable
+          continue;                   // Next node
+          // # # # //
+        } else if ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != (*inapp))) // Children have tokens in common, excluding {-}
+        {} else {
           (pars[k])++;              // Increase parsimony score by one
           (*w) += weight[k];        // Increase parsimony score by one
           this[k] = this[k] | (ancestor[k] & child_r[k]) | (ancestor[k] & child_q[k]);
           continue;                 // Next node
         }
       } else if (ancestor[k] != (*inapp) && (child_q[k] != (*inapp) || child_r[k] != (*inapp))) { // Parent + one child have applicable token
+        // DUPLICATED ABOVE //
         if (!((((child_q[k] | child_r[k]) & ancestor[k]) | (*inapp)) != (*inapp))) { // Parent has no applicable token in common with either child
           (pars[k])++;              // Increase parsimony score by one
           (*w) += weight[k];        // Increase parsimony score by one
@@ -130,13 +142,18 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
         }
         if (this[k] & *inapp) this[k] -= *inapp;             // Excluding inapplicable
         continue;                   // Next node
+        // # # # //
       }
     }
     if ((ancestor[k] & this[k]) == ancestor[k]) { // All parent node's tokens among this node's possible tokens
       this[k] = ancestor[k];                      // Set this node's tokens to parent's tokens
     } else if (child_q[k] & child_r[k]) {         // Children have tokens in common
-      this[k] = this[k] | (ancestor[k] & child_q[k]) | (ancestor[k] & child_r[k]); 
+      if (this[k] == *inapp) {                    // Node's tokens are {-}
+        this[k] = ancestor[k];                    // Set this node's tokens to parent's tokens
+      } else {
+        this[k] = this[k] | (ancestor[k] & child_q[k]) | (ancestor[k] & child_r[k]); 
                                                   // Add tokens common to parent and either child to this node
+      }
     } else {                                     
       this[k] = this[k] | ancestor[k];            // Add parent's tokens to this node's tokens
     }

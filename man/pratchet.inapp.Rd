@@ -3,8 +3,8 @@
 \title{Parsimony ratchet}
 \description{This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.}
 \usage{
-pratchet.inapp(tree, data, outgroup = NULL, concavity = NULL, all.trees = FALSE, maxit = 5000, 
-  maxiter = 500, maxhits = 20, k = 10, trace = 0, rearrangements = "NNI", ...)
+pratchet.inapp(tree, data, outgroup = NULL, concavity = NULL, all.trees = FALSE, maxit = 100, 
+  maxiter = 5000, maxhits = 40, k = 10, trace = 0, rearrangements = "NNI", ...)
 }
 \arguments{
   \item{tree}{An object of class \code{phyDat} denoting the topology to begin the search from;}

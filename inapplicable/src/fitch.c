@@ -21,11 +21,13 @@ void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight
       tmp = dat1[k] | dat2[k];
       if ((dat1[k] == *inapp) || (dat2[k] == *inapp)) { // One child's only possible token {-}
       } else {
-        if (tmp & (*inapp)) { // Only delete inapplicable token if it is present
+        if (tmp & (*inapp)) { // Is {-} among this node's possible tokens?
           tmp = tmp - (*inapp);
+          need_uppass[k] = 1L;
+        } else {
+          (pars[k])++;
+          (*w) += weight[k];
         }
-        (pars[k])++;
-        (*w) += weight[k];
       }
     }
     dat1[k] = tmp;

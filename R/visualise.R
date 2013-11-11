@@ -23,8 +23,8 @@ visualize.character <- visualise.character <- visualize.char <- visualise.char <
   up <- .Call("FITCHUP", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
   
   plot.fun(tree)
-  text(1,1,paste0('TS', char.no, ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[2]]) else paste0('; uppass skipped (+', up[[2]], ')'), '; total +', down[[2]] + up[[2]]), pos=4, cex=0.8)
-  
+  text(1,1,paste0('TS', paste(which(at$index == char.no), collapse=', '), ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[2]]) else paste0('; uppass skipped (+', up[[2]], ')'), '; total +', down[[2]] + up[[2]]), pos=4, cex=0.8)
+    
   downpass.states <- down[[3]]
   down.scorers <- down[[4]]
   down.change <- sapply(nodes, function(n) {
@@ -61,5 +61,5 @@ possible.tokens <- function (lvls, number) {
   which.levels <- matrix(FALSE, nNumber, nTokens)
   binary <- as.binary(number)
   which.levels[,seq_along(binary[1,])] <- as.logical(binary)
-  apply(which.levels, 1, function(x) {if (all(x)) return ('?') else y <- x; y[lvls=='-']<-TRUE; if (all(y)) return ('+') else return (output(lvls[x]))})
+  apply(which.levels, 1, function(x) {if (all(x)) return ('?') else y <- x; y[lvls=='-']<-TRUE; if (nTokens > 4 && all(y)) return ('+') else return (output(lvls[x]))})
 }

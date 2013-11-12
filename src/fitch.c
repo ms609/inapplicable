@@ -56,24 +56,45 @@ SEXP FITCHDOWNIA(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP 
 }
 
 void fitch_uproot_ia(int *this, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
-  int k, ancestor_k;
+  int k, ancestor_k, q_inapp, r_inapp, common;
   for (k = 0; k < (*n_rows); k++) { // Next TS
     ancestor_k = this[k];
     if ((ancestor_k & (*inapp)) && (ancestor_k != (*inapp))) ancestor_k -= (*inapp);  // Remove {-} from parent node: Hennig's Auxiliary Principle
-        if (ancestor_k != *inapp) {
-      if (child_q[k] & (*inapp)) {
-        if (child_q[k] == *inapp) child_q[k] = ancestor_k;
-        else child_q[k] -= *inapp;
+    r_inapp = (child_r[k] == *inapp);
+    if ((ancestor_k != *inapp)                           // Parent is applicable
+    && ((q_inapp = (child_q[k] == *inapp)) || r_inapp)) { // One child is inapplicable
+      if (q_inapp && r_inapp) {
+        child_q[k] = ancestor_k;
+        child_r[k] = ancestor_k;
+        this[k] = ancestor_k;
+      } else if (q_inapp) { // Child Q is the inapplicable child
+        if ((common = child_r[k] & ancestor_k)) { // Parent and applicable child have tokens in common
+          child_q[k] = common;
+          this[k] = common;
+        } else {
+          child_q[k] = child_r[k] | ancestor_k;
+          if (child_q[k] & *inapp) child_q[k] -= *inapp;
+          this[k] = child_q[k];          
+          (pars[k])++;                              // Increase parsimony score by one
+          (*w) += weight[k];                        // Increase parsimony score by one
+        }
+      } else { // child R is the inapplicable child
+        if ((common = child_q[k] & ancestor_k)) { // Parent and applicable child have tokens in common
+          child_r[k] = common;
+          this[k] = common;
+        } else {
+          child_r[k] = child_q[k] | ancestor_k;
+          if (child_r[k] & *inapp) child_r[k] -= *inapp;
+          this[k] = child_r[k];
+          (pars[k])++;                              // Increase parsimony score by one
+          (*w) += weight[k];                        // Increase parsimony score by one
+        }
       }
-      if (child_r[k] & (*inapp)) {
-        if (child_r[k] == *inapp) child_r[k] = ancestor_k;
-        else child_r[k] -= *inapp;
-      }
-    }
-    if ((ancestor_k & this[k]) == ancestor_k) { // All parent node's tokens among this node's possible tokens
+    } else if ((ancestor_k & this[k]) == ancestor_k) { // All parent node's tokens among this node's possible tokens
       this[k] = ancestor_k;                      // Set this node's tokens to parent's tokens
-      if (child_q[k] & child_r[k] 
-        || (child_q[k] | child_r[k]) & *inapp) {} else {
+      if (((common = (child_q[k] & child_r[k])) && common != *inapp)   // Children have tokens in common, except {-}
+        || child_q[k] == *inapp || child_r[k] == *inapp) // Either child == {-}
+      {} else {
         (pars[k])++;                              // Increase parsimony score by one
         (*w) += weight[k];                        // Increase parsimony score by one
       }
@@ -93,30 +114,31 @@ void fitch_uproot_ia(int *this, int *child_q, int *child_r, int *n_rows, int *pa
 void fitch_upnode_ia(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
   int k, q_inapp, r_inapp, common;
   for (k = 0; k < (*n_rows); k++) { // Next node in preorder
-    if (ancestor[k] != *inapp       // Parent is applicable
-    && ((q_inapp = child_q[k] == *inapp) || (r_inapp = child_r[k] == *inapp))) { // One child is inapplicable
+    r_inapp = (child_r[k] == *inapp);
+    if ((ancestor[k] != *inapp)                           // Parent is applicable
+    && ((q_inapp = (child_q[k] == *inapp)) || r_inapp)) { // One child is inapplicable
       if (q_inapp && r_inapp) {
         child_q[k] = ancestor[k];
         child_r[k] = ancestor[k];
         this[k] = ancestor[k];
       } else if (q_inapp) { // Child Q is the inapplicable child
-        if (common = child_r[k] & ancestor[k]) { // Parent and applicable child have tokens in common
+        if ((common = child_r[k] & ancestor[k])) { // Parent and applicable child have tokens in common
           child_q[k] = common;
           this[k] = common;
         } else {
           child_q[k] = child_r[k] | ancestor[k];
-          if (child_q[k] && *inapp) child_q[k] -= *inapp;
+          if (child_q[k] & *inapp) child_q[k] -= *inapp;
           this[k] = child_q[k];          
           (pars[k])++;                              // Increase parsimony score by one
           (*w) += weight[k];                        // Increase parsimony score by one
         }
       } else { // child R is the inapplicable child
-        if (common = child_q[k] & ancestor[k]) { // Parent and applicable child have tokens in common
+        if ((common = child_q[k] & ancestor[k])) { // Parent and applicable child have tokens in common
           child_r[k] = common;
           this[k] = common;
         } else {
           child_r[k] = child_q[k] | ancestor[k];
-          if (child_r[k] && *inapp) child_r[k] -= *inapp;
+          if (child_r[k] & *inapp) child_r[k] -= *inapp;
           this[k] = child_r[k];
           (pars[k])++;                              // Increase parsimony score by one
           (*w) += weight[k];                        // Increase parsimony score by one
@@ -124,8 +146,9 @@ void fitch_upnode_ia(int *this, int *ancestor, int *child_q, int *child_r, int *
       }
     } else if ((ancestor[k] & this[k]) == ancestor[k]) { // All parent node's tokens among this node's possible tokens
       this[k] = ancestor[k];                      // Set this node's tokens to parent's tokens
-      if (child_q[k] & child_r[k] 
-        || (child_q[k] | child_r[k]) & *inapp) {} else {
+      if (((common = (child_q[k] & child_r[k])) && common != *inapp)   // Children have tokens in common, except {-}
+        || child_q[k] == *inapp || child_r[k] == *inapp) // Either child == {-}
+      {} else {
         (pars[k])++;                              // Increase parsimony score by one
         (*w) += weight[k];                        // Increase parsimony score by one
       }

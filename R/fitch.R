@@ -80,14 +80,11 @@ fitch.inapp <- function (tree, data, target = NULL, inherit.ancestral = TRUE) {
   inapp <- at$inapp.level
   
   if (inherit.ancestral) {
-    ret <- .Call("FITCHDOWNIA", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
+    downpass <- .Call("FITCHDOWNIA", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
     parentof <- parent[match((nTip + 2L):maxNode, child )]
     allNodes <- (nTip + 1L):maxNode
     childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
-    ups <- .Call("FITCHUPIA", as.integer(ret[[3]]), as.integer(nChar), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
-    ret[[1]] <- ret[[1]] + ups[[1]]
-    ret[[2]][need.uppass] <- ret[[2]][need.uppass] + ups[[2]]
-    ret[[3]][need.uppass] <- ups[[3]]
+    ret <- .Call("FITCHUPIA", downpass, as.integer(nChar), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
   } else {
     ret <- .Call("FITCHDOWN", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
     if (any(need.uppass <- as.logical(ret[[5]])) && (is.null(target) || ret[[1]] <= target)) {

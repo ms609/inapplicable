@@ -44,14 +44,12 @@ void fitch_downpass_ia(int *dat, int *n_rows, int *parent, int *child, int *n_ed
 
 SEXP FITCHDOWNIA(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP mx, SEXP q, SEXP inapp) {   
   int *data, *n_rows=INTEGER(nrx), m=INTEGER(mx)[0], i, n=INTEGER(q)[0];   
-  SEXP RESULT, DAT;
-  PROTECT(RESULT = allocVector(VECSXP, 1L));
+  SEXP DAT;
   PROTECT(DAT = allocMatrix(INTSXP, n_rows[0], m));
   data = INTEGER(DAT);
   for(i=0; i<(*n_rows * n); i++) data[i] = INTEGER(dat)[i];
   fitch_downpass_ia(data, n_rows, INTEGER(parent), INTEGER(child), INTEGER(n_edge), INTEGER(inapp));
-  SET_VECTOR_ELT(RESULT, 0, DAT);
-  UNPROTECT(2);
+  UNPROTECT(1);
   return(DAT);
 }
 
@@ -149,6 +147,7 @@ void fitch_upnode_ia(int *this, int *ancestor, int *child_q, int *child_r, int *
       if (((common = (child_q[k] & child_r[k])) && common != *inapp)   // Children have tokens in common, except {-}
         || child_q[k] == *inapp || child_r[k] == *inapp) // Either child == {-}
       {} else {
+        if ((common = (child_q[k] | child_r[k])) & *inapp) this[k] = common - *inapp; else this[k] = common; // Tokens to union w/o -
         (pars[k])++;                              // Increase parsimony score by one
         (*w) += weight[k];                        // Increase parsimony score by one
       }

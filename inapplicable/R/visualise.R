@@ -1,5 +1,5 @@
 visualize.character <- visualise.character <- visualize.char <- visualise.char <- 
-function (tree, data, char.no, inherit.ancestral = TRUE, plot.fun = plot) {
+function (tree, data, char.no, plot.fun = plot, inherit.ancestral = TRUE) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
   at <- attributes(data)

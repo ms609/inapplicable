@@ -1,4 +1,5 @@
-visualize.character <- visualise.character <- visualize.char <- visualise.char <- function (tree, data, char.no, plot.fun = plot) {
+visualize.character <- visualise.character <- visualize.char <- visualise.char <- 
+function (tree, data, char.no, inherit.ancestral = TRUE, plot.fun = plot) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
   at <- attributes(data)
@@ -19,9 +20,13 @@ visualize.character <- visualise.character <- visualize.char <- visualise.char <
   parentof <- parent[match((nTip + 2L):maxNode, child )] # Exclude the root, which has no parent
   childof <- child [c(match(nodes, parent), length(parent) + 1L - match(nodes, rev(parent)))]
   
-  down <- .Call("FITCHDOWN", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
-  up <- .Call("FITCHUP", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
-  
+  if (inherit.ancestral) {
+    down <- .Call("FITCHDOWNIA", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
+    up <- .Call("FITCHUPIA", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')  
+  } else {
+    down <- .Call("FITCHDOWN", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
+    up <- .Call("FITCHUP", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+  }
   plot.fun(tree)
   text(1,1,paste0('TS', paste(which(at$index == char.no), collapse=', '), ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[2]]) else paste0('; uppass skipped (+', up[[2]], ')'), '; total +', down[[2]] + up[[2]]), pos=4, cex=0.8)
     

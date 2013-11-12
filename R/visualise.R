@@ -20,18 +20,21 @@ function (tree, data, char.no, inherit.ancestral = TRUE, plot.fun = plot) {
   parentof <- parent[match((nTip + 2L):maxNode, child )] # Exclude the root, which has no parent
   childof <- child [c(match(nodes, parent), length(parent) + 1L - match(nodes, rev(parent)))]
   
+  plot.fun(tree)
   if (inherit.ancestral) {
     down <- .Call("FITCHDOWNIA", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
-    up <- .Call("FITCHUPIA", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')  
+    up <- .Call("FITCHUPIA", down, as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')  
+    downpass.states <- down
+    down.scorers <- rep(0, nNode + nTip)
+    text(1,1,paste0('TS', paste(which(at$index == char.no), collapse=', '), ': uppass +', up[[2]]), pos=4, cex=0.8)
   } else {
     down <- .Call("FITCHDOWN", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
     up <- .Call("FITCHUP", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+    downpass.states <- down[[3]]
+    down.scorers <- down[[4]]
+    text(1,1,paste0('TS', paste(which(at$index == char.no), collapse=', '), ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[2]]) else paste0('; uppass skipped (+', up[[2]], ')'), '; total +', down[[2]] + up[[2]]), pos=4, cex=0.8)
   }
-  plot.fun(tree)
-  text(1,1,paste0('TS', paste(which(at$index == char.no), collapse=', '), ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[2]]) else paste0('; uppass skipped (+', up[[2]], ')'), '; total +', down[[2]] + up[[2]]), pos=4, cex=0.8)
     
-  downpass.states <- down[[3]]
-  down.scorers <- down[[4]]
   down.change <- sapply(nodes, function(n) {
       children <- child[parent==n]
       return (down.scorers[n] != down.scorers[children[1]] + down.scorers[children[2]])   

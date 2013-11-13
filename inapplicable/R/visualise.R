@@ -1,7 +1,7 @@
 visualize.inheritance <- visualise.inheritance <- vis.in <- function (tree, data, char.no, plot.fun=plot) {
   par(mfrow=c(1,2), mar=rep(0.5,4))
-  visualize.character(tree, data, char.no, plot.fun, FALSE)
-  visualize.character(tree, data, char.no, plot.fun, TRUE)
+  visualize.character(tree, data, char.no, plot.fun, inherit.ancestral=FALSE)
+  visualize.character(tree, data, char.no, plot.fun, inherit.ancestral=TRUE)
 }
 
 visualize.character <- visualise.character <- visualize.char <- visualise.char <- 
@@ -9,6 +9,7 @@ function (tree, data, char.no, plot.fun = plot, inherit.ancestral = TRUE) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
   at <- attributes(data)
+  if (char.no > at$nr || char.no < 1) stop(paste0("char.no must be between 1 and ", at$nr, ' (', sum(at$weight) - at$nr, ' non-unique TS)'))
   char.dat <- data[char.no,]
   char.index <- at$index[char.no]
   if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")

@@ -1,5 +1,5 @@
-parsimony.inapp <- function (tree, data, concavity = NULL, target = NULL) {
-  return (fitch.inapp(tree, data, target=target)[[1]]) 
+parsimony.inapp <- function (tree, data, concavity = NULL, inherit.ancestral = TRUE, target = NULL) {
+  return (fitch.inapp(tree, data, target=target, inherit.ancestral=inherit.ancestral)[[1]]) 
 #  
 #  if (is.null(concavity)) return (fitch.inapp(tree, data, target=target)[[1]]) 
 #  # Implied weights
@@ -61,7 +61,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL, target = NULL) {
 #  return (sum(weighted.fit))
 }
 
-fitch.inapp <- function (tree, data, target = NULL, inherit.ancestral = TRUE) {
+fitch.inapp <- function (tree, data, inherit.ancestral = TRUE, target = NULL) {
   # Data
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
@@ -84,7 +84,8 @@ fitch.inapp <- function (tree, data, target = NULL, inherit.ancestral = TRUE) {
     parentof <- parent[match((nTip + 2L):maxNode, child )]
     allNodes <- (nTip + 1L):maxNode
     childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
-    ret <- .Call("FITCHUPIA", downpass, as.integer(nChar), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+    uppass <- .Call("FITCHUPIA", downpass, as.integer(nChar), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+    ret <- list(sum(uppass[[3]]), uppass[[1]], uppass[[2]])
   } else {
     ret <- .Call("FITCHDOWN", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
     if (any(need.uppass <- as.logical(ret[[5]])) && (is.null(target) || ret[[1]] <= target)) {

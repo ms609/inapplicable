@@ -95,9 +95,7 @@ rooted.spr <- function(tree) {
   nEdge <- length(child)
   reordered.edge <- .C('order_edges', as.integer(edge[,1]), as.integer(edge[,2]), as.integer(nTips-1L), as.integer(nEdge), PACKAGE='inapplicable')
   numbered.edge <- .C('number_nodes', as.integer(reordered.edge[[1]]), as.integer(reordered.edge[[2]]), as.integer(root), as.integer(nEdge), PACKAGE='inapplicable')
-  edge[,1] <- numbered.edge[[1]]
-  edge[,2] <- numbered.edge[[2]]
-  tree$edge <- edge
+  tree$edge <- matrix(c(numbered.edge[[1]], numbered.edge[[2]]), ncol=2)
   tree
 }
 
@@ -130,7 +128,57 @@ rooted.tbr <- function(tree) {
   }
 }
 
-lb <- function () {nodelabels(); edgelabels(); tiplabels(adj=c(2, 0.5))}
+quick.nni <- function (tree) {
+  n      <- sample(tree$Nnode - 1L, 1L)
+  edge   <- tree$edge
+  parent <- edge[, 1L]
+  child  <- edge[, 2L]
+  k      <- min(parent) - 1L
+  ind    <- which(child > k)[n]
+  p1     <- parent[ind]
+  p2     <- child[ind]
+  ind1   <- which(parent == p1)
+  ind1   <- ind1[ind1 != ind][1L]
+  ind2   <- which(parent == p2)[sample(2L,1L)]
+  tree$edge[c(ind1, ind2), 2L] <- child[c(ind2, ind1)]
+  renumber(phangorn:::reorderPruning(tree))
+}
+
+spr <- function(tree) {
+  tip.label <- tree$tip.label
+  nTips <- length(tip.label)
+  if (nTips < 4L) stop ('must be >3 tips for SPR rearrangement!')
+  edge  <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
+  nEdge <- length(child)
+  root  <- nTips + 1L # Assumes fully-resolved bifurcating tree
+  pruning.candidates <- seq(nEdge + 1L)[-root]
+  repeat {
+    prune.node <- sample(pruning.candidates, 1)
+    moving.subnodes <- c(prune.node, which(do.descendants(parent, child, nTips, prune.node)))
+    moving.nodes <- c(prune.parent <- parent[child==prune.node], moving.subnodes)
+    dont.graft.here <- c(moving.nodes, child[parent==prune.parent])
+    dont.graft.here
+    graft.candidates <- c(pruning.candidates[!pruning.candidates %in% dont.graft.here])
+    if (any(graft.candidates)) break;
+    pruning.candidates <- pruning.candidates[-match(prune.node, pruning.candidates)]
+    if (!any(pruning.candidates)) stop('No place to graft pruned tree')
+  }
+  graft.node   <- sample(graft.candidates, 1)
+  graft.edge   <- match(graft.node, child)
+  graft.parent <- parent[graft.edge]
+  graft.child  <-  child[graft.edge]
+  leading.edge <- match(prune.parent, child)
+  prune.edge   <- match(prune.node, child)
+  parent.duplicate <- parent
+  parent.duplicate[prune.edge] <- NA
+  sister.edge <- match(prune.parent, parent.duplicate)
+  edge[c(leading.edge, sister.edge, graft.edge), 2] <- edge[c(sister.edge, graft.edge, leading.edge), 2]
+  
+  reordered.edge <- .C('order_edges', as.integer(edge[,1]), as.integer(edge[,2]), as.integer(nTips-1L), as.integer(nEdge), PACKAGE='inapplicable')
+  numbered.edge <- .C('number_nodes', as.integer(reordered.edge[[1]]), as.integer(reordered.edge[[2]]), as.integer(root), as.integer(nEdge), PACKAGE='inapplicable')
+  tree$edge <- matrix(c(numbered.edge[[1]], numbered.edge[[2]]), ncol=2)
+  renumber(phangorn:::reorderPruning(tree))
+}
 
 tbr <- function(tree, edge.to.break=NULL) {
 # Improvement targets: root.robust; extract.clade.robust; drop.tip.fast
@@ -182,5 +230,3 @@ tbr <- function(tree, edge.to.break=NULL) {
   }
   renumber(ret)
 }
-
-set.outgroup <- root.robust

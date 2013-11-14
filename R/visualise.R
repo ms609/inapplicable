@@ -5,7 +5,7 @@ visualize.inheritance <- visualise.inheritance <- vis.in <- function (tree, data
 }
 
 visualize.character <- visualise.character <- visualize.char <- visualise.char <- 
-function (tree, data, char.no, plot.fun = plot, inherit.ancestral = TRUE) {
+function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
   at <- attributes(data)
@@ -43,7 +43,7 @@ function (tree, data, char.no, plot.fun = plot, inherit.ancestral = TRUE) {
     down.scorers <- down[[4]]
     uppass.states <- up[[3]]
     up.scorers <- up[[4]]
-    text(1,1,paste0('TS', paste(which(at$index == char.no), collapse=', '), ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[1]]) else paste0('; uppass skipped (+', up[[1]], ')'), '; total +', down[[2]] + up[[1]]), pos=4, cex=0.8)
+    text(1,1,paste0('Char ', char.no, ' - TS', paste(which(at$index == char.no), collapse=', '), ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[1]]) else paste0('; uppass skipped (+', up[[1]], ')'), '; total +', down[[2]] + up[[1]]), pos=4, cex=0.8)
   }
     
   down.change <- sapply(nodes, function(n) {

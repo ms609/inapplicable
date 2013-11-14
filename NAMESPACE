@@ -1,4 +1,4 @@
-export(rearrange.tree, set.outgroup, root.robust, rooted.nni, rooted.spr, rooted.tbr, tbr)
+export(rearrange.tree, set.outgroup, root.robust, rooted.nni, quick.nni, rooted.spr, spr, rooted.tbr, tbr)
 export(parsimony.inapp, fitch.inapp)
 export(extract.clade.robust, add.tip, single.taxon.tree, two.tip.tree)
 export(prepare.cluster)

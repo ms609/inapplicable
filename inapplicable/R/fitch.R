@@ -1,4 +1,4 @@
-parsimony.inapp <- function (tree, data, concavity = NULL, inherit.ancestral = TRUE, target = NULL) {
+parsimony.inapp <- function (tree, data, concavity = NULL, inherit.ancestral = FALSE, target = NULL) {
   return (fitch.inapp(tree, data, target=target, inherit.ancestral=inherit.ancestral)[[1]]) 
 #  
 #  if (is.null(concavity)) return (fitch.inapp(tree, data, target=target)[[1]]) 
@@ -61,7 +61,7 @@ parsimony.inapp <- function (tree, data, concavity = NULL, inherit.ancestral = T
 #  return (sum(weighted.fit))
 }
 
-fitch.inapp <- function (tree, data, inherit.ancestral = TRUE, target = NULL) {
+fitch.inapp <- function (tree, data, inherit.ancestral = FALSE, target = NULL) {
   # Data
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')

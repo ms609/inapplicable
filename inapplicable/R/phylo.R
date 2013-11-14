@@ -117,7 +117,7 @@ add.tip <- function (tree, where, label) {
   
 }
 
-root.robust <- function (tree, outgroup) {
+set.outgroup <- root.robust <- function (tree, outgroup) {
   if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
     tip <- tree$tip.label
   if (is.character(outgroup)) {outgroup <- match(outgroup, tip, nomatch=0); outgroup <- outgroup[as.logical(outgroup)]}

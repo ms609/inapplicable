@@ -147,36 +147,33 @@ quick.nni <- function (tree) {
 spr <- function(tree) {
   tip.label <- tree$tip.label
   nTips <- length(tip.label)
-  if (nTips < 4L) stop ('must be >3 tips for SPR rearrangement!')
   edge  <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
   nEdge <- length(child)
-  root  <- nTips + 1L # Assumes fully-resolved bifurcating tree
+  if (nTips < 4L) stop ('must be >3 tips for SPR rearrangement!')
+  root  <- nTips + 1L
   pruning.candidates <- seq(nEdge + 1L)[-root]
   repeat {
     prune.node <- sample(pruning.candidates, 1)
     moving.subnodes <- c(prune.node, which(do.descendants(parent, child, nTips, prune.node)))
     moving.nodes <- c(prune.parent <- parent[child==prune.node], moving.subnodes)
     dont.graft.here <- c(moving.nodes, child[parent==prune.parent])
-    graft.candidates <- c(pruning.candidates[!pruning.candidates %in% dont.graft.here])
-    if (any(graft.candidates)) {
-      graft.node <- if (length(graft.candidates)==1) graft.candidates else sample(graft.candidates, 1)
-      break;
-    }
+    graft.node <- c(pruning.candidates[!pruning.candidates %in% dont.graft.here])
+    if (length(graft.node) > 1) graft.node <- sample(graft.node, 1)
+    if (any(graft.node)) break;
     pruning.candidates <- pruning.candidates[-match(prune.node, pruning.candidates)]
     if (!any(pruning.candidates)) stop('No place to graft pruned tree')
   } 
-  graft.node   <- sample(graft.candidates, 1)
+  
   graft.edge   <- match(graft.node, child)
   graft.parent <- parent[graft.edge]
   graft.child  <-  child[graft.edge]
   prune.edge   <- match(prune.node, child)
   parent.duplicate <- parent
   parent.duplicate[prune.edge] <- NA
-  sister.edge <- match(prune.parent, parent.duplicate)
+  sister.edge  <- match(prune.parent, parent.duplicate)
   if (prune.parent == root) {
     new.root <- child[parent==root]
     new.root <- new.root[new.root != prune.node]
-    cat(sister.edge, graft.edge)
     edge[sister.edge, 2L] <- edge[graft.edge, 2L]
     edge[graft.edge, 2L] <- root
     new.root.spots <- edge==new.root
@@ -184,16 +181,13 @@ spr <- function(tree) {
     edge[new.root.spots] <- root
   } else {
     leading.edge <- match(prune.parent, child)
-    cat(leading.edge, sister.edge, graft.edge)
     edge[c(leading.edge, sister.edge, graft.edge), 2] <- edge[c(sister.edge, graft.edge, leading.edge), 2]
   }
-
-  cat('\nIn case of disaster: ', prune.node, graft.node)
+  
   reordered.edge <- .C('order_edges', as.integer(edge[,1]), as.integer(edge[,2]), as.integer(nTips-1L), as.integer(nEdge), PACKAGE='inapplicable')
   numbered.edge <- .C('number_nodes', as.integer(reordered.edge[[1]]), as.integer(reordered.edge[[2]]), as.integer(root), as.integer(nEdge), PACKAGE='inapplicable')
   tree$edge <- matrix(c(numbered.edge[[1]], numbered.edge[[2]]), ncol=2)
-  cat('. r\n')
-  renumber(phangorn:::reorderPruning(tree))
+  tree
 }
 
 tbr <- function(tree, edge.to.break=NULL) {

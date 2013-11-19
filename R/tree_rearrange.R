@@ -149,8 +149,8 @@ spr <- function(tree) {
   nTips <- length(tip.label)
   edge  <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
   nEdge <- length(child)
-  if (nTips < 4L) stop ('must be >3 tips for SPR rearrangement!')
   root  <- nTips + 1L
+  if (nTips < 4L) stop ('must be >3 tips for SPR rearrangement!')
   pruning.candidates <- seq(nEdge + 1L)[-root]
   repeat {
     prune.node <- sample(pruning.candidates, 1)

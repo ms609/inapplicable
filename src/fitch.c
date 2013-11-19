@@ -302,20 +302,21 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
   int k, ancestor_k;
   for (k = 0; k < (*n_rows); k++) { // Next TS
     ancestor_k = this[k];
-    if ((ancestor_k & (*inapp)) && (ancestor_k != (*inapp))) ancestor_k -= (*inapp);  // Remove {-} from parent node: Hennig's Auxiliary Principle
+    if ((ancestor_k & (*inapp)) && (ancestor_k != (*inapp))) ancestor_k &= ~*inapp;  // Remove {-} from parent node: Hennig's Auxiliary Principle
+    //// The below should match fitch_upnode, but with ancestor_k in place of ancestor[k]
+    
     if (this[k] & (*inapp)) {       // Node has an inapplicable token?
-      if (ancestor_k == *inapp) {   // Parent is {-}
+      if (ancestor_k == *inapp) {  // Parent is {-}
         this[k] = *inapp;           // Set node's tokens to {-}
         continue;
       } 
-      else 
-      if (this[k] != (*inapp)) {    // Node has an applicable token?
-        this[k] -= (*inapp);        // Remove {-} from this node's tokens
-        if (child_q[k] == (*inapp) || child_r[k] == (*inapp)                      // One child's only possible token is {-}
+      else if (this[k] != *inapp) {    // Node has an applicable token?
+        this[k] &= ~*inapp;        // Remove {-} from this node's tokens
+        if (child_q[k] == *inapp || child_r[k] == *inapp                      // One child's only possible token is {-}
         || ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != (*inapp))) // Children have tokens in common, excluding {-}
         ) {} else {
           (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
-          this[k] = this[k] | (ancestor_k & child_r[k]) | (ancestor_k & child_q[k]);
+          this[k] |= (ancestor_k & child_r[k]) | (ancestor_k & child_q[k]);
           continue;                 // Next node
         }
       } else if (ancestor_k & child_r[k] & child_q[k] & *inapp) {
@@ -334,10 +335,22 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
     if ((ancestor_k & this[k]) == ancestor_k) { // All parent node's tokens among this node's possible tokens
       this[k] = ancestor_k;                      // Set this node's tokens to parent's tokens
     } else if (child_q[k] & child_r[k]) {         // Children have tokens in common
-      this[k] = this[k] | (ancestor_k & child_q[k]) | (ancestor_k & child_r[k]); 
+      this[k] |= (ancestor_k & child_q[k]) | (ancestor_k & child_r[k]); 
                                                   // Add tokens common to parent and either child to this node
     } else {                                     
-      this[k] = this[k] | ancestor_k;            // Add parent's tokens to this node's tokens
+      this[k] |= ancestor_k;            // Add parent's tokens to this node's tokens
+    }
+    if (this[k] & *inapp) {
+      if (
+        ((ancestor_k != *inapp) ? 1L : 0 + (child_q[k] != *inapp) ? 1L : 0 + (child_r[k] != *inapp) ? 1L : 0) // number of relatives with applicable token
+        >= 
+        ((ancestor_k &  *inapp) ? 1L : 0 + (child_q[k] &  *inapp) ? 1L : 0 + (child_r[k] &  *inapp) ? 1L : 0) // number of relatives with inapplicable token
+      ) {
+        if (this[k] & *inapp) this[k] &= ~*inapp;
+      }
+    } else {
+      if ((child_q[k] & *inapp) && child_q[k] != *inapp) child_q[k] &= ~*inapp;
+      if ((child_r[k] & *inapp) && child_r[k] != *inapp) child_r[k] &= ~*inapp;
     }
   }
 }
@@ -345,46 +358,51 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
 void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
   int k;
   for (k = 0; k < (*n_rows); k++) { // Next node in preorder
-    if (this[k] & (*inapp)) {       // Node has an inapplicable token?
+    if (this[k] & *inapp) {         // Node has an inapplicable token?
       if (ancestor[k] == *inapp) {  // Parent is {-}
         this[k] = *inapp;           // Set node's tokens to {-}
         continue;
       } 
-      else if (this[k] != (*inapp)) {    // Node has an applicable token?
-        this[k] -= (*inapp);        // Remove {-} from this node's tokens
-        if (child_q[k] == (*inapp) || child_r[k] == (*inapp)                      // One child's only possible token is {-}
-        || ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != (*inapp))) // Children have tokens in common, excluding {-}
+      else if (this[k] != *inapp) {    // Node has an applicable token?
+        this[k] -= *inapp;          // Remove {-} from this node's tokens
+        if (child_q[k] == *inapp || child_r[k] == *inapp                        // One child's only possible token is {-}
+        || ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != *inapp)) // Children have tokens in common, excluding {-}
         ) {} else {
+          this[k] |= ((ancestor[k] & child_r[k]) | (ancestor[k] & child_q[k]));
           (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
-          this[k] = this[k] | (ancestor[k] & child_r[k]) | (ancestor[k] & child_q[k]);
-          continue;                 // Next node
+          continue;                        // Next node
         }
       } else if (ancestor[k] & child_r[k] & child_q[k] & *inapp) {
         continue;                   // Parent and both children have inapplicable token
-      } else if (ancestor[k] != (*inapp) && (child_q[k] != (*inapp) || child_r[k] != (*inapp))) { // Parent + one child have applicable token
-        if (!((((child_q[k] | child_r[k]) & ancestor[k]) | (*inapp)) != (*inapp))) { // Parent has no applicable token in common with either child
+      } else if (~*inapp & ancestor[k] & (child_q[k] | child_r[k])) { // Parent + one child have applicable token
+        if (!(ancestor[k] & ~*inapp & (child_q[k] | child_r[k]))) { // Parent has no applicable token in common with either child
           (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
-          this[k] = child_q[k] | child_r[k] | ancestor[k]; // Set this node's tokens to the tokens present in the parent or either child...
+          this[k] = (child_q[k] | child_r[k] | ancestor[k]) & ~*inapp; // Set this node's tokens to the tokens present in the parent or either child, excluding inapplicable
         } else {
-          this[k] = (child_q[k] | child_r[k]) & ancestor[k]; // Set this node's tokens to those in common...
+          this[k] = ((child_q[k] | child_r[k]) & ancestor[k]) & ~*inapp; // Set this node's tokens to those in common, excluding inapplicable
         }
-        if (this[k] & *inapp) this[k] -= *inapp;             // Excluding inapplicable
         continue;                   // Next node
       }
     }
     if ((ancestor[k] & this[k]) == ancestor[k]) { // All parent node's tokens among this node's possible tokens
       this[k] = ancestor[k];                      // Set this node's tokens to parent's tokens
     } else if (child_q[k] & child_r[k]) {         // Children have tokens in common
-      this[k] = this[k] | (ancestor[k] & child_q[k]) | (ancestor[k] & child_r[k]); 
+      this[k] |= (ancestor[k] & child_q[k]) | (ancestor[k] & child_r[k]); 
                                                   // Add tokens common to parent and either child to this node
     } else {                                     
-      this[k] = this[k] | ancestor[k];            // Add parent's tokens to this node's tokens
+      this[k] |= ancestor[k];                     // Add parent's tokens to this node's tokens
     }
-    if (this[k] & *inapp) {
-      continue;
+    if (this[k] & *inapp) {                       // This has an inapplicable token
+      if (
+        (((ancestor[k] != *inapp) ? 1L : 0) + ((child_q[k] != *inapp) ? 1L : 0) + ((child_r[k] != *inapp) ? 1L : 0)) // number of relatives with applicable token
+        >= 
+        (((ancestor[k] &  *inapp) ? 1L : 0) + ((child_q[k] &  *inapp) ? 1L : 0) + ((child_r[k] &  *inapp) ? 1L : 0)) // number of relatives with inapplicable token
+      ) {
+        this[k] &= ~*inapp;                       // Remove inapplicable token from this node
+      }
     } else {
-      if ((child_q[k] & *inapp) && child_q[k] != *inapp) child_q[k] -= *inapp;
-      if ((child_r[k] & *inapp) && child_r[k] != *inapp) child_r[k] -= *inapp;
+      if (child_q[k] != *inapp) child_q[k] &= ~*inapp; // Remove - from children with applicable token
+      if (child_r[k] != *inapp) child_r[k] &= ~*inapp; // Remove - from children with applicable token
     }
   }
 }

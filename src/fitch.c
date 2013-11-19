@@ -303,7 +303,12 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
   for (k = 0; k < (*n_rows); k++) { // Next TS
     ancestor_k = this[k];
     if ((ancestor_k & (*inapp)) && (ancestor_k != (*inapp))) ancestor_k -= (*inapp);  // Remove {-} from parent node: Hennig's Auxiliary Principle
-    if (this[k] & (*inapp)) {       // Node has a - token?
+    if (this[k] & (*inapp)) {       // Node has an inapplicable token?
+      if (ancestor_k == *inapp) {   // Parent is {-}
+        this[k] = *inapp;           // Set node's tokens to {-}
+        continue;
+      } 
+      else 
       if (this[k] != (*inapp)) {    // Node has an applicable token?
         this[k] -= (*inapp);        // Remove {-} from this node's tokens
         if (child_q[k] == (*inapp) || child_r[k] == (*inapp)                      // One child's only possible token is {-}
@@ -340,8 +345,12 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
 void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
   int k;
   for (k = 0; k < (*n_rows); k++) { // Next node in preorder
-    if (this[k] & (*inapp)) {       // Node has a - token?
-      if (this[k] != (*inapp)) {    // Node has an applicable token?
+    if (this[k] & (*inapp)) {       // Node has an inapplicable token?
+      if (ancestor[k] == *inapp) {  // Parent is {-}
+        this[k] = *inapp;           // Set node's tokens to {-}
+        continue;
+      } 
+      else if (this[k] != (*inapp)) {    // Node has an applicable token?
         this[k] -= (*inapp);        // Remove {-} from this node's tokens
         if (child_q[k] == (*inapp) || child_r[k] == (*inapp)                      // One child's only possible token is {-}
         || ((child_q[k] & child_r[k]) && ((child_q[k] & child_r[k]) != (*inapp))) // Children have tokens in common, excluding {-}

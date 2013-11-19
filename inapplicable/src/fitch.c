@@ -380,6 +380,12 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
     } else {                                     
       this[k] = this[k] | ancestor[k];            // Add parent's tokens to this node's tokens
     }
+    if (this[k] & *inapp) {
+      continue;
+    } else {
+      if ((child_q[k] & *inapp) && child_q[k] != *inapp) child_q[k] -= *inapp;
+      if ((child_r[k] & *inapp) && child_r[k] != *inapp) child_r[k] -= *inapp;
+    }
   }
 }
 

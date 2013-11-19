@@ -380,7 +380,7 @@ void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int
                &state[(children_of[0      ]-1L) * (*n_rows)], // child q
                &state[(children_of[*n_node]-1L) * (*n_rows)], // child r
     n_rows, pars, weight, inapp, &pvec[parent_of[0]-1L]);
-  pscore[0] += pvec[parent_of[0]];
+  pscore[0] += pvec[parent_of[0] - 1L];
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
   for (i = 0; i < (*n_node)-1L; i++) {
     // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)

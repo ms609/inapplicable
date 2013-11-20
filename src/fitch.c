@@ -226,27 +226,21 @@ SEXP FITCHUPIA(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP children_
 
 
 void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight, int *inapp, double *w, int *need_uppass) {
-  int k, tmp;
+  int k, tmp, applicables = ~*inapp;
   for (k = 0; k < (*n_rows); k++) {
-    tmp = dat1[k] & dat2[k];
-    if (tmp) {// Tokens in Common
-      if ((tmp == (*inapp))) {  // Is - the only common token?
+    if (tmp = dat1[k] & dat2[k]) { // Tokens in Common
+      if ((tmp == *inapp)) {  // Is - the only common token?
         need_uppass[k] = 1L;
-        if ((dat1[k] | dat2[k]) != (*inapp)) { // At least one child has an applicable token        
-          if ((dat1[k] != (*inapp)) && (dat2[k] != (*inapp))) { // ... Do both children have an applicable token?
-            tmp = dat1[k] | dat2[k];
-          }
+        if (dat1[k] & dat2[k] & applicables) { // Do both children have an applicable token?    
+          tmp = dat1[k] | dat2[k];
         }
       }
     } else {
       tmp = dat1[k] | dat2[k];
       if ((dat1[k] == *inapp) || (dat2[k] == *inapp)) { // One child's only possible token {-}
       } else {
-        if (tmp & (*inapp)) { // Only delete inapplicable token if it is present
-          tmp = tmp - (*inapp);
-        }
-        (pars[k])++;
-        (*w) += weight[k];
+        tmp &= applicables; // Delete {-} from this node's possible tokens
+        (pars[k])++; (*w) += weight[k]; // Increase parsimony score by one
       }
     }
     dat1[k] = tmp;
@@ -299,10 +293,10 @@ SEXP FITCHDOWN(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP we
 }
 
 void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
-  int k, ancestor_k, tmp;
+  int k, ancestor_k, tmp, applicables = ~*inapp;
   for (k = 0; k < (*n_rows); k++) { // Next TS
     ancestor_k = this[k];
-    if ((ancestor_k & *inapp) && (ancestor_k & ~*inapp)) ancestor_k &= ~*inapp;  // Remove {-} from parent node: Hennig's Auxiliary Principle
+    if ((ancestor_k & *inapp) && (ancestor_k & applicables)) ancestor_k &= applicables;  // Remove {-} from parent node: Hennig's Auxiliary Principle
     //// The below code corresponds to fitch_upnode, but with ancestor_k in place of ancestor[k]
     
     if (
@@ -311,16 +305,16 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
       (((ancestor_k &  *inapp) ? 1L : 0) + ((child_q[k] &  *inapp) ? 1L : 0) + ((child_r[k] &  *inapp) ? 1L : 0)) // number of relatives with inapplicable token
     ) {
       if (child_q[k] & child_r[k] & *inapp) { // Children both have inapplicable token
-        if (((child_q[k] & ~*inapp) && (child_r[k] & ~*inapp)) // Children both have an applicable token
-          && !(child_q[k] & child_r[k] & ~*inapp) // Children do not have applicable tokens in common
+        if (((child_q[k] & applicables) && (child_r[k] & applicables)) // Children both have an applicable token
+          && !(child_q[k] & child_r[k] & applicables) // Children do not have applicable tokens in common
         ) {
         (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
-        } else if (((tmp = child_q[k] | child_r[k]) & ~*inapp) // Either child has an applicable token
-            && (ancestor_k & ~*inapp)            // Parent has applicable token
-            && !(ancestor_k & tmp & ~*inapp) // Parent has NOT got an applicable token in common with either child
+        } else if (((tmp = child_q[k] | child_r[k]) & applicables) // Either child has an applicable token
+            && (ancestor_k & applicables)            // Parent has applicable token
+            && !(ancestor_k & tmp & applicables) // Parent has NOT got an applicable token in common with either child
           ) {
           (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
-          this[k] = tmp & ~*inapp; // Set this node's tokens to applicable tokens in either child
+          this[k] = tmp & applicables; // Set this node's tokens to applicable tokens in either child
           continue;
         }
       }

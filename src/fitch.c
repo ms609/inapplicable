@@ -370,7 +370,7 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
         this[k] = ancestor[k] & ~*inapp;
       } else {
         if ((tmp = child_q[k] & child_r[k]) && (tmp != *inapp)) { // Children have tokens in common, excluding {-}
-          this[k] = child_q[k] | child_r[k] | ancestor[k]; // Set this node's tokens to the tokens present in the parent or either child
+          this[k] |= (ancestor[k] & tmp); // Set this node's tokens to the tokens present in the parent or either child
         } else {
           this[k] |= ancestor[k];                     // Add parent's tokens to this node's tokens
         }

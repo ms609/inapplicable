@@ -294,9 +294,8 @@ SEXP FITCHDOWN(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP we
 
 void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
   int k, ancestor_k, tmp, applicables = ~*inapp;
+  ancestor_k = ~0;
   for (k = 0; k < (*n_rows); k++) { // Next TS
-    ancestor_k = this[k];
-    if ((ancestor_k & *inapp) && (ancestor_k & applicables)) ancestor_k &= applicables;  // Remove {-} from parent node: Hennig's Auxiliary Principle
     //// The below code corresponds to fitch_upnode, but with ancestor_k in place of ancestor[k]
     
     if (

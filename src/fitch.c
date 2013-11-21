@@ -228,7 +228,7 @@ SEXP FITCHUPIA(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP children_
 void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight, int *inapp, double *w, int *need_uppass) {
   int k, tmp, applicables = ~*inapp;
   for (k = 0; k < (*n_rows); k++) {
-    if (tmp = dat1[k] & dat2[k]) { // Tokens in Common
+    if ((tmp = (dat1[k] & dat2[k]))) { // Tokens in Common
       if ((tmp == *inapp)) {  // Is - the only common token?
         need_uppass[k] = 1L;
         if (dat1[k] & dat2[k] & applicables) { // Do both children have an applicable token?    
@@ -294,12 +294,13 @@ SEXP FITCHDOWN(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP we
 
 void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
   int k, ancestor_k, tmp, applicables = ~*inapp;
-  ancestor_k = ~0;
   for (k = 0; k < (*n_rows); k++) { // Next TS
+    ancestor_k = (this[k] == *inapp) ? ~0 : this[k] & applicables;
+    
     //// The below code corresponds to fitch_upnode, but with ancestor_k in place of ancestor[k]
     
     if (
-      (((ancestor_k != *inapp) ? 1L : 0) + ((child_q[k] != *inapp) ? 1L : 0) + ((child_r[k] != *inapp) ? 1L : 0)) // number of relatives with applicable token
+      (((ancestor_k & applicables) ? 1L : 0) + ((child_q[k] & applicables) ? 1L : 0) + ((child_r[k] & applicables) ? 1L : 0)) // number of relatives with applicable token
       >= 
       (((ancestor_k &  *inapp) ? 1L : 0) + ((child_q[k] &  *inapp) ? 1L : 0) + ((child_r[k] &  *inapp) ? 1L : 0)) // number of relatives with inapplicable token
     ) {
@@ -326,12 +327,12 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
 }
 
 void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
-  int k, tmp;
+  int k, tmp, applicables = ~*inapp;
   for (k = 0; k < (*n_rows); k++) {    // Next node in preorder
     if (
-      (((ancestor[k] != *inapp) ? 1L : 0) + ((child_q[k] != *inapp) ? 1L : 0) + ((child_r[k] != *inapp) ? 1L : 0)) // number of relatives with applicable token
+      (((ancestor[k] & applicables) ? 1L : 0) + ((child_q[k] & applicables) ? 1L : 0) + ((child_r[k] & applicables) ? 1L : 0)) // number of relatives with applicable token
       >= 
-      (((ancestor[k] &  *inapp) ? 1L : 0) + ((child_q[k] &  *inapp) ? 1L : 0) + ((child_r[k] &  *inapp) ? 1L : 0)) // number of relatives with inapplicable token
+      (((ancestor[k] & *inapp) ? 1L : 0) + ((child_q[k] & *inapp) ? 1L : 0) + ((child_r[k] & *inapp) ? 1L : 0)) // number of relatives with inapplicable token
     ) {
       if (child_q[k] & child_r[k] & *inapp) { // Children both have inapplicable token
         if (((child_q[k] & ~*inapp) && (child_r[k] & ~*inapp)) // Children both have an applicable token

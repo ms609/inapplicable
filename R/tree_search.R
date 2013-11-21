@@ -88,7 +88,7 @@ pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, maxit=1
   kmax <- 0
   for (i in 1:maxit) {
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
-    bstree <- bootstrap.inapp(phy=tree, x=data, concavity=concavity, maxiter=maxiter, inherit.ancestral=inherit.ancestral, trace=trace-1, ...)
+    bstree <- bootstrap.inapp(phy=tree, x=data, concavity=concavity, maxiter=maxiter, maxhits=maxhits, inherit.ancestral=inherit.ancestral, trace=trace-1, ...)
     
     if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new candidate tree:")
     if (rearrangements == "TBR") {
@@ -151,7 +151,7 @@ pratchet.consensus <- function (tree, data, concavity=NULL, maxit=5000, maxiter=
   return (trees)
 }
 
-bootstrap.inapp <- function (phy, x, concavity, maxiter, trace=1, inherit.ancestral=inherit.ancestral, ...) {
+bootstrap.inapp <- function (phy, x, concavity, maxiter, maxhits, trace=1, inherit.ancestral=inherit.ancestral, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   at <- attributes(x)
   weight <- at$weight
@@ -166,7 +166,7 @@ bootstrap.inapp <- function (phy, x, concavity, maxiter, trace=1, inherit.ancest
   attr(x, 'inapp.level') <- at$inapp.level
   attr(phy, 'pscore') <- NULL
   class(x) <- '*phyDat'
-  res <- tree.search(phy, x, concavity, method='NNI', maxiter, trace=trace-1, inherit.ancestral=inherit.ancestral, ...)
+  res <- tree.search(phy, x, concavity, method='NNI', inherit.ancestral=inherit.ancestral, maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   res

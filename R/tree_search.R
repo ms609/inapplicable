@@ -55,7 +55,7 @@ sectorial.inapp <- function (tree, data, concavity=NULL, maxit=100,
     initial.p <- parsimony.inapp(crown, crown.data, concavity, inherit.ancestral=inherit.ancestral)
     attr(crown, 'pscore') <- initial.p
     if (trace >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
-    candidate <- tree.search(crown, crown.data, 'SECTOR_ROOT', concavity=concavity, method=rearrangements, trace=trace-1, maxiter=maxiter, ...)
+    candidate <- tree.search(crown, crown.data, 'SECTOR_ROOT', concavity=concavity, method=rearrangements, inherit.ancestral = inherit.ancestral, trace=trace-1, maxiter=maxiter, ...)
     candidate.p <- attr(candidate, 'pscore')
     
     if((candidate.p + eps) < initial.p) {

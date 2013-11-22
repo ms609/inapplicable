@@ -3,7 +3,7 @@
 #include <math.h>
 #include <R.h> 
 #include <Rinternals.h>
-
+/*
 void fitch_downnode_ia(int *dat1, int *dat2, int *n_rows, int *inapp) {
   int k, tmp;
   for (k = 0; k < (*n_rows); k++) {
@@ -34,10 +34,10 @@ void fitch_downpass_ia(int *dat, int *n_rows, int *parent, int *child, int *n_ed
   ni = 0;
   for (i = 0; i < *n_edge; i++) {
     if (ni == parent[i]){
-      fitch_downnode_ia(&dat[(ni-1L) * (*n_rows)], &dat[(child[i]-1L) * (*n_rows)], n_rows, inapp);
+      fitch_downnode_ia(&dat[(ni-1) * (*n_rows)], &dat[(child[i]-1) * (*n_rows)], n_rows, inapp);
     } else {
       ni = parent[i];
-      for (k = 0; k < (*n_rows); k++) dat[(ni-1L)*(*n_rows) + k] = dat[(child[i]-1L)*(*n_rows) + k];                     
+      for (k = 0; k < (*n_rows); k++) dat[(ni-1)*(*n_rows) + k] = dat[(child[i]-1)*(*n_rows) + k];                     
     }
   }
 }
@@ -173,31 +173,31 @@ void fitch_upnode_ia(int *this, int *ancestor, int *child_q, int *child_r, int *
 
 void fitch_uppass_ia(int *state, int *parent_of, int *children_of, int *n_rows, int *pars, int *n_node, double *weight, double *pvec, int *inapp) {
   int i;
-  fitch_uproot_ia(&state[(parent_of[0]-1L) * (*n_rows)], // this_start, will become this_finish
-               &state[(children_of[0      ]-1L) * (*n_rows)], // child q
-               &state[(children_of[*n_node]-1L) * (*n_rows)], // child r
-    n_rows, pars, weight, inapp, &pvec[parent_of[0]-1L]);
+  fitch_uproot_ia(&state[(parent_of[0]-1) * (*n_rows)], // this_start, will become this_finish
+               &state[(children_of[0      ]-1) * (*n_rows)], // child q
+               &state[(children_of[*n_node]-1) * (*n_rows)], // child r
+    n_rows, pars, weight, inapp, &pvec[parent_of[0]-1]);
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
-  for (i = 0; i < (*n_node)-1L; i++) {
-    // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
-    // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
+  for (i = 0; i < (*n_node)-1; i++) {
+    // parent_of is stored as 1, 1R, 2L, 2R, 3, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
+    // children_of is stored as 0, 1, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // state and state are stored as [0 * n_rows] = states[,1], [1 * n_rows] = states[,2], ....
     
     // Worked example assumes that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
     fitch_upnode_ia(
     //  The position of node 12 in the state array is:
     //    root.number (counting from 1) + i = i.e. position[11], the 12th position
-    &state[(parent_of[0] /*+1L -1L*/ + i) * (*n_rows)], // this_start, will become this_finish
+    &state[(parent_of[0] / *+1 -1* / + i) * (*n_rows)], // this_start, will become this_finish
     //  To find the number of node 12's parent we look in parent_of[node12.index]
     //    parent_of[0] is the parent of node [root + i] = 12th node
     //    node12.index = i = 0; parent_of[0] = 11; so we need state[11-1]
-    &state[(parent_of[i]-1L) * (*n_rows)], // ancestor
+    &state[(parent_of[i]-1) * (*n_rows)], // ancestor
     //  To find the number of node 12's children we look in children_of[node12.index]
     //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
     //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
-    &state[(children_of[i + 1L]-1L) * (*n_rows)], // child q
-    &state[(children_of[i + 1L + *n_node]-1L) * (*n_rows)], // child r
-    n_rows, pars, weight, inapp, &pvec[parent_of[0] /*+1L -1L*/ + i]);
+    &state[(children_of[i + 1]-1) * (*n_rows)], // child q
+    &state[(children_of[i + 1 + *n_node]-1) * (*n_rows)], // child r
+    n_rows, pars, weight, inapp, &pvec[parent_of[0] / *+1 -1* / + i]);
   }
 }
 
@@ -205,13 +205,13 @@ SEXP FITCHUPIA(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP children_
   int *state, *n_rows=INTEGER(n_transform_series), m=INTEGER(max_node)[0], i;   
   double *pvtmp;
   SEXP DATA, pars, pvec, RESULT;
-  PROTECT(RESULT = allocVector(VECSXP, 3L));
+  PROTECT(RESULT = allocVector(VECSXP, 3));
   PROTECT(pars = allocVector(INTSXP, *n_rows));
   PROTECT(pvec = allocVector(REALSXP, m));
   PROTECT(DATA = allocMatrix(INTSXP, n_rows[0], m));
   pvtmp = REAL(pvec);
   for(i=0; i<m; i++) pvtmp[i] = 0.0;
-  for(i=0; i<*n_rows; i++) INTEGER(pars)[i] = 0L;
+  for(i=0; i<*n_rows; i++) INTEGER(pars)[i] = 0;
   state = INTEGER(DATA);
   for(i=0; i<(*n_rows * m); i++) state[i] = INTEGER(dat)[i];
   
@@ -224,13 +224,13 @@ SEXP FITCHUPIA(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP children_
   return(RESULT); 
 }
 
-
+*/
 void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight, int *inapp, double *w, int *need_uppass) {
   int k, tmp, applicables = ~*inapp;
   for (k = 0; k < (*n_rows); k++) {
     if ((tmp = (dat1[k] & dat2[k]))) { // Tokens in Common
       if ((tmp == *inapp)) {  // Is - the only common token?
-        need_uppass[k] = 1L;
+        need_uppass[k] = 1;
         if ((dat1[k] & applicables) && (dat2[k] & applicables)) { // Do both children have an applicable token?    
           tmp = dat1[k] | dat2[k];
         }
@@ -252,12 +252,12 @@ void fitch_downpass(int *dat, int *n_rows, int *pars, int *parent, int *child, i
   ni = 0;
   for (i = 0; i < *n_edge; i++) {
     if (ni == parent[i]){
-      pvec[ni-1L] += pvec[child[i]-1L];
-      fitch_downnode(&dat[(ni-1L) * (*n_rows)], &dat[(child[i]-1L) * (*n_rows)], n_rows, pars, weight, inapp, &pvec[(ni-1L)], need_uppass);
+      pvec[ni-1] += pvec[child[i]-1];
+      fitch_downnode(&dat[(ni-1) * (*n_rows)], &dat[(child[i]-1) * (*n_rows)], n_rows, pars, weight, inapp, &pvec[(ni-1)], need_uppass);
     } else {
       ni = parent[i];
-      pvec[ni-1L] += pvec[child[i]-1L];        
-      for (k = 0; k < (*n_rows); k++) dat[(ni-1L)*(*n_rows) + k] = dat[(child[i]-1L)*(*n_rows) + k];                     
+      pvec[ni-1] += pvec[child[i]-1];        
+      for (k = 0; k < (*n_rows); k++) dat[(ni-1)*(*n_rows) + k] = dat[(child[i]-1)*(*n_rows) + k];                     
     }
   }
   pscore[0] = pvec[ni-1];
@@ -267,16 +267,16 @@ SEXP FITCHDOWN(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP we
   int *data, *n_rows=INTEGER(nrx), *need_uppass, m=INTEGER(mx)[0], i, n=INTEGER(q)[0];   
   double *pvtmp;
   SEXP RESULT, pars, pscore, DAT, pvec, need_up;
-  PROTECT(RESULT = allocVector(VECSXP, 5L));
+  PROTECT(RESULT = allocVector(VECSXP, 5));
   PROTECT(pars = allocVector(INTSXP, *n_rows));
-  PROTECT(pscore = allocVector(REALSXP, 1L));
+  PROTECT(pscore = allocVector(REALSXP, 1));
   PROTECT(DAT = allocMatrix(INTSXP, n_rows[0], m));
   PROTECT(pvec = allocVector(REALSXP, m));
   PROTECT(need_up = allocVector(INTSXP, *n_rows));
   pvtmp = REAL(pvec);
   need_uppass = INTEGER(need_up);
   for(i=0; i<m; i++) pvtmp[i] = 0.0;
-  for(i=0; i<*n_rows; i++) {INTEGER(pars)[i] = 0L; need_uppass[i] = 0L;}
+  for(i=0; i<*n_rows; i++) {INTEGER(pars)[i] = 0; need_uppass[i] = 0;}
   REAL(pscore)[0]=0.0;
   data = INTEGER(DAT);
   for(i=0; i<(*n_rows * n); i++) data[i] = INTEGER(dat)[i];
@@ -300,9 +300,9 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
     //// The below code corresponds to fitch_upnode, but with ancestor_k in place of ancestor[k]
     
     if (
-      (((ancestor_k & applicables) ? 1L : 0) + ((child_q[k] & applicables) ? 1L : 0) + ((child_r[k] & applicables) ? 1L : 0)) // number of relatives with applicable token
+      (((ancestor_k & applicables) ? 1 : 0) + ((child_q[k] & applicables) ? 1 : 0) + ((child_r[k] & applicables) ? 1 : 0)) // number of relatives with applicable token
       >= 
-      (((ancestor_k &  *inapp) ? 1L : 0) + ((child_q[k] &  *inapp) ? 1L : 0) + ((child_r[k] &  *inapp) ? 1L : 0)) // number of relatives with inapplicable token
+      (((ancestor_k &  *inapp) ? 1 : 0) + ((child_q[k] &  *inapp) ? 1 : 0) + ((child_r[k] &  *inapp) ? 1 : 0)) // number of relatives with inapplicable token
     ) {
       if (child_q[k] & child_r[k] & *inapp) { // Children both have inapplicable token
         if (((child_q[k] & applicables) && (child_r[k] & applicables)) // Children both have an applicable token
@@ -333,11 +333,11 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
 
 void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
   int k, tmp, applicables = ~*inapp;
-  for (k = 0; k < (*n_rows); k++) {    // Next node in preorder
+  for (k = 0; k < (*n_rows); k++) {    // Next TS
     if (
-      (((ancestor[k] & applicables) ? 1L : 0) + ((child_q[k] & applicables) ? 1L : 0) + ((child_r[k] & applicables) ? 1L : 0)) // number of relatives with applicable token
+      (((ancestor[k] & applicables) ? 1 : 0) + ((child_q[k] & applicables) ? 1 : 0) + ((child_r[k] & applicables) ? 1 : 0)) // number of relatives with applicable token
       >= 
-      (((ancestor[k] & *inapp) ? 1L : 0) + ((child_q[k] & *inapp) ? 1L : 0) + ((child_r[k] & *inapp) ? 1L : 0)) // number of relatives with inapplicable token
+      (((ancestor[k] & *inapp) ? 1 : 0) + ((child_q[k] & *inapp) ? 1 : 0) + ((child_r[k] & *inapp) ? 1 : 0)) // number of relatives with inapplicable token
     ) {
       if (child_q[k] & child_r[k] & *inapp) { // Children both have inapplicable token
         if (((child_q[k] & applicables) && (child_r[k] & applicables)) // Children both have an applicable token
@@ -379,33 +379,33 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
 
 void fitch_uppass(int *state, int *parent_of, int *children_of, int *n_rows, int *pars, int *n_node, double *weight, double *pvec, int *inapp, double *pscore) {
   int i;
-  fitch_uproot(&state[(parent_of[0]-1L) * (*n_rows)], // this_start, will become this_finish
-               &state[(children_of[0      ]-1L) * (*n_rows)], // child q
-               &state[(children_of[*n_node]-1L) * (*n_rows)], // child r
-    n_rows, pars, weight, inapp, &pvec[parent_of[0]-1L]);
-  pscore[0] += pvec[parent_of[0] - 1L];
+  fitch_uproot(&state[(parent_of[0]-1) * (*n_rows)], // this_start, will become this_finish
+               &state[(children_of[0      ]-1) * (*n_rows)], // child q
+               &state[(children_of[*n_node]-1) * (*n_rows)], // child r
+    n_rows, pars, weight, inapp, &pvec[parent_of[0]-1]);
+  pscore[0] += pvec[parent_of[0] - 1];
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
-  for (i = 0; i < (*n_node)-1L; i++) {
-    // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
-    // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
+  for (i = 0; i < (*n_node)-1; i++) {
+    // parent_of is stored as 1, 1R, 2L, 2R, 3, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
+    // children_of is stored as 0, 1, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // state and state are stored as [0 * n_rows] = states[,1], [1 * n_rows] = states[,2], ....
     
     // Worked example assumes that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
     fitch_upnode(
     //  The position of node 12 in the state array is:
     //    root.number (counting from 1) + i = i.e. position[11], the 12th position
-    &state[(parent_of[0] /*+1L -1L*/ + i) * (*n_rows)], // this_start, will become this_finish
+    &state[(parent_of[0] +1-1 + i) * (*n_rows)], // this_start, will become this_finish
     //  To find the number of node 12's parent we look in parent_of[node12.index]
     //    parent_of[0] is the parent of node [root + i] = 12th node
     //    node12.index = i = 0; parent_of[0] = 11; so we need state[11-1]
-    &state[(parent_of[i]-1L) * (*n_rows)], // ancestor
+    &state[(parent_of[i]-1) * (*n_rows)], // ancestor
     //  To find the number of node 12's children we look in children_of[node12.index]
     //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
     //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
-    &state[(children_of[i + 1L]-1L) * (*n_rows)], // child q
-    &state[(children_of[i + 1L + *n_node]-1L) * (*n_rows)], // child r
-    n_rows, pars, weight, inapp, &pvec[parent_of[0] /*+1L -1L*/ + i]);
-    pscore[0] += pvec[parent_of[0] /*+1L -1L*/ + i];
+    &state[(children_of[i + 1]-1) * (*n_rows)], // child q
+    &state[(children_of[i + 1 + *n_node]-1) * (*n_rows)], // child r
+    n_rows, pars, weight, inapp, &pvec[parent_of[0] +1-1 + i]);
+    pscore[0] += pvec[parent_of[0] +1-1 + i];
   }
 }
 
@@ -415,12 +415,12 @@ SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP children_of
   SEXP DATA, pars, pscore, pvec, RESULT;
   PROTECT(RESULT = allocVector(VECSXP, 4L));
   PROTECT(pars = allocVector(INTSXP, *n_rows));
-  PROTECT(pscore = allocVector(REALSXP, 1L));
+  PROTECT(pscore = allocVector(REALSXP, 1));
   PROTECT(pvec = allocVector(REALSXP, m));
   PROTECT(DATA = allocMatrix(INTSXP, n_rows[0], m));
   pvtmp = REAL(pvec);
   for(i=0; i<m; i++) pvtmp[i] = 0.0;
-  for(i=0; i<*n_rows; i++) INTEGER(pars)[i] = 0L;
+  for(i=0; i<*n_rows; i++) INTEGER(pars)[i] = 0;
   REAL(pscore)[0] = 0.0;
   state = INTEGER(DATA);
   for(i=0; i<(*n_rows * m); i++) state[i] = INTEGER(dat)[i];
@@ -433,4 +433,85 @@ SEXP FITCHUP(SEXP dat, SEXP n_transform_series, SEXP parent_of, SEXP children_of
   SET_VECTOR_ELT(RESULT, 3, pvec);
   UNPROTECT(5);
   return(RESULT); 
+}
+
+void app_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows) {
+  int k; // Iterate through each transformation series
+  for (k = 0; k < (*n_rows); k++) this[k] = (child_q[k] + child_r[k] + (ancestor[k] ? 1 : -1) >= 0) ? 1 : 0;
+}
+
+void app_uproot(int *this, int *n_rows) {
+  int k; // Iterate through each transformation series
+  for (k = 0; k < (*n_rows); k++) this[k] = ((this[k] > -1) ? 1 : 0); // Assume applicable if ambiguous.
+}
+
+void app_uppass(int *app, int *parent_of, int *children_of, int *n_rows, int *pars, int *n_node, int *inapp) {
+  int i;
+  app_uproot(&app[(parent_of[0]-1) * (*n_rows)], n_rows);
+  // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
+  for (i = 0; i < (*n_node)-1; i++) {
+    // parent_of is stored as 1, 1R, 2L, 2R, 3, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
+    // children_of is stored as 0, 1, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
+    // app and app are stored as [0 * n_rows] = apps[,1], [1 * n_rows] = apps[,2], ....
+    
+    // Worked example assumes that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
+    app_upnode(
+    //  The position of node 12 in the app array is:
+    //    root.number (counting from 1) + i = i.e. position[11], the 12th position
+    &app[(parent_of[0] +1-1 + i) * (*n_rows)], // this_start, will become this_finish
+    //  To find the number of node 12's parent we look in parent_of[node12.index]
+    //    parent_of[0] is the parent of node [root + i] = 12th node
+    //    node12.index = i = 0; parent_of[0] = 11; so we need app[11-1]
+    &app[(parent_of[i]-1) * (*n_rows)], // ancestor
+    //  To find the number of node 12's children we look in children_of[node12.index]
+    //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
+    //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
+    &app[(children_of[i + 1]-1) * (*n_rows)], // child q
+    &app[(children_of[i + 1 + *n_node]-1) * (*n_rows)], // child r
+    n_rows);
+  }
+}
+
+void app_downnode(int *dat, int *child_q, int *child_r, int *n_rows) {
+  int k, tmp;
+  for (k = 0; k < (*n_rows); k++) dat[k] = ((tmp = (child_q[k] + child_r[k])) ? (tmp > 0 ? 1 : -1) : 0);
+}
+
+void app_downpass(int *app, int *n_rows, int *parent, int *child, int *n_edge) {
+  int i;
+  for (i = 0; i < *n_edge; i+=2) app_downnode(&app[(parent[i]-1) * (*n_rows)], &app[(child[i]-1) * (*n_rows)], &app[(child[i+1]-1) * (*n_rows)], n_rows);
+}
+
+SEXP FITCH1(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEXP children_of, SEXP n_edge, SEXP weight, SEXP mx, SEXP q, SEXP inapp) {   
+  int *data, *n_rows=INTEGER(nrx), *inappl=INTEGER(inapp), *appl,  m=INTEGER(mx)[0], i, n=INTEGER(q)[0];
+  double *pvtmp;
+  SEXP RESULT, pars, pscore, DAT, pvec, APPL;
+  PROTECT(RESULT = allocVector(VECSXP, 5));
+  PROTECT(pars = allocVector(INTSXP, *n_rows));
+  PROTECT(pscore = allocVector(REALSXP, 1));
+  PROTECT(DAT = allocMatrix(INTSXP, n_rows[0], m));
+  PROTECT(pvec = allocVector(REALSXP, m));
+  PROTECT(APPL = allocMatrix(INTSXP, n_rows[0], m));
+  pvtmp = REAL(pvec);
+  for(i=0; i<m; i++) pvtmp[i] = 0.0;
+  for(i=0; i<*n_rows; i++) {INTEGER(pars)[i] = 0;}
+  REAL(pscore)[0]=0.0;
+  data = INTEGER(DAT);
+  appl = INTEGER(APPL);
+  for(i=0; i<(*n_rows * n); i++) {
+    data[i] = INTEGER(dat)[i];
+    appl[i] = ((data[i] & ~*inappl) ? 1 : 0) - ((data[i] & *inappl) ? 1 : 0);
+  }
+  
+  app_downpass(appl, n_rows, INTEGER(parent), INTEGER(child), INTEGER(n_edge));
+  app_uppass(appl, n_rows, INTEGER(pars), INTEGER(parent), INTEGER(child), INTEGER(n_edge), INTEGER(inapp));
+  //fitch_app_down(data, app, n_rows, INTEGER(pars), INTEGER(parent), INTEGER(child), INTEGER(n_edge), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore));
+  
+  SET_VECTOR_ELT(RESULT, 0, pscore);
+  SET_VECTOR_ELT(RESULT, 1, pars);
+  SET_VECTOR_ELT(RESULT, 2, DAT);
+  SET_VECTOR_ELT(RESULT, 3, pvec);
+  SET_VECTOR_ELT(RESULT, 4, APPL);
+  UNPROTECT(6);
+  return(RESULT);
 }

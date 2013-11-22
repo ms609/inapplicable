@@ -77,32 +77,12 @@ fitch.inapp <- function (tree, data, inherit.ancestral = FALSE, target = NULL) {
   maxNode <- parent[1] #max(parent)
   nTip <- length(tip.label)
   nNode <- maxNode - nTip
-  inapp <- at$inapp.level
-  
+  inapp <- at$inapp.level  
   parentof <- parent[match((nTip + 2L):maxNode, child )]
   allNodes <- (nTip + 1L):maxNode
   childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
   
-  ret <- .Call("FITCHINAPP", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # 
+  ret <- .Call("FITCHINAPP", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # 
   
-  
-#if (inherit.ancestral) {
-  #  downpass <- .Call("FITCHDOWNIA", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
-  #  parentof <- parent[match((nTip + 2L):maxNode, child )]
-  #  allNodes <- (nTip + 1L):maxNode
-  #  childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
-  #  uppass <- .Call("FITCHUPIA", downpass, as.integer(nChar), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
-  #  ret <- list(sum(uppass[[3]]), uppass[[1]], uppass[[2]])
-  #} else {
-  #  ret <- .Call("FITCHDOWN", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
-  #  if (any(need.uppass <- as.logical(ret[[5]])) && (is.null(target) || ret[[1]] <= target)) {
-  #    parentof <- parent[match((nTip + 2L):maxNode, child )]
-  #    allNodes <- (nTip + 1L):maxNode
-  #    childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
-  #    ups <- .Call("FITCHUP", as.integer(ret[[3]][need.uppass,]), as.integer(sum(need.uppass)), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(weight[need.uppass]), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
-  #    ret[[1]] <- ret[[1]] + ups[[1]]
-  #    ret[[2]][need.uppass] <- ret[[2]][need.uppass] + ups[[2]]
-  #    ret[[3]][need.uppass] <- ups[[3]]
-  #}
   return (ret[1:3])
 }

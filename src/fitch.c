@@ -231,7 +231,7 @@ void fitch_downnode(int *dat1, int *dat2, int *n_rows, int *pars, double *weight
     if ((tmp = (dat1[k] & dat2[k]))) { // Tokens in Common
       if ((tmp == *inapp)) {  // Is - the only common token?
         need_uppass[k] = 1L;
-        if (dat1[k] & dat2[k] & applicables) { // Do both children have an applicable token?    
+        if ((dat1[k] & applicables) && (dat2[k] & applicables)) { // Do both children have an applicable token?    
           tmp = dat1[k] | dat2[k];
         }
       }
@@ -310,12 +310,17 @@ void fitch_uproot(int *this, int *child_q, int *child_r, int *n_rows, int *pars,
         ) {
         (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
         } else if (((tmp = child_q[k] | child_r[k]) & applicables) // Either child has an applicable token
-            && (ancestor_k & applicables)            // Parent has applicable token
-            && !(ancestor_k & tmp & applicables) // Parent has NOT got an applicable token in common with either child
-          ) {
-          (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
-          this[k] = (tmp | ancestor_k) & applicables; // Set this node's tokens to applicable tokens in any adjacent node
-          continue;
+            && (ancestor_k & applicables)) { // Parent has applicable token
+          if (ancestor_k & tmp & applicables) { // Parent has an applicable token in common with either child
+            this[k] = ((child_q[k] & ancestor_k) | (child_r[k] & ancestor_k)) &  applicables;
+          } else {
+            if (child_q[k] & child_r[k] & applicables) {
+              this[k] = tmp & applicables; // Set this node's tokens to applicable tokens in either child
+            } else {
+              this[k] = (tmp | ancestor_k) & applicables; // Set this node's tokens to applicable tokens in any adjacent node            
+              (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
+            }
+          }
         }
       }
       // At ROOT node, the IF that is here in _upnode always evaluates to TRUE; thus:
@@ -340,12 +345,16 @@ void fitch_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_r
         ) {
           (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
         } else if (((tmp = child_q[k] | child_r[k]) & applicables) // Either child has an applicable token
-            && (ancestor[k] & applicables)            // Parent has applicable token
-            && !(ancestor[k] & tmp & applicables) // Parent has NOT got an applicable token in common with either child
-          ) {
-          this[k] = (tmp | ancestor[k]) & applicables; // Set this node's tokens to applicable tokens in any adjacent node
-          if (child_q[k] & child_r[k] & applicables) {} else {
-            (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
+            && (ancestor[k] & applicables)) {           // Parent has applicable token
+          if (ancestor[k] & tmp & applicables) { // Parent has an applicable token in common with either child
+            this[k] = ((child_q[k] & ancestor[k]) | (child_r[k] & ancestor[k])) &  applicables;
+          } else {
+            if (child_q[k] & child_r[k] & applicables) {
+              this[k] = tmp & applicables; // Set this node's tokens to applicable tokens in either child
+            } else {
+              this[k] = (tmp | ancestor[k]) & applicables; // Set this node's tokens to applicable tokens in any adjacent node            
+              (pars[k])++; (*w) += weight[k];  // Increase parsimony score by one
+            }
           }
           continue;
         }

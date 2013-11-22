@@ -28,28 +28,38 @@ function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
   childof <- child [c(match(nodes, parent), length(parent) + 1L - match(nodes, rev(parent)))]
   
   plot.fun(tree)
-  if (inherit.ancestral) {
-    down <- .Call("FITCHDOWNIA", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
-    up <- .Call("FITCHUPIA", down, as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')  
-    uppass.states <- up[[2]]
-    up.scorers <- up[[3]]
-    downpass.states <- down
-    down.scorers <- rep(0, nNode + nTip)
-    text(1,1,paste0('TS', paste(which(at$index == char.no), collapse=', '), ': uppass +', up[[1]]), pos=4, cex=0.8)
-  } else {
-    down <- .Call("FITCHDOWN", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
-    up <- .Call("FITCHUP", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
-    downpass.states <- down[[3]]
-    down.scorers <- down[[4]]
-    uppass.states <- up[[3]]
-    up.scorers <- up[[4]]
-    text(1,1,paste0('Char ', char.no, ' - TS', paste(which(at$index == char.no), collapse=', '), ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[1]]) else paste0('; uppass skipped (+', up[[1]], ')'), '; total +', down[[2]] + up[[1]]), pos=4, cex=0.8)
-  }
-    
+  ret <- .Call("FITCHINAPP", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') 
+  down.scorers <- ret[[4]]
+  inapp.nodes <- ret[[5]] > 0
+  
+  #if (inherit.ancestral) {
+  #  down <- .Call("FITCHDOWNIA", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
+  #  up <- .Call("FITCHUPIA", down, as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')  
+  #  uppass.states <- up[[2]]
+  #  up.scorers <- up[[3]]
+  #  downpass.states <- down
+  #  down.scorers <- rep(0, nNode + nTip)
+  #  text(1,1,paste0('TS', paste(which(at$index == char.no), collapse=', '), ': uppass +', up[[1]]), pos=4, cex=0.8)
+  #} else {
+  #  down <- .Call("FITCHDOWN", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(nEdge), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # Return: (1), pscore; (2), pars; (3), DAT; (4), pvec; (5), need_up
+  #  up <- .Call("FITCHUP", as.integer(down[[3]]), as.integer(1), as.integer(parentof), as.integer(childof), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+  #  downpass.states <- down[[3]]
+  #  down.scorers <- down[[4]]
+  #  uppass.states <- up[[3]]
+  #  up.scorers <- up[[4]]
+  #  text(1,1,paste0('Char ', char.no, ' - TS', paste(which(at$index == char.no), collapse=', '), ': downpass +', down[[2]], if (down[[5]]) paste0('; uppass +', up[[1]]) else paste0('; uppass skipped (+', up[[1]], ')'), '; total +', down[[2]] + up[[1]]), pos=4, cex=0.8)
+  #}
+  #up.change <- as.logical(up.scorers[nodes])  
+  #bgcols <- tipcols[as.character(uppass.states[1,nodes])]
+  #bgcols[is.na(bgcols)] <- '#ffffbb'
+  
   down.change <- sapply(nodes, function(n) {
       children <- child[parent==n]
       return (down.scorers[n] != down.scorers[children[1]] + down.scorers[children[2]])   
     })
+  text(1,1,paste0('Char ', char.no, ' - TS', paste(which(at$index == char.no), collapse=', '), ': +', ret[[1]]), pos=4, cex=0.8)
+  
+  
   tipcols = c('#fafafa', '#fafafa', '#fafabb', '#ffbbbb', '#bbffbb', '#bbbbff', '#bbbbff', '#bbffbb', '#ffbbbb', '#bbddff', '#ffbbdd')
   names(tipcols) <- c(NA, max(downpass.states[1,]), max(downpass.states[1,])-inapp, 2^(0:7))
   tipcols[as.character(inapp)] <- '#999999'
@@ -59,12 +69,8 @@ function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
   tiplabels(possible.tokens(at$levels, downpass.states[1,tips]), adj=c(0.3,0.5), bg=bgcols, col='#000088', cex=0.85)
   nodelabels(possible.tokens(at$levels, downpass.states[1,nodes]), adj=rep(1.25,2), frame='no', bg=ifelse(down.change, 'white', 'yellow'), font=ifelse(down.change, 2, 1) , col=ifelse(down.change, '#cc3333', '#880000cc'), cex=ifelse(down.change,1,0.6))
   
-
-  up.change <- as.logical(up.scorers[nodes])  
-  bgcols <- tipcols[as.character(uppass.states[1,nodes])]
-  bgcols[is.na(bgcols)] <- '#ffffbb'
-  
-  nodelabels(possible.tokens(at$levels, uppass.states[1,nodes]), adj=c(1.25,-0.75), bg=bgcols, font=ifelse(up.change, 2, 1), col=ifelse(up.change, '#008800', '#008800cc'), cex=ifelse(up.change, 1,0.75))
+  nodelabels(ifelse(inapp.nodes[nodes], '+', '-'), adj=c(1.25,-0.75), col=ifelse(inapp.nodes[nodes], '#008800', '#880000'), frame='none')
+  #nodelabels(possible.tokens(at$levels, uppass.states[1,nodes]), adj=c(1.25,-0.75), bg=bgcols, font=ifelse(up.change, 2, 1), col=ifelse(up.change, '#008800', '#008800cc'), cex=ifelse(up.change, 1,0.75))
 }
 
 possible.tokens <- function (lvls, number) {

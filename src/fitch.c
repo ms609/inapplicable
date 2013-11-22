@@ -517,8 +517,8 @@ void app_downpass(int *app, int *n_rows, int *parent, int *child, int *n_edge) {
   for (i = 0; i < *n_edge; i+=2) app_downnode(&app[(parent[i]-1) * (*n_rows)], &app[(child[i]-1) * (*n_rows)], &app[(child[i+1]-1) * (*n_rows)], n_rows);
 }
 
-SEXP FITCHINAPP(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEXP children_of, SEXP n_edge, SEXP n_node, SEXP weight, SEXP mx, SEXP q, SEXP inapp) {   
-  int *data, *n_rows=INTEGER(nrx), *inappl=INTEGER(inapp), *appl,  m=INTEGER(mx)[0], i, n=INTEGER(q)[0];
+SEXP FITCHINAPP(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEXP children_of, SEXP n_edge, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp) {   
+  int *data, *n_rows=INTEGER(nrx), *inappl=INTEGER(inapp), *appl,  m=INTEGER(max_node)[0], i, n=INTEGER(n_tip)[0];
   double *pvtmp;
   SEXP RESULT, pars, pscore, DAT, pvec, APPL;
   PROTECT(RESULT = allocVector(VECSXP, 5));

@@ -83,7 +83,7 @@ fitch.inapp <- function (tree, data, inherit.ancestral = FALSE, target = NULL) {
   allNodes <- (nTip + 1L):maxNode
   childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
   
-  ret <- .Call("FITCH1", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # 
+  ret <- .Call("FITCHINAPP", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # 
   
   
 #if (inherit.ancestral) {

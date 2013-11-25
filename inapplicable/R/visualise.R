@@ -28,7 +28,7 @@ function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
   childof <- child [c(match(nodes, parent), length(parent) + 1L - match(nodes, rev(parent)))]
   
   plot.fun(tree)
-  ret <- .Call("FITCHINAPP", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
+  ret <- .Call("FITCHINAPP", char.dat[tip.label], as.integer(1), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.integer(nNode), as.double(1), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable')
   downpass.states <- ret[[3]]
   down.scorers <- ret[[4]]
   inapp.nodes <- ret[[5]] > 0

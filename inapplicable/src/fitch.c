@@ -293,8 +293,8 @@ SEXP FITCHDOWN(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP n_edge, SEXP we
 }
 
 void fitch_app_downnode(int *app, int *this, int *child_q, int *child_r, int *n_rows, int *pars, double *weight, int *inapp, double *w) {
-  int k, tmp;
-  for (k = 0; k < (*n_rows); k++) {
+  int tmp;
+  for (int k = 0; k < (*n_rows); k++) {
     if (app[k] == -1) {
       this[k] = *inapp;
     } else if (child_q[k] == *inapp) {
@@ -311,30 +311,27 @@ void fitch_app_downnode(int *app, int *this, int *child_q, int *child_r, int *n_
 }
 
 void fitch_app_downpass(int *dat, int *app, int *n_rows, int *pars, int *parent, int *child, int *n_edge, double *weight, int *inapp, double *pvec, double *pscore) {
-  int i, parent_i;
-  for (i = 0; i < *n_edge; i+=2) {
-    parent_i = parent[i];
-    pvec[parent_i -1] += pvec[child[i] -1] + pvec[child[i+1] -1];
-    fitch_app_downnode(&app[(parent_i -1)*(*n_rows)], &dat[(parent_i -1)* (*n_rows)], &dat[(child[i]-1) * (*n_rows)], &dat[(child[i+1]-1) * (*n_rows)], n_rows, pars, weight, inapp, &pvec[(parent_i -1)]);
+  int i = 0;
+  for (; i < *n_edge; i+=2) {
+    parent[i] = parent[i];
+    pvec[parent[i] -1] += pvec[child[i] -1] + pvec[child[i+1] -1];
+    fitch_app_downnode(&app[(parent[i] -1)*(*n_rows)], &dat[(parent[i] -1)* (*n_rows)], &dat[(child[i]-1) * (*n_rows)], &dat[(child[i+1]-1) * (*n_rows)], n_rows, pars, weight, inapp, &pvec[(parent[i] -1)]);
   }
-  pscore[0] = pvec[parent_i-1];
+  pscore[0] = pvec[parent[i]-1];
 }
 
 void app_upnode(int *this, int *ancestor, int *child_q, int *child_r, int *n_rows) {
-  int k; // Iterate through each transformation series
-  for (k = 0; k < (*n_rows); k++) this[k] = ((child_q[k] + child_r[k] + ancestor[k] >= 0) ? 1 : -1);
+  for (int k = 0; k < (*n_rows); k++) this[k] = ((child_q[k] + child_r[k] + ancestor[k] >= 0) ? 1 : -1);
 }
 
 void app_uproot(int *this, int *n_rows) {
-  int k; // Iterate through each transformation series
-  for (k = 0; k < (*n_rows); k++) this[k] = ((this[k] > -1) ? 1 : -1); // Assume applicable if ambiguous.
+  for (int k = 0; k < (*n_rows); k++) this[k] = ((this[k] > -1) ? 1 : -1); // Assume applicable if ambiguous.
 }
 
 void app_uppass(int *app, int *n_rows, int *parent_of, int *children_of, int *n_node) {
-  int i;
   app_uproot(&app[(parent_of[0]-1) * (*n_rows)], n_rows);
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
-  for (i = 0; i < (*n_node)-1; i++) {
+  for (int i = 0; i < (*n_node)-1; i++) {
     // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // app and app are stored as [0 * n_rows] = apps[,1], [1 * n_rows] = apps[,2], ....
@@ -358,15 +355,14 @@ void app_uppass(int *app, int *n_rows, int *parent_of, int *children_of, int *n_
 }
 
 void app_downnode(int *dat, int *child_q, int *child_r, int *n_rows) {
-  int k, tmp;
-  for (k = 0; k < (*n_rows); k++) {
+  int tmp;
+  for (int k = 0; k < (*n_rows); k++) {
     dat[k] = ((tmp = (child_q[k] + child_r[k])) ? (tmp > 0 ? 1 : -1) : 0);
   }
 }
 
 void app_downpass(int *app, int *n_rows, int *parent, int *child, int *n_edge) {
-  int i;
-  for (i = 0; i < *n_edge; i+=2) app_downnode(&app[(parent[i]-1) * (*n_rows)], &app[(child[i]-1) * (*n_rows)], &app[(child[i+1]-1) * (*n_rows)], n_rows);
+  for (int i = 0; i < *n_edge; i+=2) app_downnode(&app[(parent[i]-1) * (*n_rows)], &app[(child[i]-1) * (*n_rows)], &app[(child[i+1]-1) * (*n_rows)], n_rows);
 }
 
 SEXP FITCHINAPP(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEXP children_of, SEXP n_edge, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp) {   

@@ -76,7 +76,7 @@ sectorial.inapp <- function (tree, data, concavity=NULL, maxit=100,
   tree
 }  # sectorial.inapp
 
-pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", inherit.ancestral=FALSE, ...) {
+pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", inherit.ancestral=FALSE, ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
   eps <- 1e-08
@@ -113,7 +113,7 @@ pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, maxit=1
     if((cand.pars+eps) < best.pars) {
       if (all.trees) {
         forest <- vector('list', maxiter)
-        forest[[i]] <- candidate
+        forest[[i]] <- if (is.null(outgroup)) candidate else root.robust(candidate, outgroup)
       }
       tree <- candidate
       best.pars <- cand.pars
@@ -122,7 +122,7 @@ pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, maxit=1
       if (best.pars+eps > cand.pars) { # i.e. best == cand, allowing for floating point error
         kmax <- kmax + 1
         tree <- candidate
-        if (all.trees) forest[[i]] <- candidate
+        if (all.trees) forest[[i]] <- if (is.null(outgroup)) candidate else root.robust(candidate, outgroup)
       }
     }
     if (trace >= 0) cat("\n* Best pscore after", i, "/", maxit, "pratchet iterations:", best.pars, "( hit", kmax, "/", k, ")")
@@ -136,6 +136,7 @@ pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, maxit=1
     class(forest) <- 'multiPhylo'
     ret <- unique(forest)
     cat('Found', length(ret), 'unique MPTs.')
+    if (is.null(outgroup)) warning('"outgroup" not specified, so some "unique" trees may have same topology but distinct roots.')
   } else {
     ret <- tree
     attr(ret, 'hits') <- NULL

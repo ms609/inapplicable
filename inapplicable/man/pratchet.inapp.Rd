@@ -3,7 +3,7 @@
 \title{Parsimony ratchet}
 \description{This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.}
 \usage{
-pratchet.inapp(tree, data, concavity = NULL, all.trees = FALSE, outgroup = NULL, maxit = 100, 
+pratchet.inapp(tree, data, concavity = NULL, all = FALSE, outgroup = NULL, maxit = 100, 
   maxiter = 5000, maxhits = 40, k = 10, trace = 0, rearrangements = "NNI", ...)
 }
 \arguments{
@@ -12,7 +12,7 @@ pratchet.inapp(tree, data, concavity = NULL, all.trees = FALSE, outgroup = NULL,
     (which the function will itself pass through \code{prepare.data});}
   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
     see \code{\link{parsimony.inapp}};}
-  \item{all.trees}{Set to TRUE to report all MPTs encountered during the search, perhaps to analyze consensus}
+  \item{all}{Set to TRUE to report all MPTs encountered during the search, perhaps to analyze consensus}
   \item{outgroup}{a vector specifying all tips in the outgroup; if unspecified then identical trees with different roots will be considered unique;}
   \item{maxit}{maximum ratchet iterations to perform;}
   \item{maxiter}{maximum rearrangements to perform on each bootstrap or ratchet iteration;}

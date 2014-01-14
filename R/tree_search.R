@@ -76,14 +76,14 @@ sectorial.inapp <- function (tree, data, concavity=NULL, maxit=100,
   tree
 }  # sectorial.inapp
 
-pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", inherit.ancestral=FALSE, ...) {
+pratchet.inapp <- function (tree, data, concavity=NULL, all=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", inherit.ancestral=FALSE, ...) {
   if (class(data) == 'phyDat') data <- prepare.data(data)
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of prepare.data(phyDat object).")
   eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- parsimony.inapp(tree, data, concavity, inherit.ancestral=inherit.ancestral)
   best.pars <- attr(tree, "pscore")
   if (trace >= 0) cat("* Initial pscore:", best.pars)
-  if (all.trees) forest <- vector('list', maxiter)
+  if (all) forest <- vector('list', maxiter)
 
   kmax <- 0
   for (i in 1:maxit) {
@@ -111,7 +111,7 @@ pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, outgrou
     #pscores <- sapply(trees, function(data) attr(data, "pscore"))
     cand.pars <- attr(candidate, 'pscore')
     if((cand.pars+eps) < best.pars) {
-      if (all.trees) {
+      if (all) {
         forest <- vector('list', maxiter)
         forest[[i]] <- if (is.null(outgroup)) candidate else root.robust(candidate, outgroup)
       }
@@ -122,7 +122,7 @@ pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, outgrou
       if (best.pars+eps > cand.pars) { # i.e. best == cand, allowing for floating point error
         kmax <- kmax + 1
         tree <- candidate
-        if (all.trees) forest[[i]] <- if (is.null(outgroup)) candidate else root.robust(candidate, outgroup)
+        if (all) forest[[i]] <- if (is.null(outgroup)) candidate else root.robust(candidate, outgroup)
       }
     }
     if (trace >= 0) cat("\n* Best pscore after", i, "/", maxit, "pratchet iterations:", best.pars, "( hit", kmax, "/", k, ")")
@@ -131,7 +131,7 @@ pratchet.inapp <- function (tree, data, concavity=NULL, all.trees=FALSE, outgrou
   if (trace >= 0)
     cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
     
-  if (all.trees) {
+  if (all) {
     forest <- forest[!vapply(forest, is.null, logical(1))]
     class(forest) <- 'multiPhylo'
     ret <- unique(forest)

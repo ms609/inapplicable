@@ -173,22 +173,17 @@ bootstrap.inapp <- function (phy, x, concavity, maxiter, maxhits, trace=1, inher
   res
 }
 
-tree.search <- function (tree, data, concavity=NULL, method='NNI', inherit.ancestral = FALSE, maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, ...) {
+tree.search <- function (tree, data, concavity=NULL, method='NNI', inherit.ancestral = FALSE, maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, criterion=NULL, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1
   if (forest.size > 1) {forest <- empty.forest <- vector('list', forest.size); forest[[1]] <- tree}
   if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- parsimony.inapp(tree, data, concavity, inherit.ancestral=inherit.ancestral)
   best.pscore <- attr(tree, 'pscore')
   if (trace > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
-   
-  rearrange.func <- if (inherit.ancestral) {
-    switch(method, 'TBR' = rooted.tbr, 'SPR' = rooted.spr, 'NNI' = rooted.nni)
-  } else {
-    switch(method, 'TBR' = tbr, 'SPR' = spr, 'NNI' = quick.nni)
-  }
+  rearrange.func <- switch(method, 'TBR' = tbr, 'SPR' = spr, 'NNI' = quick.nni)
   
   for (iter in 1:maxiter) {
-    trees <- rearrange.tree(tree, data, rearrange.func, min.score=best.pscore, concavity=concavity, return.single=forest.size==1, iter=iter, cluster=cluster, trace=trace)
+    trees <- rearrange.tree(tree, data, rearrange.func, min.score=best.pscore, concavity=concavity, return.single=forest.size==1, iter=iter, cluster=cluster, criterion=criterion, trace=trace)
     iter.pscore <- attr(trees, 'pscore')
     if (forest.size > 1) {
       hits <- attr(trees, 'hits')
@@ -222,12 +217,12 @@ tree.search <- function (tree, data, concavity=NULL, method='NNI', inherit.ances
   } else tree
 }
 
-sectorial.search <- function (tree, data, concavity = NULL, rearrangements='NNI', inherit.ancestral = FALSE, maxiter=2000, cluster=NULL, trace=3) {
+sectorial.search <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
   best.score <- attr(tree, 'pscore')
-  if (length(best.score) == 0) best.score <- parsimony.inapp(tree, data, concavity, inherit.ancestral=inherit.ancestral)
+  if (length(best.score) == 0) best.score <- parsimony.inapp(tree, data, concavity, method=)
   sect <- sectorial.inapp(tree, data, concavity=concavity, cluster=cluster,
     trace=trace-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 
-    largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements, inherit.ancestral=inherit.ancestral)
+    largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)
   sect <- tree.search(sect, data, method='NNI', concavity=concavity, maxiter=maxiter, maxhits=30, cluster=cluster, trace=trace)
   sect <- tree.search(sect, data, method='TBR', concavity=concavity, maxiter=maxiter, maxhits=20, cluster=cluster, trace=trace)
   sect <- tree.search(sect, data, method='SPR', concavity=concavity, maxiter=maxiter, maxhits=50, cluster=cluster, trace=trace)

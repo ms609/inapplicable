@@ -1,5 +1,6 @@
-parsimony.inapp <- function (tree, data, concavity = NULL, inherit.ancestral = FALSE, target = NULL) {
-  return (fitch.inapp(tree, data, target=target, inherit.ancestral=inherit.ancestral)[[1]]) 
+parsimony.inapp <- function (tree, data, concavity = NULL, inherit.ancestral = FALSE, target = NULL, criterion=NULL) {
+  if (is.null(criterion)) return (fitch.inapp(tree, data, target=target, inherit.ancestral=inherit.ancestral)[[1]]) 
+  return (tree.information(tree, data))
 #  
 #  if (is.null(concavity)) return (fitch.inapp(tree, data, target=target)[[1]]) 
 #  # Implied weights

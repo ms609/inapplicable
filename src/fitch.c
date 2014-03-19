@@ -23,7 +23,7 @@ void fitch_app_downnode(int *app, int *this, int *child_q, int *child_r, int *n_
 }
 
 void fitch_app_downpass(int *dat, int *app, int *n_rows, int *pars, int *parent, int *child, int *n_edge, double *weight, int *inapp, double *pvec, double *pscore) {
-  int parent_i;
+  int parent_i = 0;
   for (int i = 0; i < *n_edge; i+=2) {
     parent_i = parent[i];
     pvec[parent_i -1] += pvec[child[i] -1] + pvec[child[i+1] -1];

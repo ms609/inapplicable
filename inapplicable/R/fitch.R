@@ -1,6 +1,6 @@
 parsimony.inapp <- function (tree, data, inherit.ancestral = FALSE, target = NULL, criterion=NULL) {
   if (is.null(criterion)) return (fitch.inapp(tree, data)[[1]]) 
-  return (tree.information(tree, data))
+  return (fitch.info(tree, data))
 }
 
 fitch.inapp <- function (tree, data) {
@@ -52,15 +52,17 @@ fitch.info <- function (tree, data) {
   childEdge <- c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))
   childof <- child[childEdge]
   if (any(is.na(data[, tip.label]))) stop("Tree's tip labels could not all be found in data matrix")
-  ret <- .Call("FITCHTRANS", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof),  as.integer(childEdge), as.integer(nEdge), as.integer(nNode), as.integer(maxNode), as.integer(nTip), as.integer(inapp)) # 
-  extras <- apply(ret[[4]], 1, function (x) {
-    unx <- unique(x)
-    unx <- unx[unx>0]
-    uniques <- vapply(unx, function (u) sum(x==u), integer(1))
-    sum(uniques - 1)
-  })
-  il <- vapply(1:nChar, function (i) {
-    information.loss(colSums(as.split(data[i, ], attr(data, 'inapp.level'))), extras[i])
-  }, double(1))
-  -sum(il)
+  ret <- .Call("FITCHTRANS", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof),  as.integer(childEdge), as.integer(nEdge), as.integer(nNode), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # 
+  #extras <- apply(ret[[4]], 1, function (x) {
+  #  unx <- unique(x)
+  #  unx <- unx[unx>0 & unx != inapp]
+  #  uniques <- vapply(unx, function (u) sum(x==u), integer(1))
+  #  sum(uniques - 1)
+  #})
+  #il <- vapply(1:nChar, function (i) {
+  #  information.loss(colSums(as.split(data[i, ], attr(data, 'inapp.level'))), extras[i])
+  #}, double(1))
+  #-sum(il)
+  bric <- apply(ret[[5]], 1, brooks.info.content)
+  sum(bric)
 }

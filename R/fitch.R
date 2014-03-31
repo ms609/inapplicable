@@ -31,7 +31,7 @@ fitch.inapp <- function (tree, data) {
 
 fitch.info <- function (tree, data) {
   steps <- fitch.inapp(tree, data)[[2]]
-  splits <- apply(data, 1, function (x) vapply(0:1, function (i) sum(x==2^i), integer(1)))
+  splits <- attr(data, 'split.sizes')
   info <- vapply(1:attr(data, 'nr'), function (i) {proportion.of.trees.consistent(splits[,i], steps[i])}, double(1))
   log2(prod(info^attr(data, 'weight'))) # prod then log is faster than log then sum
 }

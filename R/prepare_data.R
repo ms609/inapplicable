@@ -21,6 +21,8 @@ prepare.data <- function (data) {
   attr(ret, 'inapp.level') <- 2^(inapp.level - 1)
   attr(ret, 'dim') <- c(nChar, nTip)  
   attr(ret, 'unique.tokens') <- apply(ret, 1, function(x) quick.min(x, inapp.level))
+  applicable.tokens <- setdiff(powers.of.2, 2^(inapp.level - 1))
+  attr(ret, 'split.sizes') <- apply(ret, 1, function(x) vapply(applicable.tokens, function (y) sum(x==y), integer(1)))
   dimnames(ret) <- list(NULL, nam)
   class(ret) <- '*phyDat'
   ret

@@ -26,13 +26,60 @@ fitch.inapp <- function (tree, data) {
   
   ret <- .Call("FITCHINAPP", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # 
   
-  return (ret[1:3])
+  return (ret)
 }
 
 fitch.info <- function (tree, data) {
-  steps <- fitch.inapp(tree, data)[[2]]
+    # Data
+  if (class(data) == 'phyDat') data <- prepare.data(data)
+  if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
+  at <- attributes(data)
+  nChar  <- at$nr # strictly, transformation series patterns; these'll be upweighted later
+  weight <- at$weight
+  if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")
+  tree.edge <- tree$edge
+  parent <- tree.edge[,1]
+  child <- tree.edge[,2]
+  tip.label <- tree$tip.label
+  nEdge <- length(parent)
+  maxNode <- parent[1] #max(parent)
+  nTip <- length(tip.label)
+  nNode <- maxNode - nTip
+  inapp <- at$inapp.level  
+  parentof <- parent[match((nTip + 2L):maxNode, child )]
+  allNodes <- (nTip + 1L):maxNode
+  childof <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
+  
+  nLevel <- length(at$level)
+  powers.of.2 <- 2L^c(0L:(nLevel - 1L))
+  inapp.level <- which(at$levels == "-")
+  applicable.tokens <- setdiff(powers.of.2, 2^(inapp.level - 1))
+  
+  fitch <- .Call("FITCHINAPP", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # 
+  
+  steps <- fitch[[2]]
+  nodes.inapp <- fitch[[5]]
   splits <- attr(data, 'split.sizes')
-  info <- vapply(1:attr(data, 'nr'), function (i) {proportion.of.trees.consistent(splits[,i], steps[i])}, double(1))
+  info <- vapply(1:attr(data, 'nr'), function (TS) {
+    inapp.nodes <- nodes.inapp[TS,allNodes] < 0
+    if (any(inapp.nodes)) {
+      nodecount <- vapply(1:nNode, function(node) {
+        if (inapp.nodes[node]) do.descendants(parent, child, nTip, node + nTip, include.ancestor=FALSE) else logical(nNode + nTip)
+      }, logical(nNode + nTip))
+      for (i in order(-colSums(nodecount))) {
+        nodecount[apply(as.matrix(nodecount[,nodecount[allNodes, i]]), 1, any), i] <- FALSE
+      }
+      nodecount <- nodecount[1:nTip,]
+      number.of.origins <- sum(colSums(nodecount) > 1)
+      my.splits <- splits[,TS]
+      my.splits <- my.splits[my.splits > 1]
+      if (length(my.splits) < 2) return (1)
+      number.of.trees <- unrooted(n.inapplicables <- sum(fitch[[5]][TS,1:nTip] < 0)) * 
+      ways.to.add.next.tip(n.inapplicables, 0, 0, steps[TS] + 1, 0, 0, number.of.origins, 0, my.splits[1])
+    } else {
+      return (proportion.of.trees.consistent(splits[,TS], steps[TS]))
+    }
+  }, double(1))
   log2(prod(info^attr(data, 'weight'))) # prod then log is faster than log then sum
 }
 

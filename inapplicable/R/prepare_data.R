@@ -7,15 +7,15 @@ prepare.data <- function (data) {
   cont <- attr(data, "contrast")
   nTip <- length(data)
   at$names <- NULL
-  powers.of.2 = 2L^c(0L:(nLevel - 1L))
-  tmp = cont %*% powers.of.2
-  tmp = as.integer(tmp)
-  data = unlist(data, FALSE, FALSE)
-  ret = tmp[data] 
+  powers.of.2 <- 2L^c(0L:(nLevel - 1L))
+  tmp <- cont %*% powers.of.2
+  tmp <- as.integer(tmp)
+  data <- unlist(data, FALSE, FALSE)
+  ret <- tmp[data] 
   ret <- as.integer(ret)
   attributes(ret) <- at
   inapp.level <- which(at$levels == "-")
-  if (!any(inapp.level)) stop ("No inapplicable tokens detected in data.
+  if (!any(inapp.level)) warning ("    No inapplicable tokens detected in data.
     Use a hyphen ('-', not a dash) to denote taxa in which a transformation series is inapplicable.
     Does typing attributes(mydataname, 'contrast') return a column labelled '-'?")
   attr(ret, 'inapp.level') <- 2^(inapp.level - 1)

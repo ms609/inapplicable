@@ -74,6 +74,14 @@ fitch.info <- function (tree, data) {
       my.splits <- splits[,TS]
       my.splits <- my.splits[my.splits > 1]
       if (length(my.splits) < 2) return (1)
+      n.inapplicables <- sum(nodes.inapp[TS,1:nTip] < 0)
+      # need to multiply by unrooted(n.inapplicables) #TODO
+      vapply(1:number.of.origins, function(n.origins) {
+        ways.to.add.next.tip(n.inapplicables, 0, 0, 0, 0, 0, 0, n.origins, 0, my.splits[1], TRUE)
+        * possibilities(n.inapplicables, my.splits[1], my.splits[-1], steps[TS], n.origins, number.of.origins)
+      }, double(1))
+      
+      
       number.of.trees <- unrooted(n.inapplicables <- sum(fitch[[5]][TS,1:nTip] < 0)) * 
       ways.to.add.next.tip(n.inapplicables, 0, 0, steps[TS] + 1, 0, 0, number.of.origins, 0, my.splits[1])
     } else {

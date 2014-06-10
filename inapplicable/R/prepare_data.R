@@ -29,7 +29,8 @@ prepare.data <- function (data) {
 }
 
 quick.min <- function (x, inapp.level) {
-  sum(2^(c(0:(inapp.level-2), inapp.level:12)) %in% unique(x))
+  if (length(inapp.level)) return(sum(2^(c(0:(inapp.level-2), inapp.level:12)) %in% unique(x)))
+  return (sum(2^(0:12) %in% unique(x)))
 }
 
 as.binary <- function(x) {

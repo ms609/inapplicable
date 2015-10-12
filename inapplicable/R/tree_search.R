@@ -90,7 +90,7 @@ pratchet.inapp <- function (tree, data, all=FALSE, outgroup=NULL, maxit=100, max
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
     bstree <- bootstrap.inapp(phy=tree, x=data, maxiter=maxiter, maxhits=maxhits, criterion=criterion, trace=trace-1, ...)
     
-    if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new candidate tree:")
+    if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new cannew candidate tree:")
     if (rearrangements == "TBR") {
       candidate <- tree.search(bstree,    data, concavity, criterion=criterion, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
       candidate <- tree.search(candidate, data, concavity, criterion=criterion, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
@@ -168,7 +168,7 @@ bootstrap.inapp <- function (phy, x, concavity, maxiter, maxhits, criterion=crit
   attr(x, 'inapp.level') <- at$inapp.level
   attr(phy, 'pscore') <- NULL
   class(x) <- '*phyDat'
-  res <- tree.search(phy, x, concavity, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
+  res <- tree.search(phy, x, concavity, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, trace=trace-1, forest.size=1, cluster=NULL, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   res
@@ -177,16 +177,24 @@ bootstrap.inapp <- function (phy, x, concavity, maxiter, maxhits, criterion=crit
 tree.search <- function (tree, data, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, criterion=NULL, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1
-  if (forest.size > 1) {forest <- empty.forest <- vector('list', forest.size); forest[[1]] <- tree}
+  if (!is.null(forest.size) && length(forest.size)) {
+    if (forest.size > 1) {
+      forest <- empty.forest <- vector('list', forest.size); forest[[1]] <- tree
+    } else {
+      forest.size <-1 
+    }
+  }
+  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- parsimony.inapp(tree, data, concavity, criterion=criterion)
   if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- parsimony.inapp(tree, data, concavity, criterion=criterion)
   best.pscore <- attr(tree, 'pscore')
   if (trace > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
   rearrange.func <- switch(method, 'TBR' = tbr, 'SPR' = spr, 'NNI' = quick.nni)
+  return.single <- !(forest.size > 1)
   
   for (iter in 1:maxiter) {
-    trees <- rearrange.tree(tree, data, rearrange.func, min.score=best.pscore, return.single=forest.size==1, iter=iter, cluster=cluster, criterion=criterion, trace=trace)
+    trees <- rearrange.tree(tree, data, rearrange.func, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, criterion=criterion, trace=trace)
     iter.pscore <- attr(trees, 'pscore')
-    if (forest.size > 1) {
+    if (length(forest.size) && forest.size > 1) {
       hits <- attr(trees, 'hits')
       if (iter.pscore == best.pscore) {
         forest[(hits-length(trees)+1L):hits] <- trees

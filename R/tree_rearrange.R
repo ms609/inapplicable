@@ -23,7 +23,7 @@ rearrange.tree <- function (tree, data, rearrange, min.score=NULL, concavity=NUL
     hits <- sum(best.trees)
     if (trace > 1) cat("\n    * Iteration", iter, "- New best score", min.score, "found on", hits, "trees")
   }
-  if (return.single) trees <- sample(trees, 1)[[1]]
+  if (length(return.single) && return.single) trees <- sample(trees, 1)[[1]]
   attr(trees, 'hits') <- hits
   attr(trees, 'pscore') <- min.score
   trees

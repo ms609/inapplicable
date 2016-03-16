@@ -1,27 +1,30 @@
 renumber <- function (tree) {
 ## Numbers the nodes and tips in a tree to conform with the phylo standards.
-  tree <- reorder(tree, 'postorder')
-  edge <- tree$edge
-  nTip <- length(tree$tip.label)
-  nNode = nTip - 1L
-  edge1 <- edge[,1L]
-  edge2 <- edge[,2L]
-  NODES <- edge2 > nTip
-  TIPS <- !NODES
+  tree   <- reorder(tree, 'postorder')
+  edge   <- tree$edge
+  nTip   <- length(tree$tip.label)
+  parent <- edge[, 1L]
+  child  <- edge[, 2L]
+  NODES  <- child > nTip
+  TIPS   <- !NODES
+  nNode  <- sum(NODES) + 1 # Root node has no edge leading to it, so add 1
   
-  tip <- edge2[TIPS]
+  tip <- child[TIPS]
   name <- vector("character", length(tip))
   name[1:nTip] <- tree$tip.label[tip]
   tree$tip.label <- name
-  edge2[TIPS] <- 1:nTip
+  child[TIPS] <- 1:nTip
   
-  old.node.number <- unique(edge1)
-  new.node.number <- (nTip + nNode):(nTip + 1L)
-  edge2[NODES] <- new.node.number[match(edge2[NODES], old.node.number)]
+  old.node.number <- unique(parent)
+  new.node.number <- rev(nTip + seq_along(old.node.number))
+  renumbering.schema <- integer(nNode)
+  renumbering.schema[old.node.number - nTip] <- new.node.number
+  child[NODES] <- renumbering.schema[child[NODES] - nTip]
   nodeseq <- (1L:nNode) * 2L
-  edge1[c(nodeseq, nodeseq-1L)] <- new.node.number
+  parent <- renumbering.schema[parent - nTip]
   
-  tree$edge[,1] <- edge1; tree$edge[,2] <- edge2
+  tree$edge[,1] <- parent
+  tree$edge[,2] <- child
   reorder(tree)
 }
 

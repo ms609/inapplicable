@@ -1,7 +1,6 @@
 InapplicableSectorial <- function (tree, data, maxit=100, 
     maxiter=500, k=5, trace=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", criterion=NULL, ...) {
-  if (class(data) == 'phyDat') data <- PrepareData(data)
-  if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of PrepareData(phyDat object).")
+  if (class(data) != 'phyDat') stop("data must be a phyDat object.")
   if (is.null(tree)) stop("a starting tree must be provided")
   if (trace >= 0) cat('InapplicableSectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
@@ -28,6 +27,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
     attr(X, 'levels') <- at$levels
     attr(X, 'weight') <- at$weight[parsimony.informative]
     class(X) <- '*phyDat'
+    stop("To re-code!") #TODO!
     X
   }
   
@@ -77,8 +77,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 }  # InapplicableSectorial
 
 InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
-  if (class(data) == 'phyDat') data <- PrepareData(data)
-  if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of PrepareData(phyDat object).")
+  if (class(data) != 'phyDat') stop("data must be a phyDat object.")
   eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- MorphyParsimony(tree, data, ...)
   best.pars <- attr(tree, "pscore")
@@ -168,6 +167,7 @@ bootstrap.inapp <- function (phy, x, maxiter, maxhits, criterion=criterion, trac
   attr(x, 'inapp.level') <- at$inapp.level
   attr(phy, 'pscore') <- NULL
   class(x) <- '*phyDat'
+  stop("TO RECODE!")#TODO
   res <- TreeSearch(phy, x, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL

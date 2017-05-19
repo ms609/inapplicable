@@ -52,7 +52,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
     } 
     if (trace >= 0) cat(' Sector OK.')
     crown <- root(AddTip(crown, 0, 'SECTOR_ROOT'), length(crown$tip.label) + 1, resolve.root=TRUE)
-    initial.p <- InapplicableParsimony(crown, crown.data, criterion=criterion)
+    initial.p <- MorphyParsimony(crown, crown.data, ...)
     attr(crown, 'pscore') <- initial.p
     if (trace >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
     candidate <- TreeSearch(crown, crown.data, 'SECTOR_ROOT', method=rearrangements, criterion=criterion, trace=trace-1, maxiter=maxiter, ...)
@@ -80,7 +80,7 @@ InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=10
   if (class(data) == 'phyDat') data <- PrepareData(data)
   if (class(data) != '*phyDat') stop("data must be a phyDat object, or the output of PrepareData(phyDat object).")
   eps <- 1e-08
-  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- InapplicableParsimony(tree, data, criterion=criterion)
+  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- MorphyParsimony(tree, data, ...)
   best.pars <- attr(tree, "pscore")
   if (trace >= 0) cat("* Initial pscore:", best.pars)
   if (all) forest <- vector('list', maxiter)
@@ -184,8 +184,7 @@ TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, fores
       forest.size <-1 
     }
   }
-  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- InapplicableParsimony(tree, data, criterion=criterion)
-  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- InapplicableParsimony(tree, data, concavity, criterion=criterion)
+  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- MorphyParsimony(tree, data)
   best.pscore <- attr(tree, 'pscore')
   if (trace > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
   rearrange.func <- switch(method, 'TBR' = TBR, 'SPR' = SPR, 'NNI' = QuickNNI)
@@ -228,7 +227,7 @@ TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, fores
 
 SectorialSearch <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
   best.score <- attr(tree, 'pscore')
-  if (length(best.score) == 0) best.score <- InapplicableParsimony(tree, data, method=)
+  if (length(best.score) == 0) best.score <- MorphyParsimony(tree, data, ...)
   sect <- InapplicableSectorial(tree, data, cluster=cluster,
     trace=trace-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 
     largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)

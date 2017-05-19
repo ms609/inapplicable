@@ -1,4 +1,4 @@
-renumber <- function (tree) {
+Renumber <- function (tree) {
 ## Numbers the nodes and tips in a tree to conform with the phylo standards.
   tree   <- reorder(tree, 'postorder')
   edge   <- tree$edge
@@ -28,20 +28,20 @@ renumber <- function (tree) {
   reorder(tree)
 }
 
-single.taxon.tree <- function (label) {
+SingleTaxonTree <- function (label) {
   res <- list(edge=matrix(c(2L,1L), 1, 2), tip.label=label, Nnode=1L)
   class(res) <- 'phylo'
   res
 }
 
-extract.clade.robust <- function (phy, node) {
+ExtractClade <- function (phy, node) {
   phy.tip.label <- phy$tip.label
   phy.edge <- phy$edge
   phy.child <- phy.edge[,2L]
   nTip <- length(phy.tip.label)
-  if (node <= nTip) return(single.taxon.tree(phy.tip.label[node]))
+  if (node <= nTip) return(SingleTaxonTree(phy.tip.label[node]))
   if (node == nTip + 1L) return(phy)
-  nodes.to.keep <- do.descendants(phy.edge[,1L], phy.child, nTip, node)
+  nodes.to.keep <- DoDescendants(phy.edge[,1L], phy.child, nTip, node)
   edges.to.keep <- phy.child %in% which(nodes.to.keep)
   phy.edge <- phy.edge[edges.to.keep, ]
 
@@ -64,9 +64,9 @@ extract.clade.robust <- function (phy, node) {
   
   phy
 }
-ecr <- extract.clade.robust
+ecr <- ExtractClade
 
-add.tip <- function (tree, where, label) {
+AddTip <- function (tree, where, label) {
   nTip <- length(tree$tip.label)
   nNode <- tree$Nnode
   ROOT <- nTip + 1L
@@ -120,7 +120,7 @@ add.tip <- function (tree, where, label) {
   
 }
 
-set.outgroup <- root.robust <- function (tree, outgroup) {
+SetOutgroup <- Root <- function (tree, outgroup) {
   if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
   tip <- tree$tip.label
   if (is.character(outgroup)) {outgroup <- match(outgroup, tip, nomatch=0); outgroup <- outgroup[as.logical(outgroup)]}
@@ -135,7 +135,7 @@ set.outgroup <- root.robust <- function (tree, outgroup) {
   rooted.on.ingroup <- FALSE
   # Check that outgroup is currently monophyletic, swapping with 'ingroup' if it's not
   repeat { 
-    ancestry <- ancestors(parent, child, outgroup)
+    ancestry <- Ancestors(parent, child, outgroup)
     if (length(outgroup) > 1) {
       common.ancestors <- Reduce(intersect, ancestry)
       outgroup.root.node <- max(common.ancestors)
@@ -156,7 +156,7 @@ set.outgroup <- root.robust <- function (tree, outgroup) {
     } else { # Adding a node
       this.node.new.number <- max(c(nTips + 1, new.edges[, 2])) + 1
       new.edges[blank.edge, ] <- c(parent.number, this.node.new.number)    
-      descendant.nodes <- do.descendants(parent, child, nTips, old.tree.node)
+      descendant.nodes <- DoDescendants(parent, child, nTips, old.tree.node)
       n.new.nodes <- sum(descendant.nodes)
       fill.edge.index <- blank.edge + (1:n.new.nodes)
       fill.edge <- edge[child %in% which(descendant.nodes), ]
@@ -221,7 +221,7 @@ siblings <- function (parent, child, node, include.self = FALSE) {
   ret
 }
 
-ancestors <- function (parent, child, node) {
+Ancestors <- function (parent, child, node) {
   if (length(node) == 1) {
     pvector <- numeric(max(parent))
     pvector[child] <- parent
@@ -237,10 +237,10 @@ ancestors <- function (parent, child, node) {
       res
     }
     return(anc(pvector, node))
-  } else all.ancestors(parent, child)[node]
+  } else AllAncestors(parent, child)[node]
 }
 
-all.ancestors <- function (parent, child) {
+AllAncestors <- function (parent, child) {
   res <- vector("list", max(parent))
   for (i in seq_along(parent)) {
     pa <- parent[i]
@@ -249,7 +249,7 @@ all.ancestors <- function (parent, child) {
   res
 }
 
-descendants <- function (tree, node, ...) {
+Descendants <- function (tree, node, ...) {
 # ARGUMENTS:
 #   "tree", a phydat object
 #   "node", number of an internal node
@@ -260,10 +260,9 @@ descendants <- function (tree, node, ...) {
   edge <- tree$edge
   edge1 <- edge[,1]
   edge2 <- edge[,2]
-  return (which(do.descendants(edge1, edge2, nTip, node, ...)))
+  return (which(DoDescendants(edge1, edge2, nTip, node, ...)))
 }
-
-do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.internal=FALSE, include.ancestor = FALSE) {
+DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.internal=FALSE, include.ancestor = FALSE) {
   # ARGUMENTS:
   #   "edge1", parent nodes: from tree$edge[,1]
   #   "edge2", parent nodes: from tree$edge[,2]
@@ -284,9 +283,9 @@ do.descendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.in
   return (is.descendant)
 }
 
-two.tip.tree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))
+TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))
 
-bind.tree.fast <- function(x, y, where = "root", position = 0, interactive = FALSE) {
+BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
 ## Copied from ape:::bind.tree; the only change is that I use (x|y).edge in place of (x|y)$edge.
 
     nx <- length(x$tip.label)
@@ -492,7 +491,7 @@ bind.tree.fast <- function(x, y, where = "root", position = 0, interactive = FAL
     x
 }
 
-drop.tip.fast <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
+DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
 # Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.
 # Dropped support for branch lengths.
   if (!inherits(phy, "phylo"))
@@ -505,7 +504,7 @@ drop.tip.fast <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.
   ntip.to.drop <- length(tip)
   if (!ntip.to.drop) return(phy)
   if (ntip.to.drop + 1 == Ntip) 
-    return(single.taxon.tree(phy.tip[setdiff(1:Ntip, tip)]))
+    return(SingleTaxonTree(phy.tip[setdiff(1:Ntip, tip)]))
   if (any(tip > Ntip))
     warning("Some tip numbers were higher than the number of tips")
   if (!rooted && subtree) {
@@ -604,10 +603,10 @@ drop.tip.fast <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.
   storage.mode(phy$edge) <- "integer"
   if (!is.null(phy$node.label)) # update node.label if needed
       phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
-  collapse.singles.fast(phy)
+  CollapseSingles(phy)
 }
 
-drop.tip.no.subtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
+DropTipNoSubtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
 # Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.
 # Dropped support for branch lengths.
 # Dropped checks and warnings: assumed that data passed to this function is good!
@@ -623,7 +622,7 @@ drop.tip.no.subtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy)
   ntip.to.drop <- length(tip)
   if (!ntip.to.drop) return(phy)
   if (ntip.to.drop + 1 == Ntip) 
-    return(single.taxon.tree(phy.tip[setdiff(1:Ntip, tip)]))
+    return(SingleTaxonTree(phy.tip[setdiff(1:Ntip, tip)]))
 
   phy <- reorder(phy)
   NEWROOT <- ROOT <- Ntip + 1
@@ -670,10 +669,10 @@ drop.tip.no.subtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy)
   storage.mode(phy$edge) <- "integer"
   if (!is.null(phy$node.label)) # update node.label if needed
       phy$node.label <- phy$node.label[which(newNb > 0) - Ntip]
-  collapse.singles.fast(phy)
+  CollapseSingles(phy)
 }
 
-collapse.singles.fast <- function (tree) {
+CollapseSingles <- function (tree) {
 # Copied from ape:::collapse.singles.
 # Removed support for elen & node.label
   xmat <- tree$edge
@@ -696,7 +695,7 @@ collapse.singles.fast <- function (tree) {
   tree
 }
 
-keep.edges <- function (edge, tip.label, nTips, kept.edges) {
+KeepEdges <- function (edge, tip.label, nTips, kept.edges) {
   kept <- list()
   class(kept) <- 'phylo'
   kept.edge <- edge[kept.edges,]
@@ -706,5 +705,5 @@ keep.edges <- function (edge, tip.label, nTips, kept.edges) {
   new.index <- match(unique(kept.edge), unique(sort(kept.edge)))
   kept$edge <- matrix(new.index, ncol=2)
   kept$Nnode <- length(unique(kept.edge[,1]))
-  kept <- collapse.singles.fast(kept)
+  kept <- CollapseSingles(kept)
 }

@@ -28,15 +28,13 @@ Be aware that the algorithm distinguishes between character-states that are inap
 character-states that are ambiguous (but definitely not inapplicable);
 and character-states that are ambiguous (and may or may not be applicable).  
 These three cases should be denoted with different tokens: perhaps '-', '+' and '?'.
-
 }
 
 \author{
 Martin R. Smith
 }
 \references{
-Smith, M. R., & Brazeau, M. D. (201X). \cite{Inapplicable data in parsimony analysis.} 
-Systematic Biology XXX, doi: \href{http://dx.doi.org/10.1093/sysbio/syXXXX}{10.1093/sysbio/syXXXX}.
+##REFERENCE TO FOLLOW##
 }
 \keyword{ package }
 \keyword{ tree }
@@ -92,7 +90,7 @@ contrast.matrix
 my.phyDat <- phyDat(my.data, type='USER', contrast=contrast.matrix)
 
 ## ... and optimize the data for analysis 
-my.prepdata <- prepare.data(my.phyDat)
+my.prepdata <- PrepareData(my.phyDat)
 
 ## Specify the names of the outgroup taxa
 my.outgroup <- c('taxon1', 'taxon2')
@@ -108,23 +106,23 @@ tree <- root(nj(dist.hamming(my.phyDat)), my.outgroup, resolve.root=TRUE); tree$
 plot(tree)
 
 ## Calculate the tree's parsimony score
-parsimony.inapp(tree, my.prepdata)
+InapplicableParsimony(tree, my.prepdata)
 
 ## Search for a better tree
-better.tree <- tree.search(tree, my.prepdata, my.outgroup, method='SPR')
+better.tree <- TreeSearch(tree, my.prepdata, my.outgroup, method='SPR')
 ## Try a sectorial search (Goloboff, 1999)
-better.tree <- sectorial.search(better.tree, my.prepdata, my.outgroup)
+better.tree <- SectorialSearch(better.tree, my.prepdata, my.outgroup)
 ## Try the parsimony ratchet (Nixon, 1999)
-better.tree <- pratchet.inapp(better.tree, my.prepdata, my.outgroup, maxhits=50, k=20)
+better.tree <- InapplicablePratchet(better.tree, my.prepdata, my.outgroup, maxhits=50, k=20)
 ## The default parameters may not be enough to find the most parsimonious tree; type 
-##    ?pratchet.inapp or ?sectorial.search to view all search parameters.
+##    ?InapplicablePratchet or ?SectorialSearch to view all search parameters.
 
 
 ## View the results
 plot(better.tree)
 
 ## Once you have reached the most parsimonious tree, retain multiple trees to determine the consensus: 
-best.trees <- tree.search(better.tree, my.prepdata, my.outgroup,
+best.trees <- TreeSearch(better.tree, my.prepdata, my.outgroup,
       method='SPR', forest.size=100, maxiter=10000, maxhits=100)
 
 ## Calculate and display the consensus tree

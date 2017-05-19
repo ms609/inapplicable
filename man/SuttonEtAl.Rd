@@ -24,7 +24,7 @@ SuttonElAl.besttree}
   \tabular{ll}{
     \code{SuttonEtAl.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
     \code{SuttonEtAl.phy        }  \tab \code{\link{phyDat}} \cr
-    \code{SuttonEtAl.preparedata}  \tab \code{\link[=prepare.data]{*phyDat}} \cr
+    \code{SuttonEtAl.preparedata}  \tab \code{\link[=PrepareData]{*phyDat}} \cr
     \code{SuttonEtAl.parstree   }  \tab \code{\link{phylo}} \cr
     \code{SuttonEtAl.besttree   }  \tab \code{\link{phylo}} \cr
   }
@@ -50,7 +50,7 @@ Some coding errors in the matrix were corrected:
 The dataset contains:
 \tabular{ll}{\code{SuttonEtAl.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('SuttonEtAl.nex')}\cr
   \code{SuttonEtAl.phy}   \tab      The dataset, in phyDat format\cr
-  \code{SuttonEtAl.preparedata}\tab The dataset, in the format produced by \code{prepare.data(SuttonEtAl.data)}\cr
+  \code{SuttonEtAl.preparedata}\tab The dataset, in the format produced by \code{PrepareData(SuttonEtAl.data)}\cr
   \code{SuttonEtAl.parstree}\tab    The phylogenetic tree recovered by equal-weights analysis\cr
   \tab  of the dataset under the standard parsimony method\cr
   \code{SuttonEtAl.besttree}\tab     The phylogenetic tree recovered by equal-weights analysis\cr

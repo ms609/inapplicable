@@ -1,25 +1,25 @@
-\name{parsimony.inapp}
-\alias{parsimony.inapp}
-\alias{fitch.inapp}
+\name{InapplicableParsimony}
+\alias{InapplicableParsimony}
+\alias{InapplicableFitch}
 \title{Calculate parsimony score}
 \description{Calculates the parsimony score for a rooted tree, correctly handling the inapplicable token.}
 \usage{
-  parsimony.inapp(tree, data, concavity = NULL, target = NULL)
-  fitch.inapp(tree, data, target = NULL)
+  InapplicableParsimony(tree, data, concavity = NULL, target = NULL)
+  InapplicableFitch(tree, data, target = NULL)
 }
 \arguments{
   \item{tree}{ a rooted tree in \code{phylo} format;}
-  \item{data}{ data to use to score the tree, preferably formatted using \code{\link{prepare.data}};}
+  \item{data}{ data to use to score the tree, preferably formatted using \code{\link{PrepareData}};}
   \item{concavity}{set concavity constant (k) to use Goloboff's implied weighting (not yet implemented); \code{concavity = 3} is a typical value;}
   \item{target}{abandon search once target parsimony score is exceeded.}
 }
 \value{
-\code{parsimony.inapp} returns the parsimony score of the tree, calculated from \code{data} using Algorithm III in Smith & Brazeau (201X).
+\code{InapplicableParsimony} returns the parsimony score of the tree, calculated from \code{data} using Algorithm III in Smith & Brazeau (201X).
 The parsimony score is calculated under equal weights unless a value is provided for \code{concavity}.  
 If \code{concavity} is specified, the returned score will be calculated using the method of Goloboff (1993) 
 with a concavity constant of \code{concavity}.
  
-\code{fitch.inapp} returns a list comprising two elements: 
+\code{InapplicableFitch} returns a list comprising two elements: 
   \item{ 1 }{Number of evolutionary events (i.e. unweighted parsimony score) 
              implied by the tree topology and the data}
   \item{ 2 }{A vector listing the number of evolutionary events implied
@@ -33,6 +33,6 @@ Smith, M. R., & Brazeau, M. D. (201X). \cite{Incorporating inapplicable data in 
 \examples{
 data('SigSut')
 random.tree <- rtree(34, tip.label=names(SigSut.data), br=NULL)
-parsimony.inapp(random.tree, SigSut.preparedata)
+InapplicableParsimony(random.tree, SigSut.preparedata)
 }
 \keyword{ tree }

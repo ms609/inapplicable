@@ -11,7 +11,7 @@ visualise.character(tree, data, char.no, plot.fun = plot)
 }
 \arguments{
   \item{tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
-  \item{data}{a matrix, ideally in the format produced by \code{\link{prepare.data}}, 
+  \item{data}{a matrix, ideally in the format produced by \code{\link{PrepareData}}, 
   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;}
   \item{char.no}{number of the character to be displayed;}
   \item{plot.fun}{a function that plots a tree, \code{\link{plot}} by default.}
@@ -28,7 +28,7 @@ Martin R. Smith
 data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
-njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)
+njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 visualise.character(njtree, SigSut.phy, 5, function(x) {plot(x); edgelabels();})
 }
 \keyword{ tree }

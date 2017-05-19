@@ -1,9 +1,9 @@
-\name{set.outgroup}
-\alias{set.outgroup}
-\alias{root.robust}
+\name{SetOutgroup}
+\alias{SetOutgroup}
+\alias{Root}
 \title{Root a phylogenetic tree}
 \description{Sets the root of a phylogenetic tree, such that one child of the root node is \code{outgroup}.}
-\usage{set.outgroup(tree, outgroup)}
+\usage{SetOutgroup(tree, outgroup)}
 \arguments{
   \item{tree}{a tree, in \code{\link{phylo}} format, with all nodes resolved;}
   \item{outgroup}{a vector of mode numeric or character specifying the new outgroup.}
@@ -20,6 +20,6 @@ Martin R. Smith
 \examples{
   tree <- read.tree(text='(((a,b),c),(d,e));')
   plot(tree)
-  plot(root.robust(tree, c('a', 'b')))
-  plot(root.robust(tree, 3))
+  plot(Root(tree, c('a', 'b')))
+  plot(Root(tree, 3))
 }

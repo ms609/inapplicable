@@ -1,4 +1,4 @@
-prepare.data <- function (data) {
+PrepareData <- function (data) {
 # Written with reference to phangorn:::prepareDataFitch
   at <- attributes(data)
   nam <- at$names
@@ -33,7 +33,7 @@ quick.min <- function (x, inapp.level) {
   return (sum(2^(0:12) %in% unique(x)))
 }
 
-as.binary <- function(x) {
+AsBinary <- function(x) {
   # Adapted from code posted to R mailing list by Spencer Graves
 	N <- length(x)
 	xMax <- max(x)	

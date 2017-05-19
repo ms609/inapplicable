@@ -1,13 +1,13 @@
-\name{rooted.nni}
-\alias{rooted.nni}
-\alias{rooted.spr}
-\alias{rooted.tbr}
+\name{RootedNNI}
+\alias{RootedNNI}
+\alias{RootedSPR}
+\alias{RootedTBR}
 \title{Rearrange a rooted tree}
 \description{This function performs a rearrangement iteration on a tree, retaining the position of the root.}
 \usage{
-rooted.nni(tree)
-rooted.spr(tree)
-rooted.tbr(tree)
+RootedNNI(tree)
+RootedSPR(tree)
+RootedTBR(tree)
 }
 \arguments{
   \item{tree}{An object of class \code{\link{phylo}}, with all nodes resolved (bifurcating).}
@@ -23,22 +23,22 @@ This function returns a tree, in \code{phylo} format.
 \author{
 Martin R. Smith
 
-\code{rooted.nni} is abridged from the \pkg{phangorn} function \code{nnin}
+\code{RootedNNI} is abridged from the \pkg{phangorn} function \code{nnin}
 }
 
 \seealso{
 \itemize{
-\item \code{\link{set.outgroup}}, set the outgroup of the phylogenetic tree
-\item \code{\link{nni}}, unrooted \acronym{NNI} and \acronym{SPR}
-\item \code{\link{tbr}}, unrooted \acronym{TBR}
+\item \code{\link{SetOutgroup}}, set the outgroup of the phylogenetic tree
+\item \code{\link{NNI}}, unrooted \acronym{NNI} and \acronym{SPR}
+\item \code{\link{TBR}}, unrooted \acronym{TBR}
 }
 }
 \examples{
   tree <- read.tree(text='(((a,b),c),(d,(e,f)));')
-  tree <- set.outgroup(tree, c('e', 'f'))
+  tree <- SetOutgroup(tree, c('e', 'f'))
   plot(tree)
   dev.new()
-  plot(rooted.nni(tree))
-  plot(rooted.spr(tree))
-  plot(rooted.tbr(tree))
+  plot(RootedNNI(tree))
+  plot(RootedSPR(tree))
+  plot(RootedTBR(tree))
 }

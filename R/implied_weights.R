@@ -1,6 +1,6 @@
 min.steps <- function (x, inapp.power2) {
   if (is.null(x)) return (NULL)
-  vals = as.binary(unique(as.integer(x)))
+  vals = AsBinary(unique(as.integer(x)))
   number.of.vals = ncol(vals)
   if (is.null(number.of.vals)) return (0) 
   if (number.of.vals >= inapp.power2) vals[,inapp.power2] = 0
@@ -26,7 +26,7 @@ min.steps <- function (x, inapp.power2) {
 min.steps.inapp <- function (dat, inapp.level) {
   # This function gives unconventional results; see text.
   apply(dat, 1, function (x) {
-    vals = as.binary(unique(x))
+    vals = AsBinary(unique(x))
     if (ncol(vals) >= inapp.level) vals[,inapp.level] = 0
     possibles <- matrix(FALSE, nrow(vals), ncol(vals))
     definites <- rep(FALSE, ncol(vals))

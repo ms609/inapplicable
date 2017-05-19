@@ -21,7 +21,7 @@ VVRB.besttree}
   \tabular{ll}{
     \code{VVRB.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
     \code{VVRB.phy        }  \tab \code{\link{phyDat}} \cr
-    \code{VVRB.preparedata}  \tab \code{\link[=prepare.data]{*phyDat}} \cr
+    \code{VVRB.preparedata}  \tab \code{\link[=PrepareData]{*phyDat}} \cr
     \code{VVRB.besttree   }  \tab \code{\link{phylo}} \cr
   }
 }
@@ -31,7 +31,7 @@ The ambiguous token ('?') was replaced with an 'ambiguous but applicable' token 
 The dataset contains:
 \tabular{ll}{\code{VVRB.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('VVRB.nex')}\cr
   \code{VVRB.phy}   \tab      The dataset, in \code{phyDat} format\cr
-  \code{VVRB.preparedata}\tab The dataset, in the format produced by \code{prepare.data(VVRB.data)}\cr
+  \code{VVRB.preparedata}\tab The dataset, in the format produced by \code{PrepareData(VVRB.data)}\cr
   \code{VVRB.besttree}\tab     The phylogenetic tree recovered by equal-weights analysis\cr
   \tab of the dataset under the revised method of Smith & Brazeau (201X)\cr
 }
@@ -58,7 +58,7 @@ contrast5 <- matrix(data=c(
  1,1,1,1,1), ncol=5, byrow=TRUE);
  dimnames(contrast5) <- list(c(0:3, '-', "*", '&', '+', '?'), c(0:3, '-'))
 identical(VVRB.phy, phyDat(VVRB.data, type="USER", contrast=contrast5))
-VVRB.preparedata # <- prepare.data(VVRB.phy)
+VVRB.preparedata # <- PrepareData(VVRB.phy)
 outgroup <- c('Nemertean')
 plot(VVRB.besttree)
 }

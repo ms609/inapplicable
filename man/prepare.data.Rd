@@ -1,8 +1,8 @@
-\name{prepare.data}
-\alias{prepare.data}
+\name{PrepareData}
+\alias{PrepareData}
 \title{Prepare phyDat object}
-\description{Prepares a \code{phyDat} object for analysis with \code{\link{fitch.inapp}}.}
-\usage{prepare.data(data)}
+\description{Prepares a \code{phyDat} object for analysis with \code{\link{InapplicableFitch}}.}
+\usage{PrepareData(data)}
 \arguments{\item{data}{An object of class \code{\link{phyDat}}}}
 \details{Optimizes the \code{data} for efficient processing.}
 \value{
@@ -21,8 +21,8 @@
   distribution of tokens (necessary when calculating implied weights).
 }
 \author{Martin R. Smith}
-\seealso{\code{\link{parsimony.inapp}}}
+\seealso{\code{\link{InapplicableParsimony}}}
 \examples{
 data('SigSut')
-prepare.data(SigSut.phy)
+PrepareData(SigSut.phy)
 }

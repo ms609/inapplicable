@@ -6,8 +6,8 @@ visualize.inheritance <- visualise.inheritance <- vis.in <- function (tree, data
 
 visualize.character <- visualise.character <- visualize.char <- visualise.char <- 
 function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
-  if (class(data) == 'phyDat') data <- prepare.data(data)
-  if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
+  if (class(data) == 'phyDat') data <- PrepareData(data)
+  if (class(data) != '*phyDat') stop('Invalid data type; try InapplicableFitch(tree, data <- PrepareData(valid.phyDat.object)).')
   at <- attributes(data)
   if (char.no > at$nr || char.no < 1) stop(paste0("char.no must be between 1 and ", at$nr, ' (', sum(at$weight), 'TS, ', at$nr, ' unique)'))
   char.dat <- data[char.no,]
@@ -60,19 +60,19 @@ possible.tokens <- function (lvls, number) {
   if (nNumber == 1) {    
     if (number == 2^nTokens - 1) return('?')
     which.levels <- rep(FALSE, nTokens)
-    binary <- as.binary(number)
+    binary <- AsBinary(number)
     which.levels[seq_along(binary)] <- binary
     return (output(lvls[as.logical(which.levels)]))
   }
   which.levels <- matrix(FALSE, nNumber, nTokens)
-  binary <- as.binary(number)
+  binary <- AsBinary(number)
   which.levels[,seq_along(binary[1,])] <- as.logical(binary)
   apply(which.levels, 1, function(x) {if (all(x)) return ('?') else y <- x; y[lvls=='-']<-TRUE; if (nTokens > 4 && all(y)) return ('+') else return (output(lvls[x]))})
 }
 
 #edge.lengths <- function (tree, data, char.no) {
-#  if (class(data) == 'phyDat') data <- prepare.data(data)
-#  if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
+#  if (class(data) == 'phyDat') data <- PrepareData(data)
+#  if (class(data) != '*phyDat') stop('Invalid data type; try InapplicableFitch(tree, data <- PrepareData(valid.phyDat.object)).')
 #  if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")
 #  tree.edge <- tree$edge
 #  parent <- tree.edge[,1]
@@ -100,7 +100,7 @@ possible.tokens <- function (lvls, number) {
 #  for (i in unique.ts) {
 #      if (is.na(parentof[parent[n]])) {
 #        # at root
-#         len[n] = len[n] + as.binary(downpass.states[i, parent[n]]) && downpass.states[i, child[n]]) / 2
+#         len[n] = len[n] + AsBinary(downpass.states[i, parent[n]]) && downpass.states[i, child[n]]) / 2
 #      }
 #      children <- child[parent==n]
 #      return (down.scorers[n] != down.scorers[children[1]] + down.scorers[children[2]])   

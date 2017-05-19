@@ -1,10 +1,11 @@
-\name{tbr}
+\name{TBR}
 \alias{tbr}
+\alias{TBR}
 
 \title{Tree bisection and reconnection}
 \description{This function performs a single random \acronym{TBR} iteration.}
 \usage{
-tbr(tree, edge.to.break = NULL)
+TBR(tree, edge.to.break = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,9 +26,9 @@ Martin R. Smith
 }
 
 \seealso{
-\code{\link{rooted.tbr}}, useful when the position of the root node should be retained.
+\code{\link{RootedTBR}}, useful when the position of the root node should be retained.
 }
 \examples{
 tree <- rtree(20, br=NULL)
-tbr(tree)
+TBR(tree)
 }

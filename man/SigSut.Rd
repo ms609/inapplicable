@@ -22,7 +22,7 @@ SigSut.besttree
   \tabular{ll}{
     \code{SigSut.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
     \code{SigSut.phy        }  \tab \code{\link{phyDat}} \cr
-    \code{SigSut.preparedata}  \tab \code{\link[=prepare.data]{*phyDat}} \cr
+    \code{SigSut.preparedata}  \tab \code{\link[=PrepareData]{*phyDat}} \cr
     \code{SigSut.parstree   }  \tab \code{\link{phylo}} \cr
     \code{SigSut.besttree   }  \tab \code{\link{phylo}} \cr
     \code{SigSut.outgroup   }  \tab \code{\link{vector}} \cr
@@ -43,7 +43,7 @@ I have also replaced the ambiguous token ('?') with an 'ambiguous but applicable
 The dataset contains:
 \tabular{ll}{\code{SigSut.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('SigSut-fold.nex')}\cr
   \code{SigSut.phy}   \tab      The dataset, in phyDat format\cr
-  \code{SigSut.preparedata}\tab The dataset, in the format produced by \code{prepare.data(SigSut.data)}\cr
+  \code{SigSut.preparedata}\tab The dataset, in the format produced by \code{PrepareData(SigSut.data)}\cr
   \code{SigSut.parstree}\tab    The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr
   \tab  of the dataset under the standard parsimony method\cr
   \code{SigSut.besttree}\tab     The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr

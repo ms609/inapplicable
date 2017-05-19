@@ -1,17 +1,17 @@
-\name{pratchet.inapp}
-\alias{pratchet.inapp}
+\name{InapplicablePratchet}
+\alias{InapplicablePratchet}
 \title{Parsimony ratchet}
 \description{This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.}
 \usage{
-pratchet.inapp(tree, data, concavity = NULL, all = FALSE, outgroup = NULL, maxit = 100, 
+InapplicablePratchet(tree, data, concavity = NULL, all = FALSE, outgroup = NULL, maxit = 100, 
   maxiter = 5000, maxhits = 40, k = 10, trace = 0, rearrangements = "NNI", ...)
 }
 \arguments{
   \item{tree}{An object of class \code{phyDat} denoting the topology to begin the search from;}
-  \item{data}{the output of \code{\link{prepare.data}}, or a matrix in phyDat format
-    (which the function will itself pass through \code{prepare.data});}
+  \item{data}{the output of \code{\link{PrepareData}}, or a matrix in phyDat format
+    (which the function will itself pass through \code{PrepareData});}
   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
-    see \code{\link{parsimony.inapp}};}
+    see \code{\link{InapplicableParsimony}};}
   \item{all}{Set to TRUE to report all MPTs encountered during the search, perhaps to analyze consensus}
   \item{outgroup}{a vector specifying all tips in the outgroup; if unspecified then identical trees with different roots will be considered unique;}
   \item{maxit}{maximum ratchet iterations to perform;}
@@ -32,15 +32,15 @@ Adapted from \code{\link{pratchet}} in the \pkg{phangorn} package, which does no
 \seealso{
 \itemize{
 \item \code{\link{pratchet}}
-\item \code{\link{tree.search}}
-\item \code{\link{sectorial.search}}
+\item \code{\link{TreeSearch}}
+\item \code{\link{SectorialSearch}}
 }
 }
 \examples{
 data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
-njtree$edge.length <- NULL; njtree<-set.outgroup(njtree, outgroup)
-pratchet.inapp(njtree, SigSut.preparedata, outgroup, maxit=1, maxiter=50)
+njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
+InapplicablePratchet(njtree, SigSut.preparedata, outgroup, maxit=1, maxiter=50)
 }
 \keyword{ tree }

@@ -1,15 +1,15 @@
-rearrange.tree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
+RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
     trees <- list(re.tree<-rearrange(tree))
-    min.score <- parsimony.inapp(re.tree, data, concavity, target=min.score, criterion=criterion)
+    min.score <- InapplicableParsimony(re.tree, data, concavity, target=min.score, criterion=criterion)
     best.trees <- c(TRUE)
   } else {
-    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- parsimony.inapp(ret, cl.data, k); ret}, rearrange, tree, concavity)
+    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableParsimony(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
     candidates <- clusterCall(cluster, rearrange, tree)
-    scores <- vapply(candidates, parsimony.inapp, 1, data, concavity=concavity, target=min.score, criterion=criterion) # ~3x faster to do this in serial in r233.
+    scores <- vapply(candidates, InapplicableParsimony, 1, data, concavity=concavity, target=min.score, criterion=criterion) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score
     trees <- candidates[best.trees]
@@ -29,7 +29,7 @@ rearrange.tree <- function (tree, data, rearrange, min.score=NULL, concavity=NUL
   trees
 }
 
-rooted.nni <- function (tree) {
+RootedNNI <- function (tree) {
   edge <- matrix(tree$edge, ncol = 2)
   parent <- edge[, 1]
   child <- edge[, 2]
@@ -52,17 +52,17 @@ rooted.nni <- function (tree) {
     warning("Edge lengths have been deleted")
     tree$edge.length <- NULL
   }
-  tree <- renumber(phangorn:::reorderPruning(tree))  
+  tree <- Renumber(phangorn:::reorderPruning(tree))  
 }
 
-rooted.spr <- function(tree) {
-  if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
+RootedSPR <- function(tree) {
+  if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
   tip.label <- tree$tip.label
   nTips <- length(tip.label)
   edge <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
   root <- nTips + 1L # Assumes fully-resolved bifurcating tree
   root.children <- child[parent==root]
-  left.nodes <- do.descendants(parent, child, nTips, root.children[1L])
+  left.nodes <- DoDescendants(parent, child, nTips, root.children[1L])
   right.nodes <- !left.nodes
   left.nodes[root.children] <- right.nodes[root.children] <- right.nodes[root] <- FALSE
   size <- c(sum(left.nodes), sum(right.nodes))
@@ -75,7 +75,7 @@ rooted.spr <- function(tree) {
   subtree.basal.tip <- subtree.base < root
   if (any(subtree.basal.tip)) pruning.candidates <- pruning.candidates[-match(subtree.base[!subtree.basal.tip], pruning.candidates)]
   prune.node <- sample(pruning.candidates, 1)
-  moving.subnodes <- c(prune.node, which(do.descendants(parent, child, nTips, prune.node)))
+  moving.subnodes <- c(prune.node, which(DoDescendants(parent, child, nTips, prune.node)))
   moving.nodes <- c(prune.parent <- parent[child==prune.node], moving.subnodes)
   dont.graft.here <- c(moving.nodes, child[parent==prune.parent])
   graft.candidates <- c(root.children[choose.right + 1L], pruning.candidates)
@@ -99,36 +99,36 @@ rooted.spr <- function(tree) {
   tree
 }
 
-rooted.tbr <- function(tree) {
-  if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- set.outgroup(tree, outgroup).")
+RootedTBR <- function(tree) {
+  if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
   edge <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
   root <- 1 + (nTips <- dim(edge)[1] - tree$Nnode + 1L)
   root.children <- child[parent==root]
-  size <- c(left.size <- sum(do.descendants(parent, child, nTips, root.children[1L])) + 1L,
+  size <- c(left.size <- sum(DoDescendants(parent, child, nTips, root.children[1L])) + 1L,
             (nTips * 2L - 1L) - left.size - 1L)
   if (min(size) == 1L) {
     outgroup <- tree$tip.label[root.children[size==1L]]
-    tree <- tbr(tree)
-    return(root.robust(tree, outgroup))
+    tree <- TBR(tree)
+    return(Root(tree, outgroup))
   } else {
     tip.label <- tree$tip.label
     moves <- (size-3L) * (size-2L) / 2
     subtree.root <- root.children[1L + (runif(1, min=0, max=sum(moves)) > moves[1L])]
-    in.crown <- do.descendants(parent, child, nTips, subtree.root)
+    in.crown <- DoDescendants(parent, child, nTips, subtree.root)
     in.crown[subtree.root] <- TRUE
     crown.edges <- parent %in% which(in.crown)
     in.stump <- !in.crown
     in.stump[root] <- FALSE
     stump.edges <- parent %in% which(in.stump)
-    stump <- keep.edges(edge, tip.label, nTips, stump.edges) # faster than drop.tip.fast
-    crown <- extract.clade.robust(tree, subtree.root) # faster than keep.edges
-    new.crown <- tbr(crown)
+    stump <- KeepEdges(edge, tip.label, nTips, stump.edges) # faster than DropTip
+    crown <- ExtractClade(tree, subtree.root) # faster than KeepEdges
+    new.crown <- TBR(crown)
     new.crown$root.edge <- 1
     return (stump + new.crown)
   }
 }
 
-quick.nni <- function (tree) {
+QuickNNI <- function (tree) {
   n      <- sample(tree$Nnode - 1L, 1L)
   edge   <- tree$edge
   parent <- edge[, 1L]
@@ -141,10 +141,10 @@ quick.nni <- function (tree) {
   ind1   <- ind1[ind1 != ind][1L]
   ind2   <- which(parent == p2)[sample(2L,1L)]
   tree$edge[c(ind1, ind2), 2L] <- child[c(ind2, ind1)]
-  renumber(phangorn:::reorderPruning(tree))
+  Renumber(phangorn:::reorderPruning(tree))
 }
 
-spr <- function(tree) {
+SPR <- function(tree) {
   tip.label <- tree$tip.label
   nTips <- length(tip.label)
   edge  <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
@@ -154,7 +154,7 @@ spr <- function(tree) {
   pruning.candidates <- seq(nEdge + 1L)[-root]
   repeat {
     prune.node <- sample(pruning.candidates, 1)
-    moving.subnodes <- c(prune.node, which(do.descendants(parent, child, nTips, prune.node)))
+    moving.subnodes <- c(prune.node, which(DoDescendants(parent, child, nTips, prune.node)))
     moving.nodes <- c(prune.parent <- parent[child==prune.node], moving.subnodes)
     dont.graft.here <- c(moving.nodes, child[parent==prune.parent])
     graft.node <- c(pruning.candidates[!pruning.candidates %in% dont.graft.here])
@@ -190,27 +190,27 @@ spr <- function(tree) {
   tree
 }
 
-tbr <- function(tree, edge.to.break=NULL) {
-# Improvement targets: root.robust; extract.clade.robust; drop.tip.fast
+TBR <- function(tree, edge.to.break=NULL) {
+# Improvement targets: Root; ExtractClade; DropTip
   nTips <- tree$Nnode + 1
   if (nTips < 3) return (tree)
   tree.edge <- tree$edge
   tree.parent <- tree.edge[,1]
   tree.child <- tree.edge[,2]
-  if (nTips == 3) return (root.robust(tree, sample(tree.child[tree.parent==max(tree.parent)], 1L)))
+  if (nTips == 3) return (Root(tree, sample(tree.child[tree.parent==max(tree.parent)], 1L)))
   all.nodes <- 1:(2*(nTips-1))
   root <- nTips + 1
   if (is.null(edge.to.break)) edge.to.break <- sample(2L:nrow(tree.edge), 1L) # Only include one root edge
   subtree.root <- tree.child[edge.to.break]
   #cat("\n - ", edge.to.break, subtree.root)
   stump <- if (subtree.root <= nTips) {
-    drop.tip.no.subtree(tree, subtree.root, root.edge=1)
+    DropTipNoSubtree(tree, subtree.root, root.edge=1)
   } else {
-    in.crown <- do.descendants(tree.parent, tree.child, nTips, subtree.root, just.tips=TRUE)
-    drop.tip.no.subtree (tree, which(in.crown), root.edge=1)
+    in.crown <- DoDescendants(tree.parent, tree.child, nTips, subtree.root, just.tips=TRUE)
+    DropTipNoSubtree (tree, which(in.crown), root.edge=1)
   }
   stump.len <- dim(stump$edge)[1]
-  crown <- extract.clade.robust(tree, subtree.root) # ~ 2x faster than drop.tip.fast
+  crown <- ExtractClade(tree, subtree.root) # ~ 2x faster than DropTip
   crown.edge <- crown$edge
   crown.len <- dim(crown.edge)[1]  
   if (crown.len > 1) {
@@ -224,19 +224,19 @@ tbr <- function(tree, edge.to.break=NULL) {
       crown.root <- min(crown.parent)
       new.root.candidates <- crown.child[-1] # Include existing root once only
       new.root.node <- sample(new.root.candidates, 1L)
-      if (new.root.node <= crown.tips) new.outgroup <- new.root.node else new.outgroup <- which(do.descendants(crown.parent, crown.child, crown.tips, new.root.node, just.tips=TRUE))
-      rerooted.crown <- root.robust(crown, new.outgroup)
+      if (new.root.node <= crown.tips) new.outgroup <- new.root.node else new.outgroup <- which(DoDescendants(crown.parent, crown.child, crown.tips, new.root.node, just.tips=TRUE))
+      rerooted.crown <- Root(crown, new.outgroup)
     }
     rerooted.crown$root.edge <- 1L
     if (stump.len > 1) {
       bind.location <- sample(seq_len(stump.len), 1L)
-      ret <- bind.tree.fast(stump, rerooted.crown, position=1, where=bind.location)
+      ret <- BindTree(stump, rerooted.crown, position=1, where=bind.location)
     } else {
-      ret <- add.tip(rerooted.crown, crown.root, stump$tip.label)
+      ret <- AddTip(rerooted.crown, crown.root, stump$tip.label)
     }
   } else {
     bind.location <- stump$edge[sample(2L:stump.len, 1L), 2L]
-    ret <- add.tip(stump, bind.location, crown$tip.label)
+    ret <- AddTip(stump, bind.location, crown$tip.label)
   }
-  renumber(ret)
+  Renumber(ret)
 }

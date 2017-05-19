@@ -1,12 +1,12 @@
-parsimony.inapp <- function (tree, data, inherit.ancestral = FALSE, target = NULL, criterion=NULL) {
-  if (is.null(criterion)) return (fitch.inapp(tree, data)[[1]]) 
-  return (fitch.info(tree, data))
+InapplicableParsimony <- function (tree, data, inherit.ancestral = FALSE, target = NULL, criterion=NULL) {
+  if (is.null(criterion)) return (InapplicableFitch(tree, data)[[1]]) 
+  return (FitchInfo(tree, data))
 }
 
-fitch.inapp <- function (tree, data) {
+InapplicableFitch <- function (tree, data) {
   # Data
-  if (class(data) == 'phyDat') data <- prepare.data(data)
-  if (class(data) != '*phyDat') stop('Invalid data type; try fitch.inapp(tree, data <- prepare.data(valid.phyDat.object)).')
+  if (class(data) == 'phyDat') data <- PrepareData(data)
+  if (class(data) != '*phyDat') stop('Invalid data type; try InapplicableFitch(tree, data <- PrepareData(valid.phyDat.object)).')
   at <- attributes(data)
   nChar  <- at$nr # strictly, transformation series patterns; these'll be upweighted later
   weight <- at$weight
@@ -31,8 +31,8 @@ fitch.inapp <- function (tree, data) {
 
 FitchInfo <- function (tree, data) {
     # Data
-  if (class(data) == 'phyDat') data <- prepare.data(data)
-  if (class(data) != '*phyDat') stop('Invalid data type; try FitchInfo(tree, data <- prepare.data(valid.phyDat.object)).')
+  if (class(data) == 'phyDat') data <- PrepareData(data)
+  if (class(data) != '*phyDat') stop('Invalid data type; try FitchInfo(tree, data <- PrepareData(valid.phyDat.object)).')
   at <- attributes(data)
   nChar  <- at$nr # strictly, transformation series patterns; these'll be upweighted later
   weight <- at$weight
@@ -64,7 +64,7 @@ FitchInfo <- function (tree, data) {
     inapp.nodes <- nodes.inapp[TS,allNodes] < 0
     if (any(inapp.nodes)) {
       nodecount <- vapply(1:n.node, function(node) {
-        if (inapp.nodes[node]) do.descendants(parent, child, n.tip, node + n.tip, include.ancestor=FALSE) else logical(n.node + n.tip)
+        if (inapp.nodes[node]) DoDescendants(parent, child, n.tip, node + n.tip, include.ancestor=FALSE) else logical(n.node + n.tip)
       }, logical(n.node + n.tip))
       for (i in order(-colSums(nodecount))) {
         nodecount[apply(as.matrix(nodecount[,nodecount[allNodes, i]]), 1, any), i] <- FALSE

@@ -1,9 +1,9 @@
-\name{rearrange.tree}
-\alias{rearrange.tree}
+\name{RearrangeTree}
+\alias{RearrangeTree}
 \title{Rearrange phylogenetic tree}
 \description{Performs one tree rearrangement of the specified type.}
 \usage{
-rearrange.tree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
+RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
  iter = "<unknown>", cluster = NULL, trace = 0)
 }
 \arguments{
@@ -11,16 +11,16 @@ rearrange.tree(tree, data, rearrange, min.score = NULL, concavity = NULL, return
     \code{pscore}, the tree's parsimony score, and 
     \code{hits}, the number of times the best score has been hit in the calling function;
   }
-  \item{data}{a data matrix defined by \code{\link{prepare.data}};}
+  \item{data}{a data matrix defined by \code{\link{PrepareData}};}
   \item{rearrange}{a rearrangement function: probably one of 
-    \code{\link{rooted.nni}}, \code{\link{rooted.spr}} or \code{\link{rooted.tbr}};}
+    \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};}
   \item{min.score}{trees longer than \code{min.score}, probably the score of the starting tree,
     will be discarded;}
   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
-    see \code{\link{parsimony.inapp}};}
+    see \code{\link{InapplicableParsimony}};}
   \item{return.single}{returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
   \item{iter}{iteration number of calling function, for reporting to user only;}
-  \item{cluster}{a cluster, prepared with \code{\link{prepare.cluster}}, to accelerate 
+  \item{cluster}{a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
     searches on multicore machines;}
   \item{trace}{determines how much information to output to screen.}
 }
@@ -29,13 +29,13 @@ rearrange.tree(tree, data, rearrange, min.score = NULL, concavity = NULL, return
 \author{Martin R. Smith}
 \seealso{
   \itemize{
-    \item \code{\link{rooted.nni}}
-    \item \code{\link{rooted.spr}}
-    \item \code{\link{rooted.tbr}}
+    \item \code{\link{RootedNNI}}
+    \item \code{\link{RootedSPR}}
+    \item \code{\link{RootedTBR}}
   }
 }
 \examples{
 data('SigSut')
 random.tree <- rtree(34, tip.label=names(SigSut.data), br=NULL)
-rearrange.tree(random.tree, SigSut.preparedata, rooted.nni)
+RearrangeTree(random.tree, SigSut.preparedata, RootedNNI)
 }

@@ -122,7 +122,7 @@ add.tip <- function (tree, where, label) {
 
 set.outgroup <- root.robust <- function (tree, outgroup) {
   if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
-    tip <- tree$tip.label
+  tip <- tree$tip.label
   if (is.character(outgroup)) {outgroup <- match(outgroup, tip, nomatch=0); outgroup <- outgroup[as.logical(outgroup)]}
   if (length(outgroup) < 1) stop ('"outgroup" not specified')
   if (!is.null(tree$edge.length)) {tree$edge.length <- NULL; warning('Edge lengths are not supported and have been dropped.')}
@@ -133,7 +133,8 @@ set.outgroup <- root.robust <- function (tree, outgroup) {
   root <- min(parent)
   root.children <- child[parent==root]
   rooted.on.ingroup <- FALSE
-  repeat {
+  # Check that outgroup is currently monophyletic, swapping with 'ingroup' if it's not
+  repeat { 
     ancestry <- ancestors(parent, child, outgroup)
     if (length(outgroup) > 1) {
       common.ancestors <- Reduce(intersect, ancestry)
@@ -147,44 +148,49 @@ set.outgroup <- root.robust <- function (tree, outgroup) {
     outgroup <- seq_along(tip)[-outgroup] # outgroup straddles root; root on ingroup instead
     rooted.on.ingroup <- TRUE
   }
-  
-  visit.node.backwards <- function (arrival.edge, last.node.number, new.edges) {
-    previous.node <- child[arrival.edge]
-    this.node <- parent[arrival.edge]
-    forward.node <- child[parent==this.node]
-    forward.node <- forward.node[forward.node != previous.node]
-    blank.edge <- which.min(new.edges)
-    this.node.new.number <- max(c(nTips + 1L, new.edges[,2L])) + 1L
-    if (this.node != root) {
-      new.edges[blank.edge, ] <- c(last.node.number, this.node.new.number)
-      if (forward.node) for (fwd in forward.node)
-        new.edges <- visit.node.forwards(fwd, this.node.new.number, new.edges)
-    } else { # Root edge; don't create a new node
-      if (forward.node) for (fwd in forward.node) {
-        new.edges <- visit.node.forwards(fwd, last.node.number, new.edges)
-      }
-    }
-    backward.edge <- child.index[this.node]
-#    cat("\n, this.node", this.node, "be", backward.edge, "ma", match(this.node, child))
-#    arrival.edge <- backward.edge; last.node.number <- this.node.new.number
-    if (!is.na(backward.edge)) new.edges <- visit.node.backwards(backward.edge, this.node.new.number, new.edges)
-    new.edges
-  }
+ 
   visit.node.forwards <- function (old.tree.node, parent.number, new.edges) {
-    blank.edge <- which.min(new.edges)    
+    blank.edge <- which.min(new.edges) # number of first as-yet-unspecified edge
     if (old.tree.node <= nTips) { # Adding a tip
       new.edges[blank.edge, ] <- c(parent.number, old.tree.node)
     } else { # Adding a node
-      this.node.new.number <- max(c(nTips + 1, new.edges[,2])) + 1
+      this.node.new.number <- max(c(nTips + 1, new.edges[, 2])) + 1
       new.edges[blank.edge, ] <- c(parent.number, this.node.new.number)    
       descendant.nodes <- do.descendants(parent, child, nTips, old.tree.node)
       n.new.nodes <- sum(descendant.nodes)
       fill.edge.index <- blank.edge + (1:n.new.nodes)
       fill.edge <- edge[child %in% which(descendant.nodes), ]
       node.spots <- fill.edge > nTips
-      fill.edge[node.spots] <- fill.edge[node.spots] + this.node.new.number - old.tree.node 
+      fill.edge[node.spots] <- fill.edge[node.spots] + this.node.new.number - old.tree.node
       new.edges[fill.edge.index, ] <- fill.edge
     }
+    new.edges
+  }
+  visit.node.backwards <- function (arrival.edge, last.node.number, new.edges) {
+    previous.node <- child[arrival.edge]
+    this.node <- parent[arrival.edge]
+    forward.node <- child[parent==this.node]
+    forward.node <- forward.node[forward.node != previous.node]
+    blank.edge <- which.min(new.edges) # First edge left blank after visit.node.forwards
+    this.node.new.number <- max(c(nTips + 1L, new.edges[,2L])) + 1L
+    if (this.node != root) {
+      new.edges[blank.edge, ] <- c(last.node.number, this.node.new.number)
+      if (length(forward.node) > 0) {
+        for (fwd in forward.node) {
+          new.edges <- visit.node.forwards(fwd, this.node.new.number, new.edges)
+        }
+      }
+    } else { # Root edge; don't create a new node
+      if (length(forward.node) > 0) {
+        for (fwd in forward.node) {
+          new.edges <- visit.node.forwards(fwd, last.node.number, new.edges)
+        }
+      }
+    }
+    backward.edge <- child.index[this.node]
+#   cat("\n, this.node", this.node, "backward.edge", backward.edge, "match", match(this.node, child))  # For debugging only
+#   arrival.edge <- backward.edge; last.node.number <- this.node.new.number              # For debugging only
+    if (!is.na(backward.edge)) new.edges <- visit.node.backwards(backward.edge, this.node.new.number, new.edges)
     new.edges
   }
   
@@ -193,6 +199,7 @@ set.outgroup <- root.robust <- function (tree, outgroup) {
   child.index[root] <- NA
   new.edges <- matrix(0, last.edge, 2)
   new.edges <- visit.node.forwards(outgroup.root.node, root, new.edges)
+  arrival.edge <- child.index[outgroup.root.node]; last.node.number <- root # For debugging only - DELETE
   new.edges <- visit.node.backwards(child.index[outgroup.root.node], root, new.edges)
   tree$edge <- new.edges
   tree

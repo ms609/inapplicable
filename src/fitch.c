@@ -13,7 +13,6 @@ void app_fitch_downnode
  int *pars, double *weight, double *w) {
   int i;
   for (i = *start_char; i < (*end_char); i++) {
-    Rprintf(" >Char %i: Child tokens %i and %i yeild ", i, left[i], right[i]);
     if (left[i] & right[i]) {
       this[i] = left[i] & right[i];
     }
@@ -21,7 +20,6 @@ void app_fitch_downnode
       this[i] = left[i] | right[i];
       (pars[i])++; (*w) += weight[i]; // Add one to tree length
     }
-    Rprintf("%i.\n", this[i]);
   }
 }
 
@@ -31,14 +29,10 @@ void app_fitch_downpass
   int parent_i = 0;
   for (int i = 0; i < *n_edge; i+=2) {
     parent_i = parent[i];
-    pvec[parent_i -1] += pvec[child[i]-1] + pvec[child[i+1]-1];
-    Rprintf("Node %i has children %i and %i. \n", 
-                       (parent_i  -1),
-                       (child[i]  -1),
-                       (child[i+1]-1));
+    pvec[parent_i -1] += pvec[child[i+1]-1] + pvec[child[i]-1];
     app_fitch_downnode(&dat[(parent_i  -1) * (*n_char)],
-                       &dat[(child[i]  -1) * (*n_char)],
                        &dat[(child[i+1]-1) * (*n_char)], 
+                       &dat[(child[i]  -1) * (*n_char)],
                        start_char, n_char, pars, weight, &pvec[(parent_i-1)]);
   }
   pscore[0] = pvec[parent_i-1];
@@ -49,13 +43,16 @@ void inapp_first_upnode
  int *inapp, int *end_char) {
   int i;
   for (i = 0; i < *end_char; i++) {
+    // Problem seems to be arising when inspecting Ancestor[i]
+    //Rprintf("this-%i: %i, anc-%i: %i, inapp: %i\n", i, this[i], i, ancestor[i], ~(*inapp));
+    /*
     if (this[i] & (*inapp)) {
       if (this[i] & ~(*inapp)) {
         if (ancestor[i] == *inapp) {
           app[i] = *inapp;
         }
         else {
-          app[i] = this[i] & ~(*inapp);
+          app[i] = this[i] & ~(*inapp); // TODO posit: just ~(*inapp) will do
         }
       }
       else {
@@ -64,7 +61,7 @@ void inapp_first_upnode
         }
         else {
           if ((left[i] | right[i]) & ~(*inapp)) {
-            app[i] = ((left[i] | right[i]) & ~(*inapp));
+            app[i] = ((left[i] | right[i]) & ~(*inapp)); // TODO posit: just ~(*inapp) will do
           }
           else {
             app[i] = *inapp;
@@ -74,8 +71,7 @@ void inapp_first_upnode
     }
     else {
       app[i] = this[i];
-    }      
-    assert(app[i]);
+    }*/
   }
 }
 
@@ -83,27 +79,34 @@ void inapp_first_uppass
 (int *dat, int *app, int *parent_of, int *children_of, 
  int *end_char, int *n_char, int *n_node, int *inapp) {
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
-  for (int i = 0; i < (*n_node)-1; i++) {
+  for (int i = 0; i < (*n_node) - 1; i++) {
     // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // app and app are stored as [0 * n_char] = apps[,1], [1 * n_char] = apps[,2], ....
     
+    Rprintf("This: %i, anc: %i; left: %i; right: %i.\n",
+      (parent_of[0] + i + 1 -1),
+      parent_of[i]-1,
+      (children_of[i + 1 + *n_node] - 1),
+      (children_of[i + 1] -1)
+      );
     // Worked example assumes that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
     inapp_first_upnode(
-    //  The position of node 12 in the app array is:
-    //    root.number (counting from 1) + i = i.e. position[11], the 12th position
-    &dat[(parent_of[0] + i + 1 -1) * (*n_char)], // this_start
-    &app[(parent_of[0] + i + 1 -1) * (*n_char)], // this_finish
-    //  To find the number of node 12's parent we look in parent_of[node12.index]
-    //    parent_of[0] is the parent of node [root + i] = 12th node
-    //    node12.index = i = 0; parent_of[0] = 11; so we need app[11-1]
-    &dat[(parent_of[i]-1) * (*n_char)], // ancestor
-    //  To find the number of node 12's children we look in children_of[node12.index]
-    //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
-    //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
-    &dat[(children_of[i + 1] -1) * (*n_char)], // left child
-    &dat[(children_of[i + 1 + *n_node] -1) * (*n_char)], // right child
-    inapp, end_char);
+      //  The position of node 12 in the app array is:
+      //    root.number (counting from 1) + i = i.e. position[11], the 12th position
+      &dat[(parent_of[0] + i + 1 -1) * (*n_char)], // this_start
+      &app[(parent_of[0] + i + 1 -1) * (*n_char)], // store applicability for future ref
+      //  To find the number of node 12's parent we look in parent_of[node12.index]
+      //    parent_of[0] is the parent of node [root + i] = 12th node
+      //    node12.index = i = 0; parent_of[0] = 11; so we need app[11-1]
+      &dat[(parent_of[i]-1) * (*n_char)], // ancestor
+      //  To find the number of node 12's children we look in children_of[node12.index]
+      //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
+      //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
+      &dat[(children_of[i + 1 + *n_node] -1) * (*n_char)], // left child
+      &dat[(children_of[i + 1] -1) * (*n_char)], // right child
+      inapp, end_char
+    );
   }
 }
 
@@ -146,11 +149,11 @@ void inapp_first_downpass
   int i;
   for (i = 0; i < *n_edge; i+=2) {
     inapp_first_downnode(&dat[(parent[i]  - 1) * (*n_char)],
-                         &dat[( child[i]  - 1) * (*n_char)],
                          &dat[( child[i+1]- 1) * (*n_char)],
+                         &dat[( child[i]  - 1) * (*n_char)],
                          &act[(parent[i]  - 1) * (*end_char)],
-                         &act[( child[i]  - 1) * (*end_char)],
-                         &act[( child[i+1]- 1) * (*end_char)], inapp, end_char);
+                         &act[( child[i+1]- 1) * (*end_char)], 
+                         &act[( child[i]  - 1) * (*end_char)], inapp, end_char);
   }
   inapp_first_root(&dat[(parent[i]-1) * (*n_char)], inapp, end_char);
 }
@@ -205,11 +208,11 @@ void inapp_second_downpass
     inapp_second_downnode(
       &dat[(parent_i  -1) * (*n_char)],
       &app[(parent_i  -1) * (*n_char)],
-      &dat[(child[i]  -1) * (*n_char)], 
       &dat[(child[i+1]-1) * (*n_char)], 
+      &dat[(child[i]  -1) * (*n_char)], 
       &act[(parent_i  -1) * (*end_char)],
-      &act[(child[i]  -1) * (*end_char)], 
       &act[(child[i+1]-1) * (*end_char)], 
+      &act[(child[i]  -1) * (*end_char)], 
       end_char, inapp, pars, weight, &pvec[(parent_i-1)]
     );
   }
@@ -278,8 +281,8 @@ int *pars, double *pvec, double *pscore, double *weight) {
     //  To find the number of node 12's children we look in children_of[node12.index]
     //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
     //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
-    &dat[(child_of[i + 1] -1) * (*n_char)], // left child
-    &dat[(child_of[i + 1 + *n_node] -1) * (*n_char)], // right child
+    &dat[(child_of[i + 1 + *n_node] -1) * (*n_char)], // left child
+    &dat[(child_of[i + 1] -1) * (*n_char)], // right child
     
     &act[(parent_of[0] + i + 1 -1) * (*n_char)], // this-actives
     &act[(child_of[i + 1] -1) * (*n_char)], // left child-actives
@@ -294,6 +297,7 @@ SEXP MORPHYFITCH
 (SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEXP children_of,
  SEXP n_edge, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip,
  SEXP inapp, SEXP inapp_chars) { // Memo: the first 'inapp_chars' require the Morphy Treatment.
+ // Memo: R plots the first-mentioned child ["left"] below the second-mentioned ["right"]
   int *data, *actives, *n_char=INTEGER(nrx), *inappl=INTEGER(inapp), *appl,  m=INTEGER(max_node)[0], 
       i, n_tips=INTEGER(n_tip)[0], *first_applicable=INTEGER(inapp_chars);
   double *pvtmp;
@@ -314,6 +318,10 @@ SEXP MORPHYFITCH
   actives = INTEGER(ACTIVES);
   for(i=0; i<(*n_char * n_tips); i++) {
     data[i] = INTEGER(dat)[i];
+    // TODO for appl, make i < (*first_applicable * n_tips)
+    /* The current code is inefficient - we don't need to copy appl for 
+    // taxa that are applicable - but then we can copy data more easily. */
+    appl[i] = INTEGER(dat)[i];
   }
   for(i=0; i<(*first_applicable * n_tips); i++) {
     actives[i] = 0;
@@ -321,13 +329,8 @@ SEXP MORPHYFITCH
 
   inapp_first_downpass(data, actives, INTEGER(parent), INTEGER(child), 
                        first_applicable, n_char, inappl, INTEGER(n_edge));
-  for(i=0; i<(*n_char * n_tips); i++) {  // TODO make i < (*first_applicable * n_tips)
-    /* This is inefficient - we don't need to copy appl for 
-    // taxa that are applicable - but this makes the maths a bit easier to implement */
-    appl[i] = data[i]; 
-  }
-//  inapp_first_uppass  (data, appl, INTEGER(parent_of), INTEGER(children_of),
-//                       first_applicable, n_char, INTEGER(n_node), inappl);
+  inapp_first_uppass(data, appl, INTEGER(parent_of), INTEGER(children_of),
+                     first_applicable, n_char, INTEGER(n_node), inappl);
 //  // TODO!: inapp_update_tips   (appl, first_applicable, INTEGER(parent), INTEGER(child), INTEGER(n_edge)); 
 //  inapp_second_downpass(data, appl, actives, INTEGER(parent), INTEGER(child), 
 //                        INTEGER(n_edge), n_char, first_inapplicable, inappl, 

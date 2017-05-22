@@ -3,65 +3,93 @@ CallMorphy <- function (n_char, n_taxa, desc, ancs, rawmatrix) {
                   as.integer(ancs - 1L), as.character(rawmatrix))[[1]]
 }
 
+InapplicableFitch <- function (tree, morphyData) {
+  # Data
+  if (class(morphyData) == 'phyDat') morphyData <- MorphyDat(morphyData)
+  if (class(morphyData) != 'morphyDat') stop('Invalid data type; try InapplicableFitch(tree, data <- MorphyData(valid.phyDat.object)).')
+  at <- attributes(morphyData)
+  nChar  <- at$nr # strictly, transformation series patterns; these'll be upweighted later
+  weight <- at$weight
+  if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")
+  tree.edge <- tree$edge
+  parent <- tree.edge[,1]
+  child <- tree.edge[,2]
+  tipLabel <- tree$tip.label
+  nEdge <- length(parent)
+  maxNode <- parent[1] #max(parent)
+  nTip <- length(tipLabel)
+  nNode <- maxNode - nTip
+  inappLevel <- at$inapp.level  
+  inappChar  <- at$treat.as.inapp
+  parentOf <- parent[match((nTip + 2L):maxNode, child )]
+  allNodes <- (nTip + 1L):maxNode
+  childOf <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
+  
+  ret <- .Call("MORPHYFITCH", morphyData[, tipLabel], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentOf), as.integer(childOf), as.integer(nEdge), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inappLevel), as.integer(inappChar), PACKAGE='inapplicable')
+  
+  return (ret)
+}
+
+
 MorphyParsimony <- function (tree, data) {
-  tip.names <- tree$tip.label
+  tipNames <- tree$tip.label
   if (class(data) == 'phyDat') {
     at <- attributes(data)
-    tip.names <- tip.names[tip.names %in% at$names]
+    tipNames <- tipNames[tipNames %in% at$names]
     weight <- at$weight
     n.char <- sum(weight) # At present, MorphyLib doesn't allow us to leverage this efficient 
                           # solution, so we'll have to be inefficient.
     contrast <- at$contrast
-    dim.contrast <- dim(contrast)
-    nrow.contrast <- dim.contrast[1]
-    contrast <- matrix(as.logical(contrast), nrow.contrast, dim.contrast[2])
+    dimContrast <- dim(contrast)
+    nRowContrast <- dimContrast[1]
+    contrast <- matrix(as.logical(contrast), nRowContrast, dimContrast[2])
     levels <- at$levels
-    matrix_as_string <- paste0(c(vapply(tip.names, function (name) paste0(vapply(
+    matrixAsString <- paste0(c(vapply(tipNames, function (name) paste0(vapply(
       rep(as.integer(data[[name]]), weight), function (x) {
-        if (x == nrow.contrast) return('?')
+        if (x == nRowContrast) return('?')
         tokens <- levels[contrast[x ,]]
         if (length(tokens) > 1) return (paste0(c('{', tokens, '}'), collapse=''))
         return (tokens)
     }, character(1)), collapse=''), character(1)), ';'), collapse='')
   } else if (class(data) == 'matrix') {
-    tip.names <- tip.names[tip.names %in% rownames(data)]
+    tipNames <- tipNames[tipNames %in% rownames(data)]
     dim.dat <- dim(data)
     n.char <- dim.dat[2]
-    n.tip  <- dim.dat[1]
-    matrix_as_string <- paste0(c(unlist(data), ';'), collapse='')
+    nTip  <- dim.dat[1]
+    matrixAsString <- paste0(c(unlist(data), ';'), collapse='')
     weight <- rep(1, n.char)
   }  else if (class(data) == 'list') {
-    tip.names <- tip.names[tip.names %in% names(data)]
+    tipNames <- tipNames[tipNames %in% names(data)]
     dim.dat <- dim(dat.matrix)
     n.char <- dim.dat[1]
-    n.tip  <- dim.dat[2]
+    nTip  <- dim.dat[2]
     dat.matrix <- vapply(dat, as.vector, dat[[1]])
-    matrix_as_string <- paste0(c(t(dat.matrix), ';'), collapse='') ##CHECK: we probably don't need the t()
+    matrixAsString <- paste0(c(t(dat.matrix), ';'), collapse='') ##CHECK: we probably don't need the t()
     weight <- rep(1, n.char)
   } else {
     stop ("Unrecognized data format. Try phyDat format; see ?phyDat.")
   }
-  n.tip <- length(tip.names)
-  if (n.tip < 3) stop ("Sorry, couldn't find enough tips with available data.")
+  nTip <- length(tipNames)
+  if (nTip < 3) stop ("Sorry, couldn't find enough tips with available data.")
   
   edge <- tree$edge
   parent <- edge[, 1]
   child  <- edge[, 2]
 
-  max.node <- n.tip * 2 - 1
-  root.node <- n.tip + 1
-  dummy.root.node <- max.node + 1
+  maxNode <- nTip * 2 - 1
+  root.node <- nTip + 1
+  dummy.root.node <- maxNode + 1
   
-  if (max.node != max(parent)) stop ("Tree must be binary")
+  if (maxNode != max(parent)) stop ("Tree must be binary")
   if (root.node != min(parent)) stop ("Root node miscalculated")
 
-  preorder <- root.node:max.node
+  preorder <- root.node:maxNode
 
   ancestor <- function (x) parent[child==x]
   descendant <- function (x) child[parent==x]
-  ancestors <- as.integer(c(vapply(1:n.tip, ancestor, double(1)), 0, vapply((n.tip + 2):(n.tip * 2 - 1), ancestor, double(1))))
+  ancestors <- as.integer(c(vapply(1:nTip, ancestor, double(1)), 0, vapply((nTip + 2):(nTip * 2 - 1), ancestor, double(1))))
   ancestors[root.node] <- dummy.root.node
   descendants <- as.integer(vapply(preorder, descendant, double(2))) # children of each node, a pair at a time, right-left, right-left
 
-  return(CallMorphy(n.char, n.tip, descendants, ancestors, matrix_as_string))
+  return(CallMorphy(n.char, nTip, descendants, ancestors, matrixAsString))
 }

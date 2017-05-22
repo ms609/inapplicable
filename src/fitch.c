@@ -4,30 +4,25 @@
 #include <R.h> 
 #include <Rinternals.h>
 
-void fitch_app_downnode(int *app, int *this, int *child_q, int *child_r, int *n_char, int *pars, double *weight, int *inapp, double *w) {
-  int tmp;
-  for (int k = 0; k < (*n_char); k++) {
-    if (app[k] == -1) {
-      this[k] = *inapp;
-    } else if (child_q[k] == *inapp) {
-      this[k] = child_r[k] & ~*inapp;
-    } else if (child_r[k] == *inapp) {
-      this[k] = child_q[k] & ~*inapp;
-    } else if ((tmp = (child_q[k] & child_r[k] & ~*inapp))) { // Applicable tokens in Common
-      this[k] = tmp;
-    } else {
-      this[k] = (child_q[k] | child_r[k]) & ~*inapp;
-      (pars[k])++; (*w) += weight[k]; // Add one to tree length
+void app_fitch_downnode(int *this, int *left, int *right, int *start_char, int *end_char, int *pars, double *weight, double *w) {
+  int i;
+  for (i = *start_char; i < (*end_char); i++) {
+    if (left[i] & right[i]) {
+      this[i] = left[i] & right[i];
+    }
+    else {
+      this[i] = left[i] | right[i];
+      (pars[i])++; (*w) += weight[i]; // Add one to tree length
     }
   }
 }
 
-void fitch_app_downpass(int *dat, int *app, int *n_char, int *pars, int *parent, int *child, int *n_edge, double *weight, int *inapp, double *pvec, double *pscore) {
+void app_fitch_downpass(int *dat, int *start_char, int *n_char, int *pars, int *parent, int *child, int *n_edge, double *weight, int *inapp, double *pvec, double *pscore) {
   int parent_i = 0;
   for (int i = 0; i < *n_edge; i+=2) {
     parent_i = parent[i];
-    pvec[parent_i -1] += pvec[child[i] -1] + pvec[child[i+1] -1];
-    fitch_app_downnode(&app[(parent_i -1)*(*n_char)], &dat[(parent_i -1)* (*n_char)], &dat[(child[i]-1) * (*n_char)], &dat[(child[i+1]-1) * (*n_char)], n_char, pars, weight, inapp, &pvec[(parent_i -1)]);
+    pvec[parent_i -1] += pvec[child[i]-1] + pvec[child[i+1]-1];
+    fitch_app_downnode(&dat[(parent_i-1)* (*n_char)], &dat[(child[i]-1) * (*n_char)], &dat[(child[i+1]-1) * (*n_char)], start_char, n_char, pars, weight, &pvec[(parent_i-1)]);
   }
   pscore[0] = pvec[parent_i-1];
 }
@@ -40,7 +35,7 @@ void app_uproot(int *this, int *n_char) {
   for (int k = 0; k < (*n_char); k++) this[k] = ((this[k] > -1) ? 1 : -1); // Assume applicable if ambiguous.
 }
 
-void app_uppass(int *app, int *n_char, int *parent_of, int *children_of, int *n_node) {
+void app_fitch_uppass(int *app, int *n_char, int *parent_of, int *children_of, int *n_node) {
   app_uproot(&app[(parent_of[0]-1) * (*n_char)], n_char);
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
   for (int i = 0; i < (*n_node)-1; i++) {
@@ -81,8 +76,9 @@ void app_downpass(int *app, int *n_char, int *parent, int *child, int *n_edge) {
   }
 }
 
-SEXP FITCHINAPP(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEXP children_of, SEXP n_edge, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp) {   
-  int *data, *n_char=INTEGER(nrx), *inappl=INTEGER(inapp), *appl,  m=INTEGER(max_node)[0], i, n=INTEGER(n_tip)[0];
+SEXP MORPHYFITCH(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEXP children_of, SEXP n_edge, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip, SEXP inapp, SEXP inapp_chars) {   
+  int *data, *n_char=INTEGER(nrx), *inappl=INTEGER(inapp), *appl,  m=INTEGER(max_node)[0], i,
+      n=INTEGER(n_tip)[0], first_applicable=INTEGER(inapp_chars)[0];
   double *pvtmp;
   SEXP RESULT, pars, pscore, DAT, pvec, APPL;
   PROTECT(RESULT = allocVector(VECSXP, 5));
@@ -102,10 +98,13 @@ SEXP FITCHINAPP(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEX
     appl[i] = ((data[i] & ~*inappl) ? 1 : 0) - ((data[i] & *inappl) ? 1 : 0);
   }
   
-  app_downpass(appl, n_char, INTEGER(parent), INTEGER(child), INTEGER(n_edge));
-  app_uppass(  appl, n_char, INTEGER(parent_of), INTEGER(children_of), INTEGER(n_node));
-  fitch_app_downpass(data, appl, n_char, INTEGER(pars), INTEGER(parent), INTEGER(child), INTEGER(n_edge), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore));
+  mpl_fitch_first_downpass(data, appl, n_char, INTEGER(pars), INTEGER(parent), INTEGER(child), INTEGER(n_edge), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore));
+  mpl_fitch_first_uppass  (data, appl, n_char, INTEGER(pars), INTEGER(parent), INTEGER(child), INTEGER(n_edge), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore));
+  mpl_fitch_NA_tip_update     (appl, first_applicable, INTEGER(parent), INTEGER(child), INTEGER(n_edge));
+  // Second passes go here too.
   
+  app_fitch_downpass(data, first_applicable, n_char, INTEGER(pars), INTEGER(parent), INTEGER(child), INTEGER(n_edge), REAL(weight), INTEGER(inapp), pvtmp, REAL(pscore)); // No need for an up-pass: all scoring on way down.
+
   SET_VECTOR_ELT(RESULT, 0, pscore);
   SET_VECTOR_ELT(RESULT, 1, pars);
   SET_VECTOR_ELT(RESULT, 2, DAT);

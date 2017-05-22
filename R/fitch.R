@@ -6,7 +6,7 @@ CallMorphy <- function (n_char, n_taxa, desc, ancs, rawmatrix) {
 InapplicableFitch <- function (tree, morphyData) {
   # Data
   if (class(morphyData) == 'phyDat') morphyData <- MorphyDat(morphyData)
-  if (class(morphyData) != 'morphyDat') stop('Invalid data type; try InapplicableFitch(tree, data <- MorphyData(valid.phyDat.object)).')
+  if (class(morphyData) != 'morphyDat') stop('Invalid data type ', class(morphyData), '; try InapplicableFitch(tree, data <- MorphyData(valid.phyDat.object)).')
   at <- attributes(morphyData)
   nChar  <- at$nr # strictly, transformation series patterns; these'll be upweighted later
   weight <- at$weight
@@ -25,7 +25,10 @@ InapplicableFitch <- function (tree, morphyData) {
   allNodes <- (nTip + 1L):maxNode
   childOf <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
   
-  ret <- .Call("MORPHYFITCH", morphyData[, tipLabel], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentOf), as.integer(childOf), as.integer(nEdge), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inappLevel), as.integer(inappChars), PACKAGE='inapplicable')
+  ret <- .Call("MORPHYFITCH", t(morphyData[tipLabel, ]), as.integer(nChar), as.integer(parent),
+               as.integer(child), as.integer(parentOf), as.integer(childOf), as.integer(nEdge), 
+               as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), 
+               as.integer(inappLevel), as.integer(inappChars))#, PACKAGE='inapplicable')
   
   return (ret)
 }

@@ -41,21 +41,25 @@ MorphyDat <- function (phydat) {
   powersOf2 <- 2L^c(0L:(nLevel - 1L))
   tmp <- contrast %*% powersOf2
   tmp <- as.integer(tmp)
-  dat <- t(vapply(phydat, c, integer(nChar)))
-  ret <- tmp[dat] 
- ## ret <- as.integer(ret)## seems unnecessary?
-  attributes(ret) <- at
+  ret <- t(vapply(phydat, function (x) as.integer(tmp[x]), integer(nChar))) 
+  # as.integer so ready to send to C
   inapp.level <- which(at$levels == "-")
-  attr(ret, 'inapp.level') <- 2 ^ (inapp.level - 1)
+  needMorphyTreatment <- colSums(ret == tmp[inapp.level]) > 2
+  newOrder <- c(which(needMorphyTreatment), which(!needMorphyTreatment))
+  ret <- ret[, newOrder]
+  attributes(ret) <- at
+  class(ret) <- 'morphyDat'
   attr(ret, 'dim') <- c(nTip, nChar)
   dimnames(ret) <- list(nam, NULL)
-  class(ret) <- 'morphyDat'
-  needMorphyTreatment <- apply(ret, 2, function (x) sum(x == inapp.level) > 2)
-  newOrder <- c(which(needMorphyTreatment), which(!needMorphyTreatment))
-  attr(ret, 'inapp.chars') <- sum(needMorphyTreatment)
-  attr(ret, 'index') <- newOrder[at$index]
   attr(ret, 'weight') <- at$weight[newOrder]
-  ret <- ret[, newOrder]
+  attr(ret, 'index') <- newOrder[at$index]
+  #attr(ret, 'nr') <- nChar
+  #attr(ret, 'levels') <- at$levels
+  #attr(ret, 'allLevels') <- at$allLevels
+  #attr(ret, 'type') <- at$type
+  #attr(ret, 'contrast') <- contrast
+  attr(ret, 'inapp.level') <- 2 ^ (inapp.level - 1)
+  attr(ret, 'inapp.chars') <- sum(needMorphyTreatment)
   ret
 }
 

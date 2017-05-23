@@ -57,7 +57,7 @@ void inapp_update_tips
 (int *dat, int *act, int *parent_of, int *n_tip, int *n_char, int *inapp) {
   int i;
   for (i=0; i<*n_tip; i++) {
-    //:DEBUG://Rprintf("I'll update tip %i, whose parent is %i. \n", i, parent_of[i] - 1);
+    //:DEBUG://Rprintf(" - Update tip %i, whose parent is %i. \n", i, parent_of[i] - 1);
     inapp_update_tip(
       &dat[i * (*n_char)], // this
       &act[i * (*n_char)], // this_active
@@ -73,6 +73,7 @@ void inapp_first_upnode
  int *inapp, int *end_char) {
   int i;
   for (i = 0; i < *end_char; i++) {
+    //:DEBUG://Rprintf("   ... this=%i, anc=%i, left=%i, right=%i\n", this[i], ancestor[i], left[i], right[i]);
     if (this[i] & (*inapp)) {
       if (this[i] & ~(*inapp)) {
         if (ancestor[i] == *inapp) {
@@ -99,6 +100,7 @@ void inapp_first_upnode
     else {
       app[i] = this[i];
     }
+    //:DEBUG://Rprintf("   - Setting APP to %i.\n\n", app[i]);
   }
 }
 
@@ -119,6 +121,7 @@ void inapp_first_uppass
   inapp_first_root(&dat[(root_node) * (*n_char)], 
                    &app[(root_node) * (*n_char)], inapp, end_char);
   for (int i = 0; i < (*n_node) - 1; i++) {
+    //:DEBUG://Rprintf(" - Calling first upnode at %i:\n", root_node + i);
     // parent_of is stored as [tip]1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node is listed as being its own parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // app and app are stored as [0 * n_char] = apps[,1], [1 * n_char] = apps[,2], ....
@@ -126,7 +129,7 @@ void inapp_first_uppass
     inapp_first_upnode(
       &dat[(root_node + i + 1 -1) * (*n_char)], // this_start
       &app[(root_node + i + 1 -1) * (*n_char)], // store applicability for future ref
-      &dat[(parent_of[root_node + i] -1) * (*n_char)], // ancestor
+      &app[(parent_of[root_node + i] -1) * (*n_char)], // ancestor - send modified APP state
       &dat[(children_of[i + 1 + *n_node] -1) * (*n_char)], // left child
       &dat[(children_of[i + 1] -1) * (*n_char)], // right child
       inapp, end_char
@@ -165,7 +168,7 @@ void inapp_first_downpass
  int *end_char, int *n_char, int *inapp, int *n_edge) {
   int i;  
   for (i = 0; i < *n_edge; i+=2) {
-//    //:DEBUG://Rprintf(" - First downpass at node %i\n", parent[i] - 1);
+    //:DEBUG://Rprintf(" - First downpass at node %i\n", parent[i] - 1);
     inapp_first_downnode(&dat[(parent[i]  - 1) * (*n_char)],
                          &dat[( child[i+1]- 1) * (*n_char)],
                          &dat[( child[i]  - 1) * (*n_char)],
@@ -180,8 +183,8 @@ void inapp_second_downnode
  int *this_acts, int *l_acts, int *r_acts,
  int *end_char, int *inapp, int *pars) {
   int i, temp;
-  for (i = 0; i < *end_char; ++i) {
-    //:DEBUG://Rprintf("   -... this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n\n",
+  for (i=0; i<*end_char; i++) {
+    //:DEBUG://Rprintf("   ... this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n\n",
     //:DEBUG://  this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
     if (this_app[i] != *inapp) { // 4.2
       if ((temp = (left[i] & right[i]))) { // 4.3
@@ -190,8 +193,7 @@ void inapp_second_downnode
         } else {
           this[i] = temp; //4.4b; temp == inapp by 4.4
         }
-      }
-      else { //4.5
+      } else { //4.5
         this[i] = (left[i] | right[i]) & ~(*inapp);
         
         if ((left[i] & ~(*inapp) && right[i] & ~(*inapp)) //4.6
@@ -222,7 +224,7 @@ void inapp_second_downpass
   int i, parent_i = 0;
   for (i=0; i<*n_edge; i+=2) {
     parent_i = parent[i];
-    //:DEBUG://Rprintf(" - Calling second downnode at %i:..\n", parent_i - 1);
+    //:DEBUG://Rprintf(" - Calling second downnode at %i:\n", parent_i - 1);
     inapp_second_downnode(
       &dat[(parent_i  -1) * (*n_char)],
       &app[(parent_i  -1) * (*n_char)],

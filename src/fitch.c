@@ -16,7 +16,7 @@ void app_fitch_downnode
     }
     else {
       this[i] = left[i] | right[i];
-      //:DEBUG://Rprintf(" +++ Increment length in standard Fitch downpass %i\n", 1);
+      Rprintf(" +++ Increment length in standard Fitch downpass %i\n", 1);
       (pars[i])++; // Add one to tree length
     }
   }
@@ -45,8 +45,10 @@ void inapp_update_tip
     else {
       this_active[i] |= this[i] & ~(*inapp);
     }
-    if (this[i] & ancestor[i]) {
-      if (ancestor[i] & ~(*inapp)) {
+    if ((this[i] & ~(*inapp)) && (this[i] & *inapp)) {
+      if (ancestor[i] == (*inapp)) {
+        this[i] = *inapp;
+      } else {
         this[i] &= ~(*inapp);
       }
     }
@@ -57,7 +59,7 @@ void inapp_update_tips
 (int *dat, int *act, int *parent_of, int *n_tip, int *n_char, int *inapp) {
   int i;
   for (i=0; i<*n_tip; i++) {
-    //:DEBUG://Rprintf(" - Update tip %i, whose parent is %i. \n", i, parent_of[i] - 1);
+    Rprintf(" - Update tip %i (=%i), whose parent (%i) = %i. \n", i, dat[i], parent_of[i] - 1, dat[(parent_of[i] -1)]);
     inapp_update_tip(
       &dat[i * (*n_char)], // this
       &act[i * (*n_char)], // this_active
@@ -65,6 +67,7 @@ void inapp_update_tips
       n_char,
       inapp
     );
+    Rprintf("   - New value = %i\n", dat[i]);
   }   
 }
 
@@ -73,7 +76,7 @@ void inapp_first_upnode
  int *inapp, int *end_char) {
   int i;
   for (i=0; i<*end_char; i++) {
-    //:DEBUG://Rprintf("   ... this=%i, anc=%i, left=%i, right=%i\n", this[i], ancestor[i], left[i], right[i]);
+    Rprintf("   ... this=%i, anc=%i, left=%i, right=%i\n", this[i], ancestor[i], left[i], right[i]);
     if (this[i] & (*inapp)) {
       if (this[i] & ~(*inapp)) {
         if (ancestor[i] == *inapp) {
@@ -117,11 +120,11 @@ void inapp_first_uppass
 (int *dat, int *app, int *parent_of, int *children_of, 
  int *end_char, int *n_char, int *n_internal, int *inapp) {
   int root_node = *n_internal + 1L;  // which is the index of the root node
-  //:DEBUG://Rprintf(" - Calling first upnode at ROOT node %i:\n", root_node);
+  Rprintf(" - Calling first upnode at ROOT node %i:\n", root_node);
   inapp_first_root(&dat[(root_node) * (*n_char)], 
                    &app[(root_node) * (*n_char)], inapp, end_char);
   for (int i = 1; i < (*n_internal); i++) {
-    //:DEBUG://Rprintf(" - Calling first upnode at %i with anc: %i < %i,%i\n", root_node + i, parent_of[root_node + i] - 1, children_of[i + *n_internal] - 1, children_of[i] - 1);
+    Rprintf(" - Calling first upnode at %i with anc: %i < %i,%i\n", root_node + i, parent_of[root_node + i] - 1, children_of[i + *n_internal] - 1, children_of[i] - 1);
     // parent_of is stored as [tip]1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node is listed as being its own parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     inapp_first_upnode(
@@ -156,7 +159,7 @@ void inapp_first_downnode
       }
     }
     this_acts[i] = (l_acts[i] | r_acts[i]) & ~(*inapp);
-//    //:DEBUG://Rprintf("   - Setting actives (%i+%i) to %i\n", l_acts[i], r_acts[i], this_acts[i]);
+//    Rprintf("   - Setting actives (%i+%i) to %i\n", l_acts[i], r_acts[i], this_acts[i]);
   }
 }
 
@@ -166,7 +169,7 @@ void inapp_first_downpass
  int *end_char, int *n_char, int *inapp, int *n_edge) {
   int i;  
   for (i = 0; i < *n_edge; i+=2) {
-    //:DEBUG://Rprintf(" - First downpass at node %i\n", parent[i] - 1);
+    Rprintf(" - First downpass at node %i\n", parent[i] - 1);
     inapp_first_downnode(&dat[(parent[i]  - 1) * (*n_char)],
                          &dat[( child[i+1]- 1) * (*n_char)],
                          &dat[( child[i]  - 1) * (*n_char)],
@@ -182,7 +185,7 @@ void inapp_second_downnode
  int *end_char, int *inapp, int *pars) {
   int i, temp;
   for (i=0; i<*end_char; i++) {
-    //:DEBUG://Rprintf("   ... this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
+    Rprintf("   ... this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
     if (this_app[i] != *inapp) { // 4.2
       if ((temp = (left[i] & right[i]))) { // 4.3
         if (temp & ~(*inapp)) { // 4.4
@@ -195,7 +198,7 @@ void inapp_second_downnode
         
         if ((left[i] & ~(*inapp) && right[i] & ~(*inapp)) //4.6
         ||  (l_acts[i] && r_acts[i])) { // 4.7
-          //:DEBUG://Rprintf(" +++ Increment length in INAPP Fitch downpass %i\n", 2);
+          Rprintf(" +++ Increment length in INAPP Fitch downpass %i\n", 2);
           (pars[i])++; // Add one to tree length
         }
       }
@@ -221,7 +224,7 @@ void inapp_second_downpass
   int i, parent_i = 0;
   for (i=0; i<*n_edge; i+=2) {
     parent_i = parent[i];
-    //:DEBUG://Rprintf(" - Calling second downnode at %i:\n", parent_i - 1);
+    Rprintf(" - Calling second downnode at %i:\n", parent_i - 1);
     inapp_second_downnode(
       &dat[(parent_i  -1) * (*n_char)],
       &app[(parent_i  -1) * (*n_char)],
@@ -245,7 +248,7 @@ void inapp_second_upnode
  int *end_char, int *inapp, int *pars) {
   int i;
   for (i = 0; i < *end_char; ++i) {    
-    //:DEBUG://Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this[i], ancestor[i], left[i], right[i], l_acts[i], r_acts[i]);
+    Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this[i], ancestor[i], left[i], right[i], l_acts[i], r_acts[i]);
     if (this[i] & ~(*inapp)) {
       if (ancestor[i] & ~(*inapp)) {
         if ((ancestor[i] & this[i]) == ancestor[i]) {
@@ -273,7 +276,7 @@ void inapp_second_upnode
     }
     else {
       if (l_acts[i] && r_acts[i]) {
-        //:DEBUG://Rprintf(" +++ Increment length in INAPP Fitch uppass %i\n", 2);
+        Rprintf(" +++ Increment length in INAPP Fitch uppass %i\n", 2);
         (pars[i])++; // Add one to tree length
       }
     }
@@ -284,10 +287,8 @@ void inapp_second_uppass
 (int *dat, int *act, int *parent_of, int *child_of, 
 int *end_char, int *n_char, int *n_node, int *inapp, int *pars) {
   int i, root_node = *n_node + 1L; // already in index notation, so no -1 needed.
-  // Start at ROOT NODE, which needs special treatment as it is "its own ancestor"
-  //:DEBUG://Rprintf(" - Calling second upnode at ROOT %i\n", root_node -1);
   for (i=0; i<(*n_node); i++) {
-    //:DEBUG://Rprintf(" - Calling second upnode at %i, anc=%i\n", root_node + i, parent_of[root_node + i] - 1);
+    Rprintf(" - Calling second upnode at %i, anc=%i\n", root_node + i, parent_of[root_node + i] - 1);
     inapp_second_upnode(
       &dat[(root_node + i) * (*n_char)], // this_start, will become this_finish
       &dat[(parent_of[root_node + i] -1) * (*n_char)], // ancestor

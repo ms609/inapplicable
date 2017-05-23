@@ -72,7 +72,7 @@ void inapp_first_upnode
 (int *this, int *app, int *ancestor, int *left, int *right,
  int *inapp, int *end_char) {
   int i;
-  for (i = 0; i < *end_char; i++) {
+  for (i=0; i<*end_char; i++) {
     //:DEBUG://Rprintf("   ... this=%i, anc=%i, left=%i, right=%i\n", this[i], ancestor[i], left[i], right[i]);
     if (this[i] & (*inapp)) {
       if (this[i] & ~(*inapp)) {
@@ -100,7 +100,6 @@ void inapp_first_upnode
     else {
       app[i] = this[i];
     }
-    //:DEBUG://Rprintf("   - Setting APP to %i.\n\n", app[i]);
   }
 }
 
@@ -116,22 +115,21 @@ void inapp_first_root(int *this, int *app, int *inapp, int *end_char) {
 
 void inapp_first_uppass
 (int *dat, int *app, int *parent_of, int *children_of, 
- int *end_char, int *n_char, int *n_node, int *inapp) {
-   int root_node = *n_node + 1L;  // which is the index of the root node
+ int *end_char, int *n_char, int *n_internal, int *inapp) {
+  int root_node = *n_internal + 1L;  // which is the index of the root node
+  //:DEBUG://Rprintf(" - Calling first upnode at ROOT node %i:\n", root_node);
   inapp_first_root(&dat[(root_node) * (*n_char)], 
                    &app[(root_node) * (*n_char)], inapp, end_char);
-  for (int i = 0; i < (*n_node) - 1; i++) {
-    //:DEBUG://Rprintf(" - Calling first upnode at %i:\n", root_node + i);
+  for (int i = 1; i < (*n_internal); i++) {
+    //:DEBUG://Rprintf(" - Calling first upnode at %i with anc: %i < %i,%i\n", root_node + i, parent_of[root_node + i] - 1, children_of[i + *n_internal] - 1, children_of[i] - 1);
     // parent_of is stored as [tip]1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node is listed as being its own parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
-    // app and app are stored as [0 * n_char] = apps[,1], [1 * n_char] = apps[,2], ....
-    
     inapp_first_upnode(
-      &dat[(root_node + i + 1 -1) * (*n_char)], // this_start
-      &app[(root_node + i + 1 -1) * (*n_char)], // store applicability for future ref
-      &app[(parent_of[root_node + i] -1) * (*n_char)], // ancestor - send modified APP state
-      &dat[(children_of[i + 1 + *n_node] -1) * (*n_char)], // left child
-      &dat[(children_of[i + 1] -1) * (*n_char)], // right child
+      &dat[(root_node + i) * (*n_char)], // this_start
+      &app[(root_node + i) * (*n_char)], // store applicability for future ref
+      &app[(parent_of[root_node + i -1] -1) * (*n_char)], // ancestor - send modified APP state
+      &dat[(children_of[i + *n_internal] -1) * (*n_char)], // left child
+      &dat[(children_of[i] -1) * (*n_char)], // right child
       inapp, end_char
     );
   }
@@ -184,8 +182,7 @@ void inapp_second_downnode
  int *end_char, int *inapp, int *pars) {
   int i, temp;
   for (i=0; i<*end_char; i++) {
-    //:DEBUG://Rprintf("   ... this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n\n",
-    //:DEBUG://  this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
+    //:DEBUG://Rprintf("   ... this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
     if (this_app[i] != *inapp) { // 4.2
       if ((temp = (left[i] & right[i]))) { // 4.3
         if (temp & ~(*inapp)) { // 4.4
@@ -229,7 +226,8 @@ void inapp_second_downpass
       &dat[(parent_i  -1) * (*n_char)],
       &app[(parent_i  -1) * (*n_char)],
       &dat[(child[i+1]-1) * (*n_char)], 
-      &dat[(child[i]  -1) * (*n_char)], 
+      &dat[(child[i]  -1) * (*n_char)],
+      
       &act[(parent_i  -1) * (*n_char)],
       &act[(child[i+1]-1) * (*n_char)], 
       &act[(child[i]  -1) * (*n_char)], 
@@ -247,8 +245,7 @@ void inapp_second_upnode
  int *end_char, int *inapp, int *pars) {
   int i;
   for (i = 0; i < *end_char; ++i) {    
-    //:DEBUG://Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n\n",
-    //:DEBUG://        this[i], ancestor[i], left[i], right[i], l_acts[i], r_acts[i]);
+    //:DEBUG://Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this[i], ancestor[i], left[i], right[i], l_acts[i], r_acts[i]);
     if (this[i] & ~(*inapp)) {
       if (ancestor[i] & ~(*inapp)) {
         if ((ancestor[i] & this[i]) == ancestor[i]) {

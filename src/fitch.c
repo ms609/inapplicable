@@ -16,6 +16,7 @@ void app_fitch_downnode
     }
     else {
       this[i] = left[i] | right[i];
+      Rprintf(" +++ Increment length in standard Fitch downpass %i\n", 1);
       (pars[i])++; // Add one to tree length
     }
   }
@@ -171,7 +172,7 @@ void inapp_second_downnode
         
         if ((left[i] & ~(*inapp) && right[i] & ~(*inapp)) //4.6
         ||  (l_acts[i] && r_acts[i])) { // 4.7
-          Rprintf(" !!! Addscore - %i\n", 173);
+          Rprintf(" +++ Increment length in INAPP Fitch downpass %i\n", 2);
           (pars[i])++; // Add one to tree length
         }
       }
@@ -197,7 +198,7 @@ void inapp_second_downpass
   int i, parent_i = 0;
   for (i=0; i<*n_edge; i+=2) {
     parent_i = parent[i];
-    Rprintf(" - Calling second downnode at %i:\n", parent_i - 1);
+    Rprintf(" - Calling second downnode at %i:..\n", parent_i - 1);
     inapp_second_downnode(
       &dat[(parent_i  -1) * (*n_char)],
       &app[(parent_i  -1) * (*n_char)],
@@ -249,6 +250,7 @@ void inapp_second_upnode
     }
     else {
       if (l_acts[i] && r_acts[i]) {
+        Rprintf(" +++ Increment length in INAPP Fitch uppass %i\n", 2);
          Rprintf(" !!!  Addscore - %i\n", 251);
         (pars[i])++; // Add one to tree length
       }

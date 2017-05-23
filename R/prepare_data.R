@@ -35,18 +35,24 @@ MorphyDat <- function (phydat) {
   nam <- at$names
   nLevel <- length(at$level)
   nChar <- at$nr
+  if (nChar < 1) stop ("No (valid) characters sent to MorphyDat.")
   contrast <- attr(phydat, "contrast")
   nTip <- length(phydat)
   at$names <- NULL
   powersOf2 <- 2L^c(0L:(nLevel - 1L))
   tmp <- contrast %*% powersOf2
   tmp <- as.integer(tmp)
-  ret <- t(vapply(phydat, function (x) as.integer(tmp[x]), integer(nChar))) 
+  if (nChar > 1) {
+    ret <- t(vapply(phydat, function (x) as.integer(tmp[x]), integer(nChar))) 
+  } else {
+    ret <- as.integer(phydat)
+    ret <- matrix(as.integer(tmp[ret]), ncol=1, dimnames=list(nam, NULL))
+  }
   # as.integer so ready to send to C
   inapp.level <- which(at$levels == "-")
   needMorphyTreatment <- colSums(ret == tmp[inapp.level]) > 2
   newOrder <- c(which(needMorphyTreatment), which(!needMorphyTreatment))
-  ret <- ret[, newOrder]
+  ret <- ret[, newOrder, drop=FALSE]
   attributes(ret) <- at
   class(ret) <- 'morphyDat'
   attr(ret, 'dim') <- c(nTip, nChar)

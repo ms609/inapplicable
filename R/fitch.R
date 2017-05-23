@@ -19,7 +19,8 @@ InapplicableFitch <- function (tree, morphyData) {
   nTip <- length(tipLabel)
   inappLevel <- at$inapp.level  
   inappChars <- at$inapp.chars
-  parentOf <- parent[match((nTip + 2L):maxNode, child )]
+  parentOf <- parent[match(1:maxNode, child )]
+  parentOf[nTip + 1] <- nTip + 1 # Root node "is its own parent"
   allNodes <- (nTip + 1L):maxNode
   childOf <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
   

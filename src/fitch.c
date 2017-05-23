@@ -16,7 +16,7 @@ void app_fitch_downnode
     }
     else {
       this[i] = left[i] | right[i];
-      Rprintf(" +++ Increment length in standard Fitch downpass %i\n", 1);
+      //:DEBUG://Rprintf(" +++ Increment length in standard Fitch downpass %i\n", 1);
       (pars[i])++; // Add one to tree length
     }
   }
@@ -131,7 +131,7 @@ void inapp_first_downnode
       }
     }
     this_acts[i] = (l_acts[i] | r_acts[i]) & ~(*inapp);
-//    Rprintf("   - Setting actives (%i+%i) to %i\n", l_acts[i], r_acts[i], this_acts[i]);
+//    //:DEBUG://Rprintf("   - Setting actives (%i+%i) to %i\n", l_acts[i], r_acts[i], this_acts[i]);
   }
 }
 
@@ -141,7 +141,7 @@ void inapp_first_downpass
  int *end_char, int *n_char, int *inapp, int *n_edge) {
   int i;  
   for (i = 0; i < *n_edge; i+=2) {
-//    Rprintf(" - First downpass at node %i\n", parent[i] - 1);
+//    //:DEBUG://Rprintf(" - First downpass at node %i\n", parent[i] - 1);
     inapp_first_downnode(&dat[(parent[i]  - 1) * (*n_char)],
                          &dat[( child[i+1]- 1) * (*n_char)],
                          &dat[( child[i]  - 1) * (*n_char)],
@@ -157,8 +157,8 @@ void inapp_second_downnode
  int *end_char, int *inapp, int *pars) {
   int i, temp;
   for (i = 0; i < *end_char; ++i) {
-    Rprintf("   - this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n",
-      this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
+    //:DEBUG://Rprintf("   -... this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n\n",
+    //:DEBUG://  this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
     if (this_app[i] != *inapp) { // 4.2
       if ((temp = (left[i] & right[i]))) { // 4.3
         if (temp & ~(*inapp)) { // 4.4
@@ -172,7 +172,7 @@ void inapp_second_downnode
         
         if ((left[i] & ~(*inapp) && right[i] & ~(*inapp)) //4.6
         ||  (l_acts[i] && r_acts[i])) { // 4.7
-          Rprintf(" +++ Increment length in INAPP Fitch downpass %i\n", 2);
+          //:DEBUG://Rprintf(" +++ Increment length in INAPP Fitch downpass %i\n", 2);
           (pars[i])++; // Add one to tree length
         }
       }
@@ -198,7 +198,7 @@ void inapp_second_downpass
   int i, parent_i = 0;
   for (i=0; i<*n_edge; i+=2) {
     parent_i = parent[i];
-    Rprintf(" - Calling second downnode at %i:..\n", parent_i - 1);
+    //:DEBUG://Rprintf(" - Calling second downnode at %i:..\n", parent_i - 1);
     inapp_second_downnode(
       &dat[(parent_i  -1) * (*n_char)],
       &app[(parent_i  -1) * (*n_char)],
@@ -221,8 +221,8 @@ void inapp_second_upnode
  int *end_char, int *inapp, int *pars) {
   int i;
   for (i = 0; i < *end_char; ++i) {    
-    Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n",
-            this[i], ancestor[i], left[i], right[i], l_acts[i], r_acts[i]);
+    //:DEBUG://Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n",
+    //:DEBUG://        this[i], ancestor[i], left[i], right[i], l_acts[i], r_acts[i]);
     if (this[i] & ~(*inapp)) {
       if (ancestor[i] & ~(*inapp)) {
         if ((ancestor[i] & this[i]) == ancestor[i]) {
@@ -250,8 +250,8 @@ void inapp_second_upnode
     }
     else {
       if (l_acts[i] && r_acts[i]) {
-        Rprintf(" +++ Increment length in INAPP Fitch uppass %i\n", 2);
-         Rprintf(" !!!  Addscore - %i\n", 251);
+        //:DEBUG://Rprintf(" +++ Increment length in INAPP Fitch uppass %i\n", 2);
+         //:DEBUG://Rprintf(" !!!  Addscore - %i\n", 251);
         (pars[i])++; // Add one to tree length
       }
     }
@@ -261,31 +261,48 @@ void inapp_second_upnode
 void inapp_second_uppass
 (int *dat, int *act, int *parent_of, int *child_of, 
 int *end_char, int *n_char, int *n_node, int *inapp, int *pars) {
-  for (int i = 0; i < (*n_node)-1; i++) {
+  int i;
+  // Start at ROOT NODE, which needs special treatment as it is "its own ancestor"
+  //:DEBUG://Rprintf(" - Calling second upnode at ROOT %i, anc=%i\n", parent_of[0] + i, parent_of[i] - 1);
+  inapp_second_upnode(
+    &dat[(parent_of[0] -1) * (*n_char)], // this_start, will become this_finish
+    &dat[(parent_of[0] -1) * (*n_char)], // The root is "its own ancestor"
+    &dat[(child_of[0 + *n_node] -1) * (*n_char)], // left child
+    &dat[(child_of[0] -1) * (*n_char)], // right child
+    
+    &act[(parent_of[0] -1) * (*n_char)], // this-actives
+    &act[(child_of[0 + *n_node] -1) * (*n_char)], // left child-actives
+    &act[(child_of[0] -1) * (*n_char)], // right child-actives
+    
+    end_char, inapp, pars
+  );
+  
+  for (i=0; i<(*n_node)-1; i++) {
     // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // app and app are stored as [0 * n_char] = apps[,1], [1 * n_char] = apps[,2], ....
-    Rprintf(" - Calling second upnode at %i, anc=%i\n", parent_of[0] + i, parent_of[i] - 1);
+    //:DEBUG://Rprintf(" - Calling second upnode at %i, anc=%i\n", parent_of[0] + i, parent_of[i] - 1);
     // Worked example assumes that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
     inapp_second_upnode(
-    //  The position of node 12 in the app array is:
-    //    root.number (counting from 1) + i = i.e. position[11], the 12th position
-    &dat[(parent_of[0] + i + 1 -1) * (*n_char)], // this_start, will become this_finish
-    //  To find the number of node 12's parent we look in parent_of[node12.index]
-    //    parent_of[0] is the parent of node [root + i] = 12th node
-    //    node12.index = i = 0; parent_of[0] = 11; so we need app[11-1]
-    &dat[(parent_of[i]-1) * (*n_char)], // ancestor
-    //  To find the number of node 12's children we look in children_of[node12.index]
-    //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
-    //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
-    &dat[(child_of[i + 1 + *n_node] -1) * (*n_char)], // left child
-    &dat[(child_of[i + 1] -1) * (*n_char)], // right child
-    
-    &act[(parent_of[0] + i + 1 -1) * (*n_char)], // this-actives
-    &act[(child_of[i + 1] -1) * (*n_char)], // left child-actives
-    &act[(child_of[i + 1 + *n_node] -1) * (*n_char)], // right child-actives
-    
-    end_char, inapp, pars);
+      //  The position of node 12 in the app array is:
+      //    root.number (counting from 1) + i = i.e. position[11], the 12th position
+      &dat[(parent_of[0] + i + 1 -1) * (*n_char)], // this_start, will become this_finish
+      //  To find the number of node 12's parent we look in parent_of[node12.index]
+      //    parent_of[0] is the parent of node [root + i] = 12th node
+      //    node12.index = i = 0; parent_of[0] = 11; so we need app[11-1]
+      &dat[(parent_of[i]-1) * (*n_char)], // ancestor
+      //  To find the number of node 12's children we look in children_of[node12.index]
+      //    children_of[0, *n_node + 0] are the two children of node [root + i] = 12
+      //    node12.index = i = 0; children_of[0*2] = Q; children_of[0*2 + 1] = R
+      &dat[(child_of[i + 1 + *n_node] -1) * (*n_char)], // left child
+      &dat[(child_of[i + 1] -1) * (*n_char)], // right child
+      
+      &act[(parent_of[0] + i + 1 -1) * (*n_char)], // this-actives
+      &act[(child_of[i + 1 + *n_node] -1) * (*n_char)], // left child-actives
+      &act[(child_of[i + 1] -1) * (*n_char)], // right child-actives
+      
+      end_char, inapp, pars
+    );
   }
 }
 

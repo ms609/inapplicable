@@ -1,14 +1,5 @@
 library(ape)
 
-#' byTaxon = TRUE, string is one TAXON's coding at a time; FALSE: one CHARACTER's coding at a time
-StringToMatrix <- function (x, tips, byTaxon = TRUE) {
-  x <- strsplit(x, '')[[1]]
-  x <- matrix(x[x != '\n'], nrow=length(tips), byrow=byTaxon)
-  rownames(x) <- tips
-  phy <- phyDat(x, levels=c(0:3, '-'), type='USER')
-  MorphyDat(phy)
-}
-
 ## Test suite designed by Thomas Guillerme
 context("correct step counting")
 test_that("right counting", {
@@ -51,20 +42,21 @@ test_that("right counting", {
                   "----1010----", # 34
                   "------11---1", # 35
                   "10----11---1", # 36
-                  "320--??3--21", #37
-                  "000011110000"  #38
+                  "320--??3--21", # 37
+                  "000011110000"  # 38
                   ) 
   ## Results
   expected_results <- c(5, 2, 3, 2, 1, 5, 5, 2, 5, 2, 2, 4, 3, 2, 5, 0, 5, 2, 4, 5, 2, 4, 3, 3, 2, 5, 1, 4, 4, 0, 5, 5, 4, 5, 2, 1, 3, 5, 2)
 
   ## Run the tests
   for(test in 1:length(characters)) {
-    output <- InapplicableFitch(tree, StringToMatrix(characters[test], tree$tip.label))
+    output <- InapplicableFitch(tree, StringToMorphy(characters[test], tree$tip.label))
     tree_length <- output[[1]]
+    cat(test - 1, ':')
     expect_equal(tree_length, expected_results[test])
   }
   ## Test combined matrix
-  morphyDat <- StringToMatrix(paste0(characters, collapse='\n'), tree$tip.label, byTaxon=FALSE)
+  morphyDat <- StringToMorphy(paste0(characters, collapse='\n'), tree$tip.label, byTaxon=FALSE)
   output <- InapplicableFitch(tree, morphyDat)
   tree_length <- output[[1]]
   expect_equal(tree_length, sum(expected_results))
@@ -78,7 +70,7 @@ test_that("right counting", {
 
   ## Run the tests
   for(test in 1:length(characters)) { 
-    output <- InapplicableFitch(tree, StringToMatrix(characters[test], tree$tip.label))
+    output <- InapplicableFitch(tree, StringToMorphy(characters[test], tree$tip.label))
     tree_length <- output[[1]]
     expect_equal(tree_length, expected_results[test])
   }

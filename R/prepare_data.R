@@ -69,6 +69,33 @@ MorphyDat <- function (phydat) {
   ret
 }
 
+#' @title String to MorphyDat
+#'
+#' @description Converts a PhyDat object to allow processing by MorphyDat
+#'
+#' @param string a string of tokens, optionally containing newlines, with no terminating semi-colon.  Polytomies not (yet) supported; each character must correspond to a unique state, ?, or the inapplicable token (-)
+#' @param tips, a character vector corresponding to the names (in order) of each taxon in the matrix
+#' @param byTaxon = TRUE, string is one TAXON's coding at a time; FALSE: one CHARACTER's coding at a time
+#' 
+#' @examples
+#' morphy <- StringToMorphy("-?01231230?-", c('Lion', 'Gazelle'), byTaxon=TRUE)
+#' # encodes the following matrix:
+#' # Lion     -?0123
+#' # Gazelle  1230?-
+#' 
+#' @value This function returns a matrix of class \code{morphyDat}; see \code{\link{MorphyData}}
+#' @seealso \code{\link{phyDat}}
+#' 
+#' @author Martin Smith
+#' @export
+StringToMorphy <- function (x, tips, byTaxon = TRUE) {
+  x <- strsplit(x, '')[[1]]
+  x <- matrix(x[x != '\n'], nrow=length(tips), byrow=byTaxon)
+  rownames(x) <- tips
+  phy <- phyDat(x, levels=c(0:3, '-'), type='USER')
+  MorphyDat(phy)
+}
+
 PrepareData <- function (data) {
 # Written with reference to phangorn:::prepareDataFitch
   at <- attributes(data)

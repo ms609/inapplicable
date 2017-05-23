@@ -44,7 +44,7 @@ void inapp_first_upnode
   int i;
   for (i = 0; i < *end_char; i++) {
     // Problem seems to be arising when inspecting Ancestor[i]
-    //Rprintf("this-%i: %i, anc-%i: %i, inapp: %i\n", i, this[i], i, ancestor[i], ~(*inapp));
+    Rprintf("this-%i: %i, anc-%i: %i, inapp: %i\n", i, this[i], i, ancestor[i], ~(*inapp));
     /*
     if (this[i] & (*inapp)) {
       if (this[i] & ~(*inapp)) {
@@ -75,24 +75,39 @@ void inapp_first_upnode
   }
 }
 
+void inapp_first_root(int *this, int *app, int *inapp, int *end_char) {
+  for (int i = 0; i < *end_char; i++) {
+    if (this[i] != *inapp) {
+      app[i] = this[i] & ~(*inapp); // TODO posit: ~(*inapp) will do?
+    } else {
+      app[i] = *inapp;
+    }
+  }
+}
+
 void inapp_first_uppass
 (int *dat, int *app, int *parent_of, int *children_of, 
  int *end_char, int *n_char, int *n_node, int *inapp) {
+  inapp_first_root(&dat[(parent_of[0]-1) * (*n_char)], 
+                   &app[(parent_of[0]-1) * (*n_char)], inapp, end_char);
   // parent_of's first member is a child of the root node.  Thus parent_of[0] = root.number
   for (int i = 0; i < (*n_node) - 1; i++) {
     // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // app and app are stored as [0 * n_char] = apps[,1], [1 * n_char] = apps[,2], ....
     
-    Rprintf("This: %i, anc: %i; left: %i; right: %i.\n",
+    Rprintf("This: %i = %i -> %i, anc: %i; left: %i; right: %i.\n",
       (parent_of[0] + i + 1 -1),
+      dat[(parent_of[0] + i + 1 -1)],
+      app[(parent_of[0] + i + 1 -1)], 
       parent_of[i]-1,
       (children_of[i + 1 + *n_node] - 1),
       (children_of[i + 1] -1)
       );
     // Worked example assumes that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
-    inapp_first_upnode(
-      //  The position of node 12 in the app array is:
+    if (i == 0) // crashes when i=3; 0 is okay
+      inapp_first_upnode(
+      //  The position of node 12 in the dat / app array is:
       //    root.number (counting from 1) + i = i.e. position[11], the 12th position
       &dat[(parent_of[0] + i + 1 -1) * (*n_char)], // this_start
       &app[(parent_of[0] + i + 1 -1) * (*n_char)], // store applicability for future ref
@@ -139,15 +154,19 @@ void inapp_first_downnode
   }
 }
 
-void inapp_first_root(int *this, int *inapp, int *end_char) {
-  for (int i = 0; i < *end_char; i++) if (this[i] != *inapp) this[i] &= ~(*inapp);
-}
 
 void inapp_first_downpass
 (int *dat, int *act, int *parent, int *child, 
  int *end_char, int *n_char, int *inapp, int *n_edge) {
-  int i;
-  for (i = 0; i < *n_edge; i+=2) {
+  int i;  
+  for (i = 0; i < *n_edge; i+=2) {    
+    Rprintf("\n %i - %i - %i - %i - %i - %i \n", 
+            dat[(parent[i]  - 1)],
+            dat[( child[i+1]- 1)],
+            dat[( child[i]  - 1)],
+            act[(parent[i]  - 1)],
+            act[( child[i+1]- 1)],
+            act[( child[i]  - 1)]);
     inapp_first_downnode(&dat[(parent[i]  - 1) * (*n_char)],
                          &dat[( child[i+1]- 1) * (*n_char)],
                          &dat[( child[i]  - 1) * (*n_char)],
@@ -155,7 +174,6 @@ void inapp_first_downpass
                          &act[( child[i+1]- 1) * (*end_char)], 
                          &act[( child[i]  - 1) * (*end_char)], inapp, end_char);
   }
-  inapp_first_root(&dat[(parent[i]-1) * (*n_char)], inapp, end_char);
 }
 
 void inapp_second_downnode
@@ -294,53 +312,53 @@ int *pars, double *pvec, double *pscore, double *weight) {
 }
 
 SEXP MORPHYFITCH
-(SEXP dat, SEXP nrx, SEXP parent, SEXP child, SEXP parent_of, SEXP children_of,
- SEXP n_edge, SEXP n_node, SEXP weight, SEXP max_node, SEXP n_tip,
- SEXP inapp, SEXP inapp_chars) { // Memo: the first 'inapp_chars' require the Morphy Treatment.
+(SEXP dat, SEXP nchar, SEXP ntip, 
+ SEXP parent, SEXP child, SEXP parent_of, SEXP children_of,
+ SEXP weight, SEXP inapp, SEXP inapp_chars) { 
+ // Memo: the first 'inapp_chars' characters require the Morphy Treatment.
  // Memo: R plots the first-mentioned child ["left"] below the second-mentioned ["right"]
-  int *data, *actives, *n_char=INTEGER(nrx), *inappl=INTEGER(inapp), *appl,  m=INTEGER(max_node)[0], 
-      i, n_tips=INTEGER(n_tip)[0], *first_applicable=INTEGER(inapp_chars);
   double *pvtmp;
-  SEXP RESULT, pars, pscore, DAT, pvec, APPL, ACTIVES;
+  int *data, *appl, *actives, *n_char=INTEGER(nchar), *inappl=INTEGER(inapp), 
+      i, n_tips=INTEGER(ntip)[0], *first_applicable=INTEGER(inapp_chars);
+  int n_internal = n_tips - 1L, n_edge = (n_tips * 2) - 2L, max_node = n_edge + 1L;
+  SEXP RESULT, pars, pscore, DAT, pvec, APPL, ACTIVE;
   PROTECT(RESULT = allocVector(VECSXP, 5));
   PROTECT(pars = allocVector(INTSXP, *n_char));
   PROTECT(pscore = allocVector(REALSXP, 1));
-  PROTECT(DAT = allocMatrix(INTSXP, n_char[0], m));
-  PROTECT(pvec = allocVector(REALSXP, m));
-  PROTECT(APPL = allocMatrix(INTSXP, n_char[0], m));
-  PROTECT(ACTIVES = allocMatrix(INTSXP, *first_applicable, m));
+  PROTECT(DAT = allocMatrix(INTSXP, *n_char, max_node));
+  PROTECT(pvec = allocVector(REALSXP, max_node));
+  PROTECT(APPL = allocMatrix(INTSXP, *n_char, max_node));
+  PROTECT(ACTIVE = allocMatrix(INTSXP, *n_char, max_node)); // #TODO One day we should use first_applicable[0] instead
   pvtmp = REAL(pvec);
-  for(i=0; i<m; i++) pvtmp[i] = 0.0;
-  for(i=0; i<*n_char; i++) {INTEGER(pars)[i] = 0;}
+  for(i=0; i<max_node; i++) pvtmp[i] = 0.0;
+  for(i=0; i<*n_char; i++) INTEGER(pars)[i] = 0;
   REAL(pscore)[0] = 0.0;
   data = INTEGER(DAT);
   appl = INTEGER(APPL);
-  actives = INTEGER(ACTIVES);
+  actives = INTEGER(ACTIVE);
   for(i=0; i<(*n_char * n_tips); i++) {
     data[i] = INTEGER(dat)[i];
     // TODO for appl, make i < (*first_applicable * n_tips)
-    /* The current code is inefficient - we don't need to copy appl for 
-    // taxa that are applicable - but then we can copy data more easily. */
+    // The current code is inefficient - we don't need to copy appl for 
+    // taxa that are applicable - but then we can copy data more easily. 
     appl[i] = INTEGER(dat)[i];
   }
-  for(i=0; i<(*first_applicable * n_tips); i++) {
-    actives[i] = 0;
-  }
+  for (i=0; i<(*n_char * max_node); i++) actives[i] = 0;
 
   inapp_first_downpass(data, actives, INTEGER(parent), INTEGER(child), 
-                       first_applicable, n_char, inappl, INTEGER(n_edge));
-  inapp_first_uppass(data, appl, INTEGER(parent_of), INTEGER(children_of),
-                     first_applicable, n_char, INTEGER(n_node), inappl);
+                       first_applicable, n_char, inappl, &n_edge);
+//  inapp_first_uppass(data, appl, INTEGER(parent_of), INTEGER(children_of),
+//                     first_applicable, n_char, &n_internal, inappl);
 //  // TODO!: inapp_update_tips   (appl, first_applicable, INTEGER(parent), INTEGER(child), INTEGER(n_edge)); 
 //  inapp_second_downpass(data, appl, actives, INTEGER(parent), INTEGER(child), 
-//                        INTEGER(n_edge), n_char, first_inapplicable, inappl, 
+//                        &n_edge, n_char, first_inapplicable, inappl, 
 //                        INTEGER(pars), pvtmp, REAL(pscore), REAL(weight));
 //  inapp_second_uppass  (data, actives, INTEGER(parent_of), INTEGER(children_of), 
-//                        first_applicable, n_char, INTEGER(n_node), inappl, 
+//                        first_applicable, n_char, &n_internal, inappl, 
 //                        INTEGER(pars), pvtmp, REAL(pscore), REAL(weight));
 //
   app_fitch_downpass(data, INTEGER(parent), INTEGER(child),
-                     first_applicable, n_char, INTEGER(n_edge), 
+                     first_applicable, n_char, &n_edge, 
                      inappl, INTEGER(pars), REAL(weight), pvtmp, REAL(pscore)); // No need for an up-pass: all scoring on way down.
 
   SET_VECTOR_ELT(RESULT, 0, pscore);

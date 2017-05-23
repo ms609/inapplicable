@@ -8,7 +8,7 @@
 
 void app_fitch_downnode
 (int *this, int *left, int *right, int *start_char, int *end_char, 
- int *pars, double *weight, double *w) {
+ int *pars) {
   int i;
   for (i = *start_char; i < (*end_char); i++) {
     if (left[i] & right[i]) {
@@ -16,22 +16,21 @@ void app_fitch_downnode
     }
     else {
       this[i] = left[i] | right[i];
-      (pars[i])++; (*w) += weight[i]; // Add one to tree length
+      (pars[i])++; // Add one to tree length
     }
   }
 }
 
 void app_fitch_downpass
 (int *dat, int *parent, int *child, int *start_char, int *n_char, int *n_edge, 
- int *inapp, int *pars, double *weight, double *pvec) {
+ int *inapp, int *pars) {
   int parent_i = 0;
   for (int i = 0; i < *n_edge; i+=2) {
     parent_i = parent[i];
-    pvec[parent_i -1] += pvec[child[i+1]-1] + pvec[child[i]-1];
     app_fitch_downnode(&dat[(parent_i  -1) * (*n_char)],
                        &dat[(child[i+1]-1) * (*n_char)], 
                        &dat[(child[i]  -1) * (*n_char)],
-                       start_char, n_char, pars, weight, &pvec[(parent_i-1)]);
+                       start_char, n_char, pars);
   }
 }
 
@@ -154,26 +153,26 @@ void inapp_first_downpass
 void inapp_second_downnode
 (int *this, int *this_app, int *left, int *right,
  int *this_acts, int *l_acts, int *r_acts,
- int *end_char, int *inapp, int *pars, double *weight, double *w) {
+ int *end_char, int *inapp, int *pars) {
   int i, temp;
   for (i = 0; i < *end_char; ++i) {
     Rprintf("   - this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n",
       this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
-    if (this_app[i] != *inapp) {
-      if ((temp = (left[i] & right[i]))) {
-        if (temp & ~(*inapp)) {
-          this[i] = temp & ~(*inapp);
+    if (this_app[i] != *inapp) { // 4.2
+      if ((temp = (left[i] & right[i]))) { // 4.3
+        if (temp & ~(*inapp)) { // 4.4
+          this[i] = temp & ~(*inapp); //4.4a
         } else {
-          this[i] = temp;
+          this[i] = temp; //4.4b; temp == inapp by 4.4
         }
       }
-      else {
+      else { //4.5
         this[i] = (left[i] | right[i]) & ~(*inapp);
         
-        if ((left[i] & ~(*inapp) && right[i] & ~(*inapp))
-        ||  (l_acts[i] && r_acts[i])) {
-          Rprintf("Addscore %f - %i\n", weight[i], 173);
-          (pars[i])++; (*w) += weight[i]; // Add one to tree length
+        if ((left[i] & ~(*inapp) && right[i] & ~(*inapp)) //4.6
+        ||  (l_acts[i] && r_acts[i])) { // 4.7
+          Rprintf(" !!! Addscore - %i\n", 173);
+          (pars[i])++; // Add one to tree length
         }
       }
     }
@@ -194,12 +193,10 @@ void inapp_second_root
 
 void inapp_second_downpass
 (int *dat, int *app, int *act, int *parent, int *child,
- int *n_edge, int *n_char, int *end_char, int *inapp, 
- int *pars, double *pvec, double *weight) {
+ int *n_edge, int *n_char, int *end_char, int *inapp, int *pars) {
   int i, parent_i = 0;
   for (i=0; i<*n_edge; i+=2) {
     parent_i = parent[i];
-    pvec[parent_i -1] += pvec[child[i+1]-1] + pvec[child[i]-1];
     Rprintf(" - Calling second downnode at %i:\n", parent_i - 1);
     inapp_second_downnode(
       &dat[(parent_i  -1) * (*n_char)],
@@ -209,7 +206,7 @@ void inapp_second_downpass
       &act[(parent_i  -1) * (*n_char)],
       &act[(child[i+1]-1) * (*n_char)], 
       &act[(child[i]  -1) * (*n_char)], 
-      end_char, inapp, pars, weight, &pvec[(parent_i-1)]
+      end_char, inapp, pars
     );
   }
   inapp_second_root(
@@ -220,7 +217,7 @@ void inapp_second_downpass
 void inapp_second_upnode
 (int *this, int *ancestor, int *left, int *right, 
  int *this_acts, int *l_acts, int *r_acts,
- int *end_char, int *inapp, int *pars, double *weight, double *w) {
+ int *end_char, int *inapp, int *pars) {
   int i;
   for (i = 0; i < *end_char; ++i) {    
     Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n",
@@ -252,8 +249,8 @@ void inapp_second_upnode
     }
     else {
       if (l_acts[i] && r_acts[i]) {
-         Rprintf("Addscore %f - %i\n", weight[i], 251);
-        (pars[i])++; (*w) += weight[i]; // Add one to tree length
+         Rprintf(" !!!  Addscore - %i\n", 251);
+        (pars[i])++; // Add one to tree length
       }
     }
   }
@@ -261,8 +258,7 @@ void inapp_second_upnode
 
 void inapp_second_uppass
 (int *dat, int *act, int *parent_of, int *child_of, 
-int *end_char, int *n_char, int *n_node, int *inapp, 
-int *pars, double *pvec, double *weight) {
+int *end_char, int *n_char, int *n_node, int *inapp, int *pars) {
   for (int i = 0; i < (*n_node)-1; i++) {
     // parent_of is stored as 1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node has no parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
@@ -287,7 +283,7 @@ int *pars, double *pvec, double *weight) {
     &act[(child_of[i + 1] -1) * (*n_char)], // left child-actives
     &act[(child_of[i + 1 + *n_node] -1) * (*n_char)], // right child-actives
     
-    end_char, inapp, pars, weight, &pvec[parent_of[0] + i + 1 -1]);
+    end_char, inapp, pars);
   }
 }
 
@@ -297,20 +293,16 @@ SEXP MORPHYFITCH
  SEXP weight, SEXP inapp, SEXP inapp_chars) { 
  // Memo: the first 'inapp_chars' characters require the Morphy Treatment.
  // Memo: R plots the first-mentioned child ["left"] below the second-mentioned ["right"]
-  double *pvtmp;
   int *data, *appl, *actives, *n_char=INTEGER(nchar), *inappl=INTEGER(inapp), 
       i, n_tips=INTEGER(ntip)[0], *first_applicable=INTEGER(inapp_chars);
   int n_internal = n_tips - 1L, n_edge = (n_tips * 2) - 2L, max_node = n_edge + 1L;
-  SEXP RESULT, pars, pscore, DAT, pvec, APPL, ACTIVE;
-  PROTECT(RESULT = allocVector(VECSXP, 4));
+  SEXP RESULT, pars, pscore, DAT, APPL, ACTIVE;
+  PROTECT(RESULT = allocVector(VECSXP, 3));
   PROTECT(pars = allocVector(INTSXP, *n_char));
   PROTECT(pscore = allocVector(REALSXP, 1));
   PROTECT(DAT = allocMatrix(INTSXP, *n_char, max_node));
-  PROTECT(pvec = allocVector(REALSXP, max_node));
   PROTECT(APPL = allocMatrix(INTSXP, *n_char, max_node));
   PROTECT(ACTIVE = allocMatrix(INTSXP, *n_char, max_node)); // #TODO One day we should use first_applicable[0] instead
-  pvtmp = REAL(pvec);
-  for(i=0; i<max_node; i++) pvtmp[i] = 0.0;
   for(i=0; i<*n_char; i++) INTEGER(pars)[i] = 0;
   REAL(pscore)[0] = 0.0;
   data = INTEGER(DAT);
@@ -323,7 +315,7 @@ SEXP MORPHYFITCH
     // The current code is inefficient - we don't need to copy appl for 
     // taxa that are applicable - but then we can copy data more easily. 
     appl[i] = INTEGER(dat)[i];
-    actives[i] = INTEGER(dat)[i];
+    actives[i] = INTEGER(dat)[i] & ~(*inappl); // We don't care whether inapp state is 'active'
   }
 
   inapp_first_downpass(data, actives, INTEGER(parent), INTEGER(child), 
@@ -332,21 +324,17 @@ SEXP MORPHYFITCH
                      first_applicable, n_char, &n_internal, inappl);
   // TODO!: inapp_update_tips   (appl, first_applicable, INTEGER(parent), INTEGER(child), INTEGER(n_edge)); 
   inapp_second_downpass(data, appl, actives, INTEGER(parent), INTEGER(child), 
-                        &n_edge, n_char, first_applicable, inappl, 
-                        INTEGER(pars), pvtmp, REAL(weight));
+                        &n_edge, n_char, first_applicable, inappl, INTEGER(pars));
   inapp_second_uppass  (data, actives, INTEGER(parent_of), INTEGER(children_of), 
-                        first_applicable, n_char, &n_internal, inappl, 
-                        INTEGER(pars), pvtmp, REAL(weight));
+                        first_applicable, n_char, &n_internal, inappl, INTEGER(pars));
 
   app_fitch_downpass(data, INTEGER(parent), INTEGER(child),
-                     first_applicable, n_char, &n_edge, 
-                     inappl, INTEGER(pars), REAL(weight), pvtmp); // No need for an up-pass: all scoring on way down.
+                     first_applicable, n_char, &n_edge, inappl, INTEGER(pars)); // No need for an up-pass: all scoring on way down.
   
-  *(REAL(pscore)) = pvtmp[n_tips];
+  for (i=0; i<*n_char; i++) *(REAL(pscore)) += (REAL(weight)[i] * INTEGER(pars)[i]);
   SET_VECTOR_ELT(RESULT, 0, pscore);
   SET_VECTOR_ELT(RESULT, 1, pars);
   SET_VECTOR_ELT(RESULT, 2, DAT);
-  SET_VECTOR_ELT(RESULT, 3, pvec);
-  UNPROTECT(7);
+  UNPROTECT(6);
   return(RESULT);
 }

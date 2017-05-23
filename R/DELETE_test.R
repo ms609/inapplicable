@@ -20,15 +20,14 @@ data <- strsplit('
 data <- matrix(data[data != '\n'], nrow=length(tree$tip), byrow=TRUE)
 rownames(data) <- tree$tip
 phy <- phyDat(data, levels=c(0:3, '-'), type='USER'); mp <- MorphyDat(phy)
-result <- InapplicableFitch(tree, mp); names(result) <- c('pscore', 'pars', 'DAT', 'pvec')
+result <- InapplicableFitch(tree, mp); names(result) <- c('pscore', 'pars', 'DAT')
 result
 nodes <- (length(tree$tip) + 1):(2 * length(tree$tip) - 1)
 charToExplore <- 1
 attach(result)
 #plot(tree); nodelabels(DAT[charToExplore, nodes])
-plot(tree); nodelabels(pvec[nodes])
+plot(tree); nodelabels(nodes - 1)
 tiplabels(data[, charToExplore])
-nodelabels(nodes - 1)
 detach(result)
 
 dyn.unload('../src/fitch.dll')

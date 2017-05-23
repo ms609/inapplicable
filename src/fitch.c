@@ -3,8 +3,6 @@
 #include <math.h>
 #include <R.h> 
 #include <Rinternals.h>
-#include <assert.h>
-#include <stdio.h>
 
 // Note: Where possible pass pointers rather than their values to conserve stack space.
 
@@ -43,9 +41,6 @@ void inapp_first_upnode
  int *inapp, int *end_char) {
   int i;
   for (i = 0; i < *end_char; i++) {
-    // Problem seems to be arising when inspecting Ancestor[i]
-    Rprintf("this-%i: %i, anc-%i: %i, inapp: %i\n", i, this[i], i, ancestor[i], ~(*inapp));
-    /*
     if (this[i] & (*inapp)) {
       if (this[i] & ~(*inapp)) {
         if (ancestor[i] == *inapp) {
@@ -71,7 +66,7 @@ void inapp_first_upnode
     }
     else {
       app[i] = this[i];
-    }*/
+    }
   }
 }
 
@@ -96,17 +91,8 @@ void inapp_first_uppass
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     // app and app are stored as [0 * n_char] = apps[,1], [1 * n_char] = apps[,2], ....
     
-    Rprintf("This: %i = %i -> %i, anc: %i; left: %i; right: %i.\n",
-      (parent_of[0] + i + 1 -1),
-      dat[(parent_of[0] + i + 1 -1)],
-      app[(parent_of[0] + i + 1 -1)], 
-      parent_of[i]-1,
-      (children_of[i + 1 + *n_node] - 1),
-      (children_of[i + 1] -1)
-      );
     // Worked example assumes that root node = 11 and i = 0, meaning 'look at node 12' [the first of 11's children].
-    if (i == 0) // crashes when i=3; 0 is okay
-      inapp_first_upnode(
+    inapp_first_upnode(
       //  The position of node 12 in the dat / app array is:
       //    root.number (counting from 1) + i = i.e. position[11], the 12th position
       &dat[(parent_of[0] + i + 1 -1) * (*n_char)], // this_start
@@ -130,10 +116,9 @@ void inapp_first_downnode
  int *this_acts, int *l_acts, int *r_acts,
  int *inapp, int *end_char) {
   int i, temp;
-  for (i = 0; i < *end_char; ++i) {
+  for (i=0; i<*end_char; i++) {
     if ((temp = (left[i] & right[i]))) {
       this[i] = temp;
-      
       if (temp == *inapp) {
         if ((left[i] & ~(*inapp)) && (right[i] & ~(*inapp))) {
           this[i] = (left[i] | right[i]);
@@ -142,15 +127,11 @@ void inapp_first_downnode
     }
     else {
       this[i] = (left[i] | right[i]);
-      
       if ((left[i] & ~(*inapp)) && (right[i] & ~(*inapp))) {
-          this[i] = this[i] & ~(*inapp);
+        this[i] = this[i] & ~(*inapp);
       }
     }
-    
     this_acts[i] = (l_acts[i] | r_acts[i]) & ~(*inapp);
-    
-    assert(this[i]);
   }
 }
 
@@ -159,20 +140,13 @@ void inapp_first_downpass
 (int *dat, int *act, int *parent, int *child, 
  int *end_char, int *n_char, int *inapp, int *n_edge) {
   int i;  
-  for (i = 0; i < *n_edge; i+=2) {    
-    Rprintf("\n %i - %i - %i - %i - %i - %i \n", 
-            dat[(parent[i]  - 1)],
-            dat[( child[i+1]- 1)],
-            dat[( child[i]  - 1)],
-            act[(parent[i]  - 1)],
-            act[( child[i+1]- 1)],
-            act[( child[i]  - 1)]);
+  for (i = 0; i < *n_edge; i+=2) {
     inapp_first_downnode(&dat[(parent[i]  - 1) * (*n_char)],
                          &dat[( child[i+1]- 1) * (*n_char)],
                          &dat[( child[i]  - 1) * (*n_char)],
-                         &act[(parent[i]  - 1) * (*end_char)],
-                         &act[( child[i+1]- 1) * (*end_char)], 
-                         &act[( child[i]  - 1) * (*end_char)], inapp, end_char);
+                         &act[(parent[i]  - 1) * (*n_char)],
+                         &act[( child[i+1]- 1) * (*n_char)], 
+                         &act[( child[i]  - 1) * (*n_char)], inapp, end_char);
   }
 }
 
@@ -200,17 +174,16 @@ void inapp_second_downnode
       }
     }
     this_acts[i] = (l_acts[i] | r_acts[i]) & ~(*inapp);
-    
-    assert(this[i]);
   }
 }
 
 void inapp_second_root
-(int *root_dat, int *root_app, int *inapp, int *n_char) {
-  for (int i = 0; i < *n_char; i++) {
-    if (root_app[i] != *inapp) { // Assume applicable if ambiguous.
-      root_dat[i] = root_dat[i] & ~(*inapp); 
-      root_app[i] = root_dat[i]; 
+(int *dat, int *app, int *inapp, int *end_char) {
+  int i;
+  for (i=0; i<*end_char; i++) {
+    if (app[i] != *inapp) { // Assume applicable if ambiguous.
+      dat[i] = dat[i] & ~(*inapp); 
+      app[i] = dat[i]; 
     }
   }
 }
@@ -220,21 +193,25 @@ void inapp_second_downpass
  int *n_edge, int *n_char, int *end_char, int *inapp, 
  int *pars, double *pvec, double *pscore, double *weight) {
   int i, parent_i = 0;
-  for (i = 0; i < *n_edge; i+=2) {
+  for (i=0; i<*n_edge; i+=2) {
     parent_i = parent[i];
-    pvec[parent_i -1] += pvec[child[i]-1] + pvec[child[i+1]-1];
+    Rprintf(" - Passing down to node %i, children %i, %i\n", parent_i - 1, child[i+1] - 1, child[i] - 1);
+    pvec[parent_i -1] += pvec[child[i+1]-1] + pvec[child[i]-1];
     inapp_second_downnode(
       &dat[(parent_i  -1) * (*n_char)],
       &app[(parent_i  -1) * (*n_char)],
       &dat[(child[i+1]-1) * (*n_char)], 
       &dat[(child[i]  -1) * (*n_char)], 
-      &act[(parent_i  -1) * (*end_char)],
-      &act[(child[i+1]-1) * (*end_char)], 
-      &act[(child[i]  -1) * (*end_char)], 
+      &act[(parent_i  -1) * (*n_char)],
+      &act[(child[i+1]-1) * (*n_char)], 
+      &act[(child[i]  -1) * (*n_char)], 
       end_char, inapp, pars, weight, &pvec[(parent_i-1)]
     );
   }
-  inapp_second_root(&dat[(parent[i]-1) * (*n_char)], &app[(parent[i]-1) * (*n_char)], inapp, n_char);
+  Rprintf("I believe the root to be %i. \n", parent_i - 1);
+  inapp_second_root(
+    &dat[(parent_i -1) * (*n_char)], 
+    &app[(parent_i -1) * (*n_char)], inapp, end_char);
   pscore[0] = pvec[parent_i-1];  
 }
 
@@ -274,7 +251,6 @@ void inapp_second_upnode
         (pars[i])++; (*w) += weight[i]; // Add one to tree length
       }
     }
-    assert(this[i]);
   }
 }
 
@@ -347,12 +323,12 @@ SEXP MORPHYFITCH
 
   inapp_first_downpass(data, actives, INTEGER(parent), INTEGER(child), 
                        first_applicable, n_char, inappl, &n_edge);
-//  inapp_first_uppass(data, appl, INTEGER(parent_of), INTEGER(children_of),
-//                     first_applicable, n_char, &n_internal, inappl);
-//  // TODO!: inapp_update_tips   (appl, first_applicable, INTEGER(parent), INTEGER(child), INTEGER(n_edge)); 
-//  inapp_second_downpass(data, appl, actives, INTEGER(parent), INTEGER(child), 
-//                        &n_edge, n_char, first_inapplicable, inappl, 
-//                        INTEGER(pars), pvtmp, REAL(pscore), REAL(weight));
+  inapp_first_uppass(data, appl, INTEGER(parent_of), INTEGER(children_of),
+                     first_applicable, n_char, &n_internal, inappl);
+  // TODO!: inapp_update_tips   (appl, first_applicable, INTEGER(parent), INTEGER(child), INTEGER(n_edge)); 
+  inapp_second_downpass(data, appl, actives, INTEGER(parent), INTEGER(child), 
+                        &n_edge, n_char, first_applicable, inappl, 
+                        INTEGER(pars), pvtmp, REAL(pscore), REAL(weight));
 //  inapp_second_uppass  (data, actives, INTEGER(parent_of), INTEGER(children_of), 
 //                        first_applicable, n_char, &n_internal, inappl, 
 //                        INTEGER(pars), pvtmp, REAL(pscore), REAL(weight));

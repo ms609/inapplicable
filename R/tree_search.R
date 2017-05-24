@@ -146,7 +146,7 @@ InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=10
   kmax <- 0
   for (i in 1:maxit) {
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
-    bstree <- bootstrap.inapp(phy=tree, x=data, maxiter=maxiter, maxhits=maxhits, criterion=criterion, trace=trace-1, ...)
+    bstree <- BoostrapInapp(phy=tree, x=data, maxiter=maxiter, maxhits=maxhits, criterion=criterion, trace=trace-1, ...)
     
     if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new cannew candidate tree:")
     if (rearrangements == "TBR") {
@@ -222,24 +222,23 @@ PratchetConsensus <- function (tree, data, maxit=5000, maxiter=500, maxhits=20, 
   return (trees)
 }
 
-bootstrap.inapp <- function (phy, x, maxiter, maxhits, criterion=criterion, trace=1, ...) {
+BoostrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion, trace=1, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
-  at <- attributes(x)
+  at <- attributes(morphy)
   weight <- at$weight
   v <- rep(1:length(weight), weight)
   BS <- tabulate(sample(v, replace=TRUE), length(weight)) 
   keep <- BS > 0
   ind <- which(keep)
-  x <- x[ind, ]
-  attr(x, 'weight') <- BS[ind]
-  attr(x, 'min.steps') <- at$min.steps[keep]
-  attr(x, 'unique.tokens') <- at$unique.tokens[keep]
-  attr(x, 'nr') <- length(ind)
-  attr(x, 'inapp.level') <- at$inapp.level
-  attr(phy, 'pscore') <- NULL
-  class(x) <- '*phyDat'
-  stop("TO RECODE!")#TODO
-  res <- TreeSearch(phy, x, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
+  morphy <- morphy[, ind]
+  attr(morphy, 'weight') <- BS[ind]
+  attr(morphy, 'min.steps') <- at$min.steps[keep]
+  attr(morphy, 'unique.tokens') <- at$unique.tokens[keep]
+  attr(morphy, 'nr') <- length(ind)
+  attr(morphy, 'inapp.level') <- at$inapp.level
+  attr(tree, 'pscore') <- NULL
+  class(morphy) <- 'morphyDat'
+  res <- TreeSearch(tree, morphy, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   res

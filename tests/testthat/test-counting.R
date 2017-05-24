@@ -52,7 +52,6 @@ test_that("right counting", {
   for(test in 1:length(characters)) {
     output <- InapplicableFitch(tree, StringToMorphy(characters[test], tree$tip.label))
     tree_length <- output[[1]]
-    cat(test - 1, ':')
     expect_equal(tree_length, expected_results[test])
   }
   ## Test combined matrix

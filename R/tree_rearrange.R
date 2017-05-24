@@ -3,13 +3,13 @@ RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
     trees <- list(re.tree<-rearrange(tree))
-    min.score <- MorphyParsimony(re.tree, data)
+    min.score <- InapplicableFitch(re.tree, data)
     best.trees <- c(TRUE)
   } else {
-    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- MorphyParsimony(ret, cl.data, k); ret}, rearrange, tree, concavity)
+    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
     candidates <- clusterCall(cluster, rearrange, tree)
-    scores <- vapply(candidates, MorphyParsimony, 1, data) # ~3x faster to do this in serial in r233.
+    scores <- vapply(candidates, InapplicableFitch, 1, data) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score
     trees <- candidates[best.trees]

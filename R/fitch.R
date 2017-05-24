@@ -1,9 +1,36 @@
-CallMorphy <- function (n_char, n_taxa, desc, ancs, rawmatrix) {
-  .Call('RMorphy', as.integer(n_char), as.integer(n_taxa), as.integer(desc - 1L),
-                  as.integer(ancs - 1L), as.character(rawmatrix))[[1]]
-}
+#' @title Calculate parsimony score with inapplicable data
+#'
+#' @description Uses code modified from the Morphy library to calculate a parsimony score 
+#' in datasets that contain inapplicable data
+#'
+#' @param tree A tree of class \code{phylo}
+#' @param morphyData A \code{phyDat} or \code{morphyDat} object, perhaps generated with 
+#'  \code{\link{phyDat}} or \code{\link{MorphyData}}
+#' @param detail Leave as 1 to just return parsimony score, or specify c(1, 2, 3) for additional detail (see below)
+#' 
+#' @examples
+#' data(SigSut)
+#' taxa <- names(SigSut.phy)
+#' tree <- rtree(length(taxa), tip.label=taxa, br=NULL)
+#' result <- InapplicableFitch(tree, SigSut.phy)
+#' 
+#' @value This function returns the elements from a list containing:
+#'    \itemize{
+#' \item     The total parsimony score
+#' \item     The parsimony score associated with each character 
+#' \item     A matrix comprising character reconstructions for each node after the final pass
+#'   }
+#' The elements to return are specified by the parameter \code{detail}.  
+#' If a single element is requested (default) then just that element will be returned
+#' If multiple elements are requested then these will be returned in a list.
+#' 
+#' @seealso \code{\link{MorphyData}}
+#' @seealso \code{\link{TreeSearch}}
+#' 
+#' @author Martin Smith (using C code adapted from MorphyLib, author Martin Brazeau)
+#' @export
 
-InapplicableFitch <- function (tree, morphyData) {
+InapplicableFitch <- function (tree, morphyData, detail=1) {
   # Data
   if (class(morphyData) == 'phyDat') morphyData <- MorphyDat(morphyData)
   if (class(morphyData) != 'morphyDat') stop('Invalid data type ', class(morphyData), '; try InapplicableFitch(tree, data <- MorphyData(valid.phyDat.object)).')
@@ -26,71 +53,8 @@ InapplicableFitch <- function (tree, morphyData) {
   
   ret <- .Call("MORPHYFITCH", t(morphyData[tipLabel, ]), as.integer(nChar), as.integer(nTip), 
                as.integer(parent), as.integer(child), as.integer(parentOf), as.integer(childOf), 
-               as.double(weight), as.integer(inappLevel), as.integer(inappChars))#, PACKAGE='inapplicable')
+               as.double(weight), as.integer(inappLevel), as.integer(inappChars), PACKAGE='inapplicable')
   
-  return (ret)
-}
-
-
-MorphyParsimony <- function (tree, data) {
-  tipNames <- tree$tip.label
-  if (class(data) == 'phyDat') {
-    at <- attributes(data)
-    tipNames <- tipNames[tipNames %in% at$names]
-    weight <- at$weight
-    n.char <- sum(weight) # At present, MorphyLib doesn't allow us to leverage this efficient 
-                          # solution, so we'll have to be inefficient.
-    contrast <- at$contrast
-    dimContrast <- dim(contrast)
-    nRowContrast <- dimContrast[1]
-    contrast <- matrix(as.logical(contrast), nRowContrast, dimContrast[2])
-    levels <- at$levels
-    matrixAsString <- paste0(c(vapply(tipNames, function (name) paste0(vapply(
-      rep(as.integer(data[[name]]), weight), function (x) {
-        if (x == nRowContrast) return('?')
-        tokens <- levels[contrast[x ,]]
-        if (length(tokens) > 1) return (paste0(c('{', tokens, '}'), collapse=''))
-        return (tokens)
-    }, character(1)), collapse=''), character(1)), ';'), collapse='')
-  } else if (class(data) == 'matrix') {
-    tipNames <- tipNames[tipNames %in% rownames(data)]
-    dim.dat <- dim(data)
-    n.char <- dim.dat[2]
-    nTip  <- dim.dat[1]
-    matrixAsString <- paste0(c(unlist(data), ';'), collapse='')
-    weight <- rep(1, n.char)
-  }  else if (class(data) == 'list') {
-    tipNames <- tipNames[tipNames %in% names(data)]
-    dim.dat <- dim(dat.matrix)
-    n.char <- dim.dat[1]
-    nTip  <- dim.dat[2]
-    dat.matrix <- vapply(dat, as.vector, dat[[1]])
-    matrixAsString <- paste0(c(t(dat.matrix), ';'), collapse='') ##CHECK: we probably don't need the t()
-    weight <- rep(1, n.char)
-  } else {
-    stop ("Unrecognized data format. Try phyDat format; see ?phyDat.")
-  }
-  nTip <- length(tipNames)
-  if (nTip < 3) stop ("Sorry, couldn't find enough tips with available data.")
-  
-  edge <- tree$edge
-  parent <- edge[, 1]
-  child  <- edge[, 2]
-
-  maxNode <- nTip * 2 - 1
-  root.node <- nTip + 1
-  dummy.root.node <- maxNode + 1
-  
-  if (maxNode != max(parent)) stop ("Tree must be binary")
-  if (root.node != min(parent)) stop ("Root node miscalculated")
-
-  preorder <- root.node:maxNode
-
-  ancestor <- function (x) parent[child==x]
-  descendant <- function (x) child[parent==x]
-  ancestors <- as.integer(c(vapply(1:nTip, ancestor, double(1)), 0, vapply((nTip + 2):(nTip * 2 - 1), ancestor, double(1))))
-  ancestors[root.node] <- dummy.root.node
-  descendants <- as.integer(vapply(preorder, descendant, double(2))) # children of each node, a pair at a time, right-left, right-left
-
-  return(CallMorphy(n.char, nTip, descendants, ancestors, matrixAsString))
+  if (length(detail) == 1) return (ret[[detail]])
+  return (ret[detail])
 }

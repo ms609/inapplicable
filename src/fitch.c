@@ -7,7 +7,7 @@
 // Note: Where possible pass pointers rather than their values to conserve stack space.
 
 void app_fitch_downnode
-(int *this, int *left, int *right, int *start_char, int *end_char, 
+(int *this, int *left, int *right, const int *start_char, const int *end_char, 
  int *pars) {
   int i;
   for (i = *start_char; i < (*end_char); i++) {
@@ -23,8 +23,8 @@ void app_fitch_downnode
 }
 
 void app_fitch_downpass
-(int *dat, int *parent, int *child, int *start_char, int *n_char, int *n_edge, 
- int *inapp, int *pars) {
+(int *dat, int *parent, int *child, const int *start_char, const int *n_char, const int *n_edge, 
+ const int *inapp, int *pars) {
   int parent_i = 0;
   for (int i = 0; i < *n_edge; i+=2) {
     parent_i = parent[i];
@@ -36,7 +36,7 @@ void app_fitch_downpass
 }
 
 void inapp_update_tip
-(int *this, int *active_tracker, int *ancestor, int *n_char, int *inapp) {
+(int *this, int *active_tracker, int *ancestor, const int *n_char, const int *inapp) {
   int i;
   for (i=0; i<*n_char; i++) {
     if ((this[i] & ~(*inapp)) && (this[i] & *inapp)) { // 2.8
@@ -59,7 +59,7 @@ void inapp_update_tip
 }
 
 void inapp_update_tips
-(int *dat, int *upp1, int *act, int *parent_of, int *n_tip, int *n_char, int *inapp) {
+(int *dat, int *upp1, int *act, int *parent_of, const int *n_tip, const int *n_char, const int *inapp) {
   int i;
   for (i=0; i<*n_tip; i++) {
   //#debug#//Rprintf(" - [TIP %i] state=%i, [parent %i] state=%i: ", i, dat[i], parent_of[i] - 1, dat[(parent_of[i] -1)]);
@@ -76,7 +76,7 @@ void inapp_update_tips
 
 void inapp_first_upnode
 (int *this, int *upp1, int *ancestor, int *left, int *right,
- int *inapp, int *end_char) {
+ const int *inapp, const int *end_char) {
   int i;
   for (i=0; i<*end_char; i++) {
     //#debug#//Rprintf("   ... this=%i, anc=%i, left=%i, right=%i:", this[i], ancestor[i], left[i], right[i]);
@@ -110,7 +110,7 @@ void inapp_first_upnode
   }
 }
 
-void inapp_first_root(int *this, int *upp1, int *inapp, int *end_char) {
+void inapp_first_root(int *this, int *upp1, const int *inapp, const int *end_char) {
   for (int i=0; i<*end_char; i++) {
     if (this[i] != *inapp) {
       upp1[i] = this[i] & ~(*inapp); // TODO posit: ~(*inapp) will do?
@@ -123,7 +123,7 @@ void inapp_first_root(int *this, int *upp1, int *inapp, int *end_char) {
 
 void inapp_first_uppass
 (int *dat, int *upp1, int *parent_of, int *children_of, 
- int *end_char, int *n_char, int *n_internal, int *inapp) {
+ const int *end_char, const int *n_char, const int *n_internal, const int *inapp) {
   int root_node = *n_internal + 1L;  // which is the index of the root node
   //#debug#//Rprintf(" - Calling first upnode at ROOT node %i:\n", root_node);
   inapp_first_root(&dat [(root_node) * (*n_char)], 
@@ -146,7 +146,7 @@ void inapp_first_uppass
 void inapp_first_downnode
 (int *this, int *left, int *right, 
  int *this_acts, int *l_acts, int *r_acts,
- int *inapp, int *end_char) {
+ const int *inapp, const int *end_char) {
   int i, temp;
   for (i=0; i<*end_char; i++) {
     if ((temp = (left[i] & right[i]))) {
@@ -171,7 +171,7 @@ void inapp_first_downnode
 
 void inapp_first_downpass
 (int *dat, int *act, int *parent, int *child, 
- int *end_char, int *n_char, int *inapp, int *n_edge) {
+ const int *end_char, const int *n_char, const int *inapp, const int *n_edge) {
   int i;  
   for (i = 0; i < *n_edge; i+=2) {
     //#debug#//Rprintf(" - First downpass at node %i\n", parent[i] - 1);
@@ -187,7 +187,7 @@ void inapp_first_downpass
 void inapp_second_downnode
 (int *this, int *this_upp1, int *left, int *right,
  int *this_acts, int *l_acts, int *r_acts,
- int *end_char, int *inapp, int *pars) {
+ const int *end_char, const int *inapp, int *pars) {
   int i, temp;
   for (i=0; i<*end_char; i++) {
     //#debug#//Rprintf("up=%i, l=%i, r=%i, l_act=%i, r_act=%i:\n", this_upp1[i], left[i], right[i], l_acts[i], r_acts[i]);
@@ -216,7 +216,7 @@ void inapp_second_downnode
 }
 
 void inapp_second_root
-(int *dat, int *upp1, int *inapp, int *end_char) {
+(int *dat, int *upp1, const int *inapp, const int *end_char) {
   int i;
   for (i=0; i<*end_char; i++) {
     if (upp1[i] != *inapp) { // Assume applicable if ambiguous.
@@ -228,7 +228,7 @@ void inapp_second_root
 
 void inapp_second_downpass
 (int *dat, int *upp1, int *act, int *parent, int *child,
- int *n_edge, int *n_char, int *end_char, int *inapp, int *pars) {
+ const int *n_edge, const int *n_char, const int *end_char, const int *inapp, int *pars) {
   int i, parent_i = 0;
   for (i=0; i<*n_edge; i+=2) {
     parent_i = parent[i];
@@ -253,7 +253,7 @@ void inapp_second_downpass
 void inapp_second_upnode
 (int *this, int *ancestor, int *left, int *right, 
  int *this_acts, int *l_acts, int *r_acts,
- int *end_char, int *inapp, int *pars) {
+ const int *end_char, const int *inapp, int *pars) {
   int i;
   for (i = 0; i < *end_char; ++i) {    
     //#debug#//Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this[i], ancestor[i], left[i], right[i], l_acts[i], r_acts[i]);
@@ -293,7 +293,7 @@ void inapp_second_upnode
 
 void inapp_second_uppass
 (int *dat, int *act, int *parent_of, int *child_of, 
-int *end_char, int *n_char, int *n_node, int *inapp, int *pars) {
+ const int *end_char, const int *n_char, const int *n_node, const int *inapp, int *pars) {
   int i, root_node = *n_node + 1L; // already in index notation, so no -1 needed.
   for (i=0; i<(*n_node); i++) {
     //#debug#//Rprintf(" - Calling second upnode at %i, anc=%i\n", root_node + i, parent_of[root_node + i] - 1);
@@ -318,9 +318,9 @@ SEXP MORPHYFITCH
  SEXP weight, SEXP inapp, SEXP inapp_chars) { 
  // Memo: the first 'inapp_chars' characters require the Morphy Treatment.
  // Memo: R plots the first-mentioned child ["left"] below the second-mentioned ["right"]
-  int *data, *upp1, *active_tracker, *n_char=INTEGER(nchar), *inappl=INTEGER(inapp), 
-      i, n_tips=INTEGER(ntip)[0], *first_applicable=INTEGER(inapp_chars);
-  int n_internal = n_tips - 1L, n_edge = (n_tips * 2) - 2L, max_node = n_edge + 1L;
+  int *data, *upp1, *active_tracker, i;
+  const int *inappl=INTEGER(inapp), *n_char=INTEGER(nchar), n_tips=INTEGER(ntip)[0], *first_applicable=INTEGER(inapp_chars);
+  const int n_internal = n_tips - 1L, n_edge = (n_tips * 2) - 2L, max_node = n_edge + 1L;
   SEXP RESULT, pars, pscore, DAT, APPL, ACTIVE;
   PROTECT(RESULT = allocVector(VECSXP, 3));
   PROTECT(pars = allocVector(INTSXP, *n_char));

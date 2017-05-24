@@ -137,18 +137,18 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' @keyword  tree 
 
 #' @export
-InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
-  if (class(data) != 'phyDat') stop("data must be a phyDat object.")
+InapplicablePratchet <- function (tree, data, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
+  if (class(data) != 'morphyDat') stop("data must be a morphyDat object.")
   eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- InapplicableFitch(tree, data, ...)
   best.pars <- attr(tree, "pscore")
   if (trace >= 0) cat("* Initial pscore:", best.pars)
-  if (all) forest <- vector('list', maxiter)
+  if (keepAll) forest <- vector('list', maxiter)
 
-  kmax <- 0
+  kmax <- 0 
   for (i in 1:maxit) {
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
-    bstree <- BoostrapInapp(phy=tree, x=data, maxiter=maxiter, maxhits=maxhits, criterion=criterion, trace=trace-1, ...)
+    bstree <- BootstrapInapp(tree=tree, morphy=data, maxiter=maxiter, maxhits=maxhits, criterion=criterion, trace=trace-1, ...)
     
     if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new cannew candidate tree:")
     if (rearrangements == "TBR") {
@@ -171,7 +171,7 @@ InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=10
     #pscores <- sapply(trees, function(data) attr(data, "pscore"))
     cand.pars <- attr(candidate, 'pscore')
     if((cand.pars+eps) < best.pars) {
-      if (all) {
+      if (keepAll) {
         forest <- vector('list', maxiter)
         forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
       }
@@ -182,7 +182,7 @@ InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=10
       if (best.pars+eps > cand.pars) { # i.e. best == cand, allowing for floating point error
         kmax <- kmax + 1
         tree <- candidate
-        if (all) forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
+        if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
       }
     }
     if (trace >= 0) cat("\n* Best pscore after", i, "/", maxit, "pratchet iterations:", best.pars, "( hit", kmax, "/", k, ")")
@@ -191,7 +191,7 @@ InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=10
   if (trace >= 0)
     cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
     
-  if (all) {
+  if (keepAll) {
     forest <- forest[!vapply(forest, is.null, logical(1))]
     class(forest) <- 'multiPhylo'
     ret <- unique(forest)
@@ -224,7 +224,8 @@ PratchetConsensus <- function (tree, data, maxit=5000, maxiter=500, maxhits=20, 
   return (trees)
 }
 
-BoostrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion, trace=1, ...) {
+#' @export
+BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion, trace=1, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   at <- attributes(morphy)
   weight <- at$weight

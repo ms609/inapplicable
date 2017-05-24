@@ -17,9 +17,9 @@ InapplicableSectorial <- function (tree, data, maxit=100,
   if (is.null(tree)) stop("a starting tree must be provided")
   if (trace >= 0) cat('InapplicableSectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
-  sector.data <- function (X, tips) {
+  SectorData <- function (X, tips) {
     at <- attributes(X)
-    dec <- X[,tips]
+    dec <- X[tips, ]
     nBits <- floor(log2(max(X))) + 1L
     bin <- array(FALSE, dim=c(nrow(dec), ncol(dec), nBits))
     for (i in 0:(nBits-1)) {
@@ -29,7 +29,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
     state.union <- apply(bin, c(1,3), all)
     parsimony.informative <- !as.logical(rowSums(state.union))
     if (!any(parsimony.informative)) return (NULL)
-    X <- X[parsimony.informative, tips]
+    X <- X[tips, parsimony.informative]
     informative.chars <- sum(parsimony.informative)
     SECTOR_ROOT <- rep(2^nBits-1, informative.chars)
     X <- cbind(X, SECTOR_ROOT)
@@ -39,8 +39,8 @@ InapplicableSectorial <- function (tree, data, maxit=100,
     #attr(X, 'min.steps') <- apply(X, 1, function(x) min.steps(x, inapp.power2))
     attr(X, 'levels') <- at$levels
     attr(X, 'weight') <- at$weight[parsimony.informative]
-    class(X) <- '*phyDat'
-    stop("To re-code!") #TODO!
+    class(X) <- 'morphyDat'
+    warning("#TODO this is not yet tested")
     X
   }
   
@@ -58,7 +58,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
       crown.tips <- crown$tip.label
       sector.size <- length(crown.tips)
       cat(sector, 'size', sector.size, '...')
-      crown.data <- sector.data(data, crown.tips)
+      crown.data <- SectorData(data, crown.tips)
       if (!is.null(crown.data)) break else cat('unsuitable (no data); trying')
       candidate.nodes <- candidate.nodes[-which(candidate.nodes==sector)]
       if (length(candidate.nodes == 0)) stop('No selectable sectors contain parsimony information! Either "largest.sector" is close to "smallest.sector" or your dataset is short of parsimony information.')

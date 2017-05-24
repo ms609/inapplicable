@@ -96,42 +96,6 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
   MorphyDat(phy)
 }
 
-PrepareData <- function (data) {
-# Written with reference to phangorn:::prepareDataFitch
-  at <- attributes(data)
-  nam <- at$names
-  nLevel <- length(at$level)
-  nChar <- at$nr
-  cont <- attr(data, "contrast")
-  nTip <- length(data)
-  at$names <- NULL
-  powers.of.2 <- 2L^c(0L:(nLevel - 1L))
-  tmp <- cont %*% powers.of.2
-  tmp <- as.integer(tmp)
-  data <- unlist(data, FALSE, FALSE)
-  ret <- tmp[data] 
-  ret <- as.integer(ret)
-  attributes(ret) <- at
-  inapp.level <- which(at$levels == "-")
-  if (!any(inapp.level)) warning ("    No inapplicable tokens detected in data.
-    Use a hyphen ('-', not a dash) to denote taxa in which a transformation series is inapplicable.
-    Does typing attributes(mydataname, 'contrast') return a column labelled '-'?")
-  attr(ret, 'inapp.level') <- 2^(inapp.level - 1)
-  attr(ret, 'dim') <- c(nChar, nTip)  
-  attr(ret, 'unique.tokens') <- apply(ret, 1, function(x) quick.min(x, inapp.level))
-  applicable.tokens <- setdiff(powers.of.2, 2^(inapp.level - 1))
-  attr(ret, 'split.sizes') <- apply(ret, 1, function(x) vapply(applicable.tokens, function (y) sum(x==y), integer(1)))
-  dimnames(ret) <- list(NULL, nam)
-  class(ret) <- '*phyDat'
-  ret
-}
-
-# No longer needed here - move to 'information' package
-quick.min <- function (x, inapp.level) {
-  if (length(inapp.level)) return(sum(2^(c(0:(inapp.level-2), inapp.level:12)) %in% unique(x)))
-  return (sum(2^(0:12) %in% unique(x)))
-}
-
 #' @name AsBinary
 #' @alias AsBinary
 #' @title Convert a number to binary

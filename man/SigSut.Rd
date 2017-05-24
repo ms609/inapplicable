@@ -7,9 +7,9 @@
 \alias{SigSut.besttree}
 \docType{data}
 \title{Data from Sigwart and Sutton 2007}
-\description{Contains the phylogenetic matrix from Sigwart and Sutton (2007), modified per Smith & Brazeau (201X),
+\description{Contains the phylogenetic matrix from Sigwart and Sutton (2007), modified per ###REFERENCE###,
 and the strict consensus of the most parsimonious trees generated under traditional parsimony
-and under the method proposed by Smith & Brazeau (201X).}
+and under the method proposed by ###REFERENCE###.}
 \usage{data('SigSut')
 SigSut.data
 SigSut.phy
@@ -22,7 +22,7 @@ SigSut.besttree
   \tabular{ll}{
     \code{SigSut.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
     \code{SigSut.phy        }  \tab \code{\link{phyDat}} \cr
-    \code{SigSut.preparedata}  \tab \code{\link[=PrepareData]{*phyDat}} \cr
+    \code{SigSut.preparedata}  \tab Obselete; to be replaced with SigSut.morphy \cr
     \code{SigSut.parstree   }  \tab \code{\link{phylo}} \cr
     \code{SigSut.besttree   }  \tab \code{\link{phylo}} \cr
     \code{SigSut.outgroup   }  \tab \code{\link{vector}} \cr
@@ -47,12 +47,12 @@ The dataset contains:
   \code{SigSut.parstree}\tab    The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr
   \tab  of the dataset under the standard parsimony method\cr
   \code{SigSut.besttree}\tab     The phylogenetic tree (in phylo format) recovered by equal-weights analysis\cr
-  \tab of the dataset under the revised method of Smith & Brazeau (201X)\cr
+  \tab of the dataset under the revised method of ###REFERENCE###\cr
   \code{SigSut.outgroup}\tab     The outgroup, \code{c('Lingula', 'Neocrania', 'Mickwitzia')}\cr
 }
 }
 \source{
-Sigwart and Sutton (2007); modified per Smith & Brazeau (201X)
+Sigwart and Sutton (2007); modified per ###REFERENCE###
 }
 \references{
 \itemize{

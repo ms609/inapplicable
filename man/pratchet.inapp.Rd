@@ -8,8 +8,8 @@ InapplicablePratchet(tree, data, concavity = NULL, all = FALSE, outgroup = NULL,
 }
 \arguments{
   \item{tree}{An object of class \code{phyDat} denoting the topology to begin the search from;}
-  \item{data}{the output of \code{\link{PrepareData}}, or a matrix in phyDat format
-    (which the function will itself pass through \code{PrepareData});}
+  \item{data}{A matrix in \code{\link{MorphyData}} format (or \code{\link{phyDat}} format,
+    which the function will itself pass through \code{MorphyData});}
   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
     see \code{\link{InapplicableParsimony}};}
   \item{all}{Set to TRUE to report all MPTs encountered during the search, perhaps to analyze consensus}
@@ -41,6 +41,6 @@ data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
-InapplicablePratchet(njtree, SigSut.preparedata, outgroup, maxit=1, maxiter=50)
+InapplicablePratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
 }
 \keyword{ tree }

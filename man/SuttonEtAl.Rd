@@ -10,9 +10,9 @@
 \description{
 \code{#TODO!  } Re-generate ALL data to avoid typo of PolysacCos.  Re-generate preparedate with new function.
 
-Phylogenetic matrix from Sutton et al. (2012), modified per Smith & Brazeau (201X),
+Phylogenetic matrix from Sutton et al. (2012), modified per ###REFERENCE###,
 and the strict consensus of the most parsimonious trees generated under traditional parsimony
-and under the method proposed by Smith & Brazeau (201X).}
+and under the method proposed by ###REFERENCE###.}
 \usage{data('SuttonEtAl')
 SuttonElAl.data
 SuttonElAl.phy
@@ -24,7 +24,7 @@ SuttonElAl.besttree}
   \tabular{ll}{
     \code{SuttonEtAl.data       }  \tab \code{list}, as produced by \code{\link{read.nexus.data}}\cr
     \code{SuttonEtAl.phy        }  \tab \code{\link{phyDat}} \cr
-    \code{SuttonEtAl.preparedata}  \tab \code{\link[=PrepareData]{*phyDat}} \cr
+    \code{SuttonEtAl.preparedata}  OBSELETE. To be replaced. \tab \code{\link[=PrepareData]{*phyDat}} \cr
     \code{SuttonEtAl.parstree   }  \tab \code{\link{phylo}} \cr
     \code{SuttonEtAl.besttree   }  \tab \code{\link{phylo}} \cr
   }
@@ -50,15 +50,15 @@ Some coding errors in the matrix were corrected:
 The dataset contains:
 \tabular{ll}{\code{SuttonEtAl.data}  \tab      The dataset, in the format produced by \code{read.nexus.data('SuttonEtAl.nex')}\cr
   \code{SuttonEtAl.phy}   \tab      The dataset, in phyDat format\cr
-  \code{SuttonEtAl.preparedata}\tab The dataset, in the format produced by \code{PrepareData(SuttonEtAl.data)}\cr
+  \code{SuttonEtAl.preparedata}\tab OBSELETE, to be replaced with S....morphy, The dataset, in the format produced by \code{MorphyData(SuttonEtAl.phy)}\cr
   \code{SuttonEtAl.parstree}\tab    The phylogenetic tree recovered by equal-weights analysis\cr
   \tab  of the dataset under the standard parsimony method\cr
   \code{SuttonEtAl.besttree}\tab     The phylogenetic tree recovered by equal-weights analysis\cr
-  \tab of the dataset under the revised method of Smith & Brazeau (201X)\cr
+  \tab of the dataset under the revised method of ###REFERENCE###\cr
 }
 }
 \source{
-Original source, Sigwart and Sutton (2007); updated by Sutton et al. (2012); modified per Smith & Brazeau (201X)
+Original source, Sigwart and Sutton (2007); updated by Sutton et al. (2012); modified per ###REFERENCE###
 }
 \references{
 \itemize{

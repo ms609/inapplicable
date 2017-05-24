@@ -11,7 +11,8 @@ InapplicableSectorial(tree, data, outgroup = NULL, concavity = NULL, maxit = 100
 }
 \arguments{
   \item{tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}
-  \item{data}{a dataset, in the format produced by \code{\link{PrepareData}} (or in \code{phyDat} format);}
+  \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}}
+              (\code{phyDat} format also accepted);}
   \item{outgroup}{a vector listing the taxa that form the outgroup;}
   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
     see \code{\link{InapplicableParsimony}};}

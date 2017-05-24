@@ -11,7 +11,7 @@ RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.
     \code{pscore}, the tree's parsimony score, and 
     \code{hits}, the number of times the best score has been hit in the calling function;
   }
-  \item{data}{a data matrix defined by \code{\link{PrepareData}};}
+  \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};}
   \item{rearrange}{a rearrangement function: probably one of 
     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};}
   \item{min.score}{trees longer than \code{min.score}, probably the score of the starting tree,

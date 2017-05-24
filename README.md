@@ -20,7 +20,7 @@ More details will be added here when details of the algorithm are published.
 
 Here's an example of using the package to conduct tree search:
 
-```
+```r 
 library(inapplicable)
 data(SigSut)
 taxa <- names(SigSut.phy)

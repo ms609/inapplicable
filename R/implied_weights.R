@@ -1,4 +1,17 @@
-min.steps <- function (x, inapp.power2) {
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
+MinSteps <- function (x, inapp.power2) {
   if (is.null(x)) return (NULL)
   vals = AsBinary(unique(as.integer(x)))
   number.of.vals = ncol(vals)
@@ -22,8 +35,20 @@ min.steps <- function (x, inapp.power2) {
   }
   return (max(0, sum(definites) - 1))
 }
-
-min.steps.inapp <- function (dat, inapp.level) {
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
+MinStepsInapp <- function (dat, inapp.level) {
   # This function gives unconventional results; see text.
   apply(dat, 1, function (x) {
     vals = AsBinary(unique(x))

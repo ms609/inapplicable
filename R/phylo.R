@@ -1,5 +1,18 @@
+#' Renumber a tree's nodes and tips
+#'
+#' \code{Renumber} numbers the nodes and tips in a tree to conform with the phylo standards.
+#'
+#' @param tree An object of class \code{phylo}
+#' 
+#' @examples
+#' tree <- rtree(10)
+#' Renumber (tree)
+#' 
+#' @return This function returns a tree of class \code{phylo}
+#'   
+#' @author Martin Smith
+#' @export
 Renumber <- function (tree) {
-## Numbers the nodes and tips in a tree to conform with the phylo standards.
   tree   <- reorder(tree, 'postorder')
   edge   <- tree$edge
   nTip   <- length(tree$tip.label)
@@ -28,12 +41,54 @@ Renumber <- function (tree) {
   reorder(tree)
 }
 
+#' @name SingleTaxonTree
+#' @alias SingleTaxonTree
+#'  Single taxon tree
+#' @description Create a phylogenetic 'tree' that comprises a single taxon.
+#' @usage SingleTaxonTree(label)
+#' @arguments   \item{label}{a character vector specifying the label of the tip.}
+#' @return This function returns a \code{phylo} object containing a single tip with the specified label.
+#' @seealso \code{\link{TwoTipTree}}
+#' @examples SingleTaxonTree('Homo_sapiens')
+#' @keyword  tree 
 SingleTaxonTree <- function (label) {
   res <- list(edge=matrix(c(2L,1L), 1, 2), tip.label=label, Nnode=1L)
   class(res) <- 'phylo'
   res
 }
 
+#' @name ExtractClade
+#' @alias ExtractClade
+#'  Extract a clade
+#' @description Safely extracts a clade from a phylogenetic tree.
+#' \usage{
+#' ExtractClade(phy, node)
+#' }
+#' \arguments{
+#'   \item{phy}{A phylogenetic tree in \code{phylo} format;}
+#'   \item{node}{The number of the node at the base of the clade to be extracted.}
+#' }
+#' \details{
+#' Modified from the \pkg{ape} function \code{\link{extract.clade}}, which sometimes behaves erratically.  
+#' The function is intended for use with the function \code{\link{TBR}}, and features present in 
+#' @code extract.clade but unnecessary for this goal have been removed. Unlike extract.clade, 
+#' this function supports the extraction of 'clades' that constitute a single tip.
+#' }
+#' @return{
+#' This function returns a phylogenetic tree that represents a clade extracted from the original tree.
+#' }
+#' \author{
+#' Martin R. Smith
+#' }
+#' \seealso{
+#' @code \link{extract.clade}
+#' }
+#' @examples{
+#' tree <- rtree(20, br=NULL)
+#' plot(tree); nodelabels(); nodelabels(33, 33, bg='yellow'); dev.new()
+#' plot(ExtractClade(tree, 33))
+#' }
+#' 
 ExtractClade <- function (phy, node) {
   phy.tip.label <- phy$tip.label
   phy.edge <- phy$edge
@@ -66,6 +121,38 @@ ExtractClade <- function (phy, node) {
 }
 ecr <- ExtractClade
 
+#' @name AddTip
+#' @alias AddTip
+#'  Add a tip to a phylogenetic tree
+#' @description This function adds a tip to a phylogenetic tree at a specified location.
+#' \usage{
+#' AddTip(tree, where, label)
+#' }
+#' \arguments{
+#'   \item{tree}{A phylogenetic tree of class \code{\link{phylo}};}
+#'   \item{where}{The node or tip that should form the sister taxon to the new node.  To add a new tip at the root, use "where = 0";}
+#'   \item{label}{A character string providing the label the new tip.}
+#' }
+#' \details{
+#' Extends \code{\link{bind.tree}}, which cannot handle single-taxon trees.
+#' }
+#' @return{
+#' This function returns a tree of class \code{phylo} with an additional tip at the desired location.
+#' }
+#' @author Martin R. Smith
+#' 
+#' \seealso{
+#' \itemize{
+#' \item \code{\link{bind.tree}}
+#' \item \code{\link{nodelabels}}
+#' }
+#' }
+#' @examples{
+#'   plot(tree <- rtree(10, br=NULL)); nodelabels(); nodelabels(15, 15, bg='green'); dev.new()
+#'   plot(AddTip(tree, 15, 'NEW_TIP'))
+#' }
+#' @keyword  tree 
+#' 
 AddTip <- function (tree, where, label) {
   nTip <- length(tree$tip.label)
   nNode <- tree$Nnode
@@ -120,6 +207,31 @@ AddTip <- function (tree, where, label) {
   
 }
 
+#' @name SetOutgroup
+#' @alias SetOutgroup
+#' @alias Root
+#'  Root a phylogenetic tree
+#' @description Sets the root of a phylogenetic tree, such that one child of the root node is \code{outgroup}.
+#' @usage SetOutgroup(tree, outgroup)
+#' \arguments{
+#'   \item{tree}{a tree, in \code{\link{phylo}} format, with all nodes resolved;}
+#'   \item{outgroup}{a vector of mode numeric or character specifying the new outgroup.}
+#' }
+#' @return This function returns a rooted tree with the new outgroup.
+#' \author{
+#' Martin R. Smith
+#' }
+#' 
+#' \seealso{
+#' @code \link{root} ought to produce the same result as this function,
+#'  but does not always do so in practice.
+#' }
+#' @examples{
+#'   tree <- read.tree(text='(((a,b),c),(d,e));')
+#'   plot(tree)
+#'   plot(Root(tree, c('a', 'b')))
+#'   plot(Root(tree, 3))
+#' }
 SetOutgroup <- Root <- function (tree, outgroup) {
   if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
   tip <- tree$tip.label
@@ -205,22 +317,20 @@ SetOutgroup <- Root <- function (tree, outgroup) {
   tree
 }
 
-siblings <- function (parent, child, node, include.self = FALSE) {
-  l = length(node)
-  if (l == 1) {
-    v <- child[parent==parent[child==node]]
-    if (!include.self) 
-      v <- v[v != node]
-    return(v)
-  } else {
-    ret <- if (include.self) lapply(parent[match(node, child)], function (x) v <- child[parent==x]) else lapply(node, function (x) {
-      v <- child[parent==parent[child==x]]
-      v <- v[v != x]
-    })
-  }
-  ret
-}
-
+#' Get Ancestors
+#'
+#' \code{GetAncestors} gets the ancestors of each node in a tree
+#' It's a more efficient version of \code{\link{phangorn:::Ancestors}}
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 GetAncestors <- function (parent, child, node) {
   if (length(node) == 1) {
     pvector <- numeric(max(parent))
@@ -240,6 +350,19 @@ GetAncestors <- function (parent, child, node) {
   } else AllAncestors(parent, child)[node]
 }
 
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 AllAncestors <- function (parent, child) {
   res <- vector("list", max(parent))
   for (i in seq_along(parent)) {
@@ -249,6 +372,19 @@ AllAncestors <- function (parent, child) {
   res
 }
 
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 GetDescendants <- function (tree, node, ...) {
 # ARGUMENTS:
 #   "tree", a phydat object
@@ -262,6 +398,20 @@ GetDescendants <- function (tree, node, ...) {
   edge2 <- edge[,2]
   return (which(DoDescendants(edge1, edge2, nTip, node, ...)))
 }
+
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.internal=FALSE, include.ancestor = FALSE) {
   # ARGUMENTS:
   #   "edge1", parent nodes: from tree$edge[,1]
@@ -283,8 +433,39 @@ DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.int
   return (is.descendant)
 }
 
+#' @name TwoTipTree
+#' @alias TwoTipTree
+#'  Two-tipped tree
+#' @description This function generates a tree of class \code{\link{phylo}} containing two tips.
+#' @usage TwoTipTree(tip1, tip2)
+#' \arguments{
+#'   \item{tip1}{A character string representing the label for tip 1}
+#'   \item{tip2}{A character string representing the label for tip 2}
+#' }
+#' @return This function returns a \code{phylo object with a single root node and two tips with
+#' the specified labels.}
+#' @author Martin R. Smith
+#' @seealso \code{\link{SingleTaxonTree}
+#' @code \link{bind.tree}}
+#' @examples TwoTipTree('Homo', 'Pan')
+#' @keyword  tree 
+#' 
+#' 
 TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))
 
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
 ## Copied from ape:::bind.tree; the only change is that I use (x|y).edge in place of (x|y)$edge.
 
@@ -491,6 +672,19 @@ BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
     x
 }
 
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
 # Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.
 # Dropped support for branch lengths.
@@ -606,6 +800,19 @@ DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge =
   CollapseSingles(phy)
 }
 
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 DropTipNoSubtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
 # Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.
 # Dropped support for branch lengths.
@@ -672,6 +879,19 @@ DropTipNoSubtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), i
   CollapseSingles(phy)
 }
 
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 CollapseSingles <- function (tree) {
 # Copied from ape:::collapse.singles.
 # Removed support for elen & node.label
@@ -695,6 +915,19 @@ CollapseSingles <- function (tree) {
   tree
 }
 
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 KeepEdges <- function (edge, tip.label, nTips, kept.edges) {
   kept <- list()
   class(kept) <- 'phylo'

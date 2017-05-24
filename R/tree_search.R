@@ -1,3 +1,16 @@
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 InapplicableSectorial <- function (tree, data, maxit=100, 
     maxiter=500, k=5, trace=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", criterion=NULL, ...) {
   if (class(data) != 'phyDat') stop("data must be a phyDat object.")
@@ -76,6 +89,52 @@ InapplicableSectorial <- function (tree, data, maxit=100,
   tree
 }  # InapplicableSectorial
 
+#' @name InapplicablePratchet
+#' @alias InapplicablePratchet
+#'  Parsimony ratchet
+#' @description This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
+#' \usage{
+#' InapplicablePratchet(tree, data, concavity = NULL, all = FALSE, outgroup = NULL, maxit = 100, 
+#'   maxiter = 5000, maxhits = 40, k = 10, trace = 0, rearrangements = "NNI", ...)
+#' }
+#' \arguments{
+#'   \item{tree}{An object of class \code{phyDat} denoting the topology to begin the search from;}
+#'   \item{data}{A matrix in \code{\link{MorphyData}} format (or \code{\link{phyDat}} format,
+#'     which the function will itself pass through \code{MorphyData});}
+#'   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
+#'     see \code{\link{InapplicableParsimony}};}
+#'   \item{all}{Set to TRUE to report all MPTs encountered during the search, perhaps to analyze consensus}
+#'   \item{outgroup}{a vector specifying all tips in the outgroup; if unspecified then identical trees with different roots will be considered unique;}
+#'   \item{maxit}{maximum ratchet iterations to perform;}
+#'   \item{maxiter}{maximum rearrangements to perform on each bootstrap or ratchet iteration;}
+#'   \item{maxhits}{maximum times to hit best score before terminating a tree search within a pratchet iteration;}
+#'   \item{k}{stop when k ratchet iterations have found the same best score;}
+#'   \item{trace}{larger numbers provides more verbose feedback to the user;}
+#'   \item{rearrangements}{method to use when rearranging trees: NNI, SPR or TBR;}
+#'   \item{\dots}{other arguments to pass to subsequent functions.}
+#' }
+#' @return This function returns a tree modified by parsimony ratchet iteration, retaining the position of the root.
+#' @references Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}
+#' \author{
+#' Martin R. Smith
+#' 
+#' Adapted from \code{\link{pratchet}} in the \pkg{phangorn} package, which does not preserve the position of the root.
+#' }
+#' \seealso{
+#' \itemize{
+#' \item \code{\link{pratchet}}
+#' \item \code{\link{TreeSearch}}
+#' \item \code{\link{SectorialSearch}}
+#' }
+#' }
+#' @examples{
+#' data('SigSut')
+#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
+#' njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
+#' InapplicablePratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
+#' }
+#' @keyword  tree 
 InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
   if (class(data) != 'phyDat') stop("data must be a phyDat object.")
   eps <- 1e-08
@@ -142,7 +201,19 @@ InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=10
   }
   return (ret)
 }
-
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
 PratchetConsensus <- function (tree, data, maxit=5000, maxiter=500, maxhits=20, k=10, trace=0, rearrangements="NNI", criterion=NULL, nSearch=10, ...) {
   trees <- lapply(1:nSearch, function (x) InapplicablePratchet(tree, data, maxit, maxiter, maxhits, k=1, trace, rearrangements, criterion=criterion, ...))
   scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
@@ -174,6 +245,58 @@ bootstrap.inapp <- function (phy, x, maxiter, maxhits, criterion=criterion, trac
   res
 }
 
+#' @name TreeSearch
+#' @alias TreeSearch
+#'  Search for most parsimonious trees
+#' @description Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR}) to search for a more parsimonious tree.
+#' \usage{
+#' TreeSearch(tree, data, outgroup, concavity = NULL, method = "NNI", maxiter = 100, 
+#'   maxhits = 20, forest.size = 1, cluster = NULL, trace = 1, ...)
+#' }
+#' \arguments{
+#'   \item{tree}{a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
+#'   \item{data}{a matrix, ideally of class \code{morphyDat}, generated by \code{\link{MorphyData}}, 
+#'   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;}
+#'   \item{outgroup}{a vector listing the taxa in the outgroup;}
+#'   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
+#'     see \code{\link{InapplicableParsimony}};}
+#'   \item{method}{rearrangements to perform; one of \kbd{NNI}, \kbd{SPR}, or \kbd{TBR};}
+#'   \item{maxiter}{the maximum number of iterations to perform before abandoning the search;}
+#'   \item{maxhits}{the maximum times to hit the best pscore before abandoning the search;}
+#'   \item{forest.size}{the maximum number of trees to return - useful in concert with \code{\link{consensus}};}
+#'   \item{cluster}{a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;}
+#'   \item{trace}{higher values provide more verbose user feedback in stdout;}
+#'   \item{\dots}{other arguments to pass to subsequent functions.}
+#' }
+#' 
+#' @return{
+#' This function returns a tree, with an attribute \code{pscore} conveying its parsimony score.
+#' Note that the parsimony score will be inherited from the tree's attributes, which is only valid if it 
+#' was generated using the same \code{data} that is passed here.
+#' }
+#' \author{
+#' Martin R. Smith
+#' }
+#' \seealso{
+#' \itemize{
+#' \item \code{\link{InapplicableParsimony}}, calculates parsimony score, supports inapplicable tokens;
+#' \item \code{\link{RootedNNI}}, conducts tree rearrangements;
+#' \item \code{\link{SectorialSearch}}, alternative heuristic, useful for larger trees;
+#' \item \code{\link{InapplicablePratchet}}, alternative heuristic, useful to escape local optima.
+#' }}
+#' @examples{
+#' data('SigSut')
+#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
+#' njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
+#' \dontrun{
+#' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='NNI')
+#' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='SPR')
+#' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='TBR')}
+#' }
+#' 
+#' @keyword  tree 
+#' 
 TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, criterion=NULL, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1
@@ -225,6 +348,86 @@ TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, fores
   } else tree
 }
 
+#' @name SectorialSearch
+#' @alias SectorialSearch
+#' @alias InapplicableSectorial
+#'  InapplicableSectorial search
+#' @description Performs a sectorial search on a tree, preserving the position of the root.
+#' \usage{
+#' SectorialSearch(tree, data, outgroup, concavity = NULL, rearrangements = "NNI",
+#'   maxiter = 2000, cluster = NULL, trace = 3)
+#' InapplicableSectorial(tree, data, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
+#'   trace = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
+#' }
+#' \arguments{
+#'   \item{tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}
+#'   \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}}
+#'               (\code{phyDat} format also accepted);}
+#'   \item{outgroup}{a vector listing the taxa that form the outgroup;}
+#'   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
+#'     see \code{\link{InapplicableParsimony}};}
+#'   \item{maxit}{maximum number of sectorial iterations to perform;}
+#'   \item{maxiter}{maximum number of rearrangements to perform on each sectorial iteration;}
+#'   \item{cluster}{a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;}
+#'   \item{k}{stop when \code{k} searches have improved their sectorial score;}
+#'   \item{trace}{integer determining how verbose the reporting to stdout will be;}
+#'   \item{smallest.sector}{sectors with fewer than \code{smallest.sector} taxa will not be selected; \kbd{4} is the smallest sensible value;}
+#'   \item{largest.sector}{sectors with more than \code{largest.sector} taxa will not be selected;}
+#'   \item{rearrangements}{method to use when rearranging subtrees: NNI, SPR or TBR;}
+#'   \item{\dots}{other arguments to pass to subsequent functions.}
+#' }
+#' \details{
+#' @code InapplicableSectorial performs a sectorial search on the tree specified. A sectorial search 
+#' detaches a random part of the tree, performs rearrangments on this subtree, then reattaches it 
+#' to the main tree (Goloboff, 1999).
+#' The improvement to local \var{pscore} hopefully (but not necessarily) improves the overall \var{pscore}.
+#' As such, the output of \code{InapplicableSectorial} should be treated by further \acronym{TBR (/SPR/NNI)}
+#' rearrangements and only retained if the ultimate parsimony score is better than 
+#' that of the original tree.
+#' 
+#' @code SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial followed by a few rounds
+#' of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
+#' }
+#' @return{
+#' These functions return a rooted tree of class \code{phylo}.
+#' }
+#' \references{
+#' Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:\href{http://dx.doi.org/10.1006/clad.1999.0122}{10.1006/clad.1999.0122}
+#' }
+#' \author{
+#' Martin R. Smith
+#' }
+#' 
+#' \seealso{
+#' \itemize{ 
+#' \item \code{\link{TreeSearch}}
+#' \item \code{\link{InapplicablePratchet}}
+#' }
+#' }
+#' 
+#' @examples{
+#' data('SigSut')
+#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
+#' njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
+#' InapplicableSectorial(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50, largest.sector=7)
+#' @dontrun SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming
+#' 
+#' ## SectorialSearch is currently defined as
+#' function (start.tree, data, outgroup, rearrangements='NNI') {
+#'   best.score <- attr(start.tree, 'pscore')
+#'   if (length(best.score) == 0) best.score <- InapplicableParsimony(start.tree, data)
+#'   sect <- InapplicableSectorial(start.tree, data, outgroup=outgroup, trace=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
+#'   sect <- TreeSearch(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=20, trace=3)
+#'   sect <- TreeSearch(sect, data, outgroup, method='TBR', maxiter=2000, maxhits=25, trace=3)
+#'   sect <- TreeSearch(sect, data, outgroup, method='SPR', maxiter=2000, maxhits=50, trace=3)
+#'   sect <- TreeSearch(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=50, trace=3)
+#'   if (attr(sect, 'pscore') <= best.score) {
+#'     return (sect)
+#'   } else return (SetOutgroup(start.tree, outgroup))
+#' }
+#' }
+#' @keyword  tree 
 SectorialSearch <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
   best.score <- attr(tree, 'pscore')
   if (length(best.score) == 0) best.score <- InapplicableFitch(tree, data, ...)[[1]]

@@ -7,7 +7,7 @@
 #' @examples
 #' morphy <- MorphyDat(SigSut.phy)
 #' 
-#' @value This function returns a matrix of class \code{*phyDat}.
+#' @return This function returns a matrix of class \code{*phyDat}.
 #'    \itemize{
 #' \item     Each row of the matrix corresponds to an operational taxonomic unit;
 #' \item     Each column of the matrix represents a transformation series, with all transformation
@@ -83,7 +83,7 @@ MorphyDat <- function (phydat) {
 #' # Lion     -?0123
 #' # Gazelle  1230?-
 #' 
-#' @value This function returns a matrix of class \code{morphyDat}; see \code{\link{MorphyData}}
+#' @return This function returns a matrix of class \code{morphyDat}; see \code{\link{MorphyData}}
 #' @seealso \code{\link{phyDat}}
 #' 
 #' @author Martin Smith
@@ -109,7 +109,7 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
 #' 
 #' Binary number 0100 (= decimal 4) will be represented as 0 0 1.
 #' 
-#' @value 
+#' @return 
 #' An array corresponding to binary digits 1, 2, 4, 8, 16, ...
 #' 
 #' 'Leading zeros' are not included.

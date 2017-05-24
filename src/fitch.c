@@ -36,103 +36,108 @@ void app_fitch_downpass
 }
 
 void inapp_update_tip
-(int *this, int *this_active, int *ancestor, int *n_char, int *inapp) {
+(int *this, int *active_tracker, int *ancestor, int *n_char, int *inapp) {
   int i;
   for (i=0; i<*n_char; i++) {
-    if (this[i] & ancestor[i]) {
-      this_active[i] = (this[i] & ancestor[i] & ~(*inapp));
-    }
-    else {
-      this_active[i] |= this[i] & ~(*inapp);
-    }
-    if ((this[i] & ~(*inapp)) && (this[i] & *inapp)) {
-      if (ancestor[i] == (*inapp)) {
+    if ((this[i] & ~(*inapp)) && (this[i] & *inapp)) { // 2.8
+      if (ancestor[i] == (*inapp)) { //2.9a
         this[i] = *inapp;
-      } else {
+      } else { //2.9b
         this[i] &= ~(*inapp);
       }
+    }
+    if (this[i] == *inapp) { // 3.2.  - Less elegant than in MorphyLib perhaps, but 
+      active_tracker[i] = 0; //         easier to match with algorithm.
+    } else if (this[i] & ~(*inapp)) { // 3.3
+      active_tracker[i] = 1;
+    } else if (ancestor[i] & *inapp) { // 3.4
+      active_tracker[i] = 0;
+    } else {
+      active_tracker[i] = 1; //3.4b
     }
   }   
 }
 
 void inapp_update_tips
-(int *dat, int *act, int *parent_of, int *n_tip, int *n_char, int *inapp) {
+(int *dat, int *upp1, int *act, int *parent_of, int *n_tip, int *n_char, int *inapp) {
   int i;
   for (i=0; i<*n_tip; i++) {
-    Rprintf(" - Update tip %i (=%i), whose parent (%i) = %i. \n", i, dat[i], parent_of[i] - 1, dat[(parent_of[i] -1)]);
+  Rprintf(" - [TIP %i] state=%i, [parent %i] state=%i: ", i, dat[i], parent_of[i] - 1, dat[(parent_of[i] -1)]);
     inapp_update_tip(
       &dat[i * (*n_char)], // this
       &act[i * (*n_char)], // this_active
-      &dat[(parent_of[i] -1) * (*n_char)], // ancestor
+      &upp1[(parent_of[i] -1) * (*n_char)], // ancestor
       n_char,
       inapp
     );
-    Rprintf("   - New value = %i\n", dat[i]);
+    Rprintf("-> [%i]\n", dat[i]);
   }   
 }
 
 void inapp_first_upnode
-(int *this, int *app, int *ancestor, int *left, int *right,
+(int *this, int *upp1, int *ancestor, int *left, int *right,
  int *inapp, int *end_char) {
   int i;
   for (i=0; i<*end_char; i++) {
-    Rprintf("   ... this=%i, anc=%i, left=%i, right=%i\n", this[i], ancestor[i], left[i], right[i]);
+    Rprintf("   ... this=%i, anc=%i, left=%i, right=%i:", this[i], ancestor[i], left[i], right[i]);
     if (this[i] & (*inapp)) {
       if (this[i] & ~(*inapp)) {
         if (ancestor[i] == *inapp) {
-          app[i] = *inapp;
+          upp1[i] = *inapp;
         }
         else {
-          app[i] = this[i] & ~(*inapp); // TODO posit: just ~(*inapp) will do
+          upp1[i] = this[i] & ~(*inapp); // TODO posit: just ~(*inapp) will do
         }
       }
       else {
         if (ancestor[i] == *inapp) {
-          app[i] = *inapp;
+          upp1[i] = *inapp;
         }
         else {
           if ((left[i] | right[i]) & ~(*inapp)) {
-            app[i] = ((left[i] | right[i]) & ~(*inapp)); // TODO posit: just ~(*inapp) will do
+            upp1[i] = ((left[i] | right[i]) & ~(*inapp)); // TODO posit: just ~(*inapp) will do
           }
           else {
-            app[i] = *inapp;
+            upp1[i] = *inapp;
           }
         }
       }
     }
     else {
-      app[i] = this[i];
+      upp1[i] = this[i];
     }
+    Rprintf("-> %i\n", upp1[i]);
   }
 }
 
-void inapp_first_root(int *this, int *app, int *inapp, int *end_char) {
-  for (int i = 0; i < *end_char; i++) {
+void inapp_first_root(int *this, int *upp1, int *inapp, int *end_char) {
+  for (int i=0; i<*end_char; i++) {
     if (this[i] != *inapp) {
-      app[i] = this[i] & ~(*inapp); // TODO posit: ~(*inapp) will do?
+      upp1[i] = this[i] & ~(*inapp); // TODO posit: ~(*inapp) will do?
     } else {
-      app[i] = *inapp;
+      upp1[i] = *inapp;
     }
+    Rprintf("   ... this=%i --> %i\n", this[i], upp1[i]);
   }
 }
 
 void inapp_first_uppass
-(int *dat, int *app, int *parent_of, int *children_of, 
+(int *dat, int *upp1, int *parent_of, int *children_of, 
  int *end_char, int *n_char, int *n_internal, int *inapp) {
   int root_node = *n_internal + 1L;  // which is the index of the root node
   Rprintf(" - Calling first upnode at ROOT node %i:\n", root_node);
-  inapp_first_root(&dat[(root_node) * (*n_char)], 
-                   &app[(root_node) * (*n_char)], inapp, end_char);
+  inapp_first_root(&dat [(root_node) * (*n_char)], 
+                   &upp1[(root_node) * (*n_char)], inapp, end_char);
   for (int i = 1; i < (*n_internal); i++) {
     Rprintf(" - Calling first upnode at %i with anc: %i < %i,%i\n", root_node + i, parent_of[root_node + i] - 1, children_of[i + *n_internal] - 1, children_of[i] - 1);
     // parent_of is stored as [tip]1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node is listed as being its own parent.)
     // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
     inapp_first_upnode(
-      &dat[(root_node + i) * (*n_char)], // this_start
-      &app[(root_node + i) * (*n_char)], // store applicability for future ref
-      &app[(parent_of[root_node + i -1] -1) * (*n_char)], // ancestor - send modified APP state
-      &dat[(children_of[i + *n_internal] -1) * (*n_char)], // left child
-      &dat[(children_of[i] -1) * (*n_char)], // right child
+      &dat [(root_node + i) * (*n_char)], // this_start
+      &upp1[(root_node + i) * (*n_char)], // store applicability for future ref
+      &upp1[(parent_of[root_node + i] -1) * (*n_char)], // ancestor (after uppass)
+      &dat [(children_of[i + *n_internal] -1) * (*n_char)], // left child
+      &dat [(children_of[i] -1) * (*n_char)], // right child
       inapp, end_char
     );
   }
@@ -180,13 +185,14 @@ void inapp_first_downpass
 }
 
 void inapp_second_downnode
-(int *this, int *this_app, int *left, int *right,
+(int *this, int *this_upp1, int *left, int *right,
  int *this_acts, int *l_acts, int *r_acts,
  int *end_char, int *inapp, int *pars) {
   int i, temp;
   for (i=0; i<*end_char; i++) {
-    Rprintf("   ... this_app = %i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this_app[i], left[i], right[i], l_acts[i], r_acts[i]);
-    if (this_app[i] != *inapp) { // 4.2
+    Rprintf("up=%i, l=%i, r=%i, l_act=%i, r_act=%i:\n", this_upp1[i], left[i], right[i], l_acts[i], r_acts[i]);
+    this_acts[i] = (l_acts[i] | r_acts[i]) & ~(*inapp); // 4.1
+    if (this_upp1[i] != *inapp) { // 4.2
       if ((temp = (left[i] & right[i]))) { // 4.3
         if (temp & ~(*inapp)) { // 4.4
           this[i] = temp & ~(*inapp); //4.4a
@@ -198,36 +204,38 @@ void inapp_second_downnode
         
         if ((left[i] & ~(*inapp) && right[i] & ~(*inapp)) //4.6
         ||  (l_acts[i] && r_acts[i])) { // 4.7
-          Rprintf(" +++ Increment length in INAPP Fitch downpass %i\n", 2);
           (pars[i])++; // Add one to tree length
+          Rprintf(" +++ Increment length to %i\n", pars[i]);
         }
       }
+    } else { //4.2b
+      this[i] = this_upp1[i]; // "leave it unchanged" = inherit from up1.
     }
-    this_acts[i] = (l_acts[i] | r_acts[i]) & ~(*inapp);
+    Rprintf("   -> %i [act %i]\n", this[i], this_acts[i]);
   }
 }
 
 void inapp_second_root
-(int *dat, int *app, int *inapp, int *end_char) {
+(int *dat, int *upp1, int *inapp, int *end_char) {
   int i;
   for (i=0; i<*end_char; i++) {
-    if (app[i] != *inapp) { // Assume applicable if ambiguous.
+    if (upp1[i] != *inapp) { // Assume applicable if ambiguous.
       dat[i] = dat[i] & ~(*inapp); 
-      app[i] = dat[i]; 
+      upp1[i] = dat[i]; 
     }
   }
 }
 
 void inapp_second_downpass
-(int *dat, int *app, int *act, int *parent, int *child,
+(int *dat, int *upp1, int *act, int *parent, int *child,
  int *n_edge, int *n_char, int *end_char, int *inapp, int *pars) {
   int i, parent_i = 0;
   for (i=0; i<*n_edge; i+=2) {
     parent_i = parent[i];
-    Rprintf(" - Calling second downnode at %i:\n", parent_i - 1);
+    Rprintf("[NODE %i] 2nd down:", parent_i - 1);
     inapp_second_downnode(
       &dat[(parent_i  -1) * (*n_char)],
-      &app[(parent_i  -1) * (*n_char)],
+      &upp1[(parent_i  -1) * (*n_char)],
       &dat[(child[i+1]-1) * (*n_char)], 
       &dat[(child[i]  -1) * (*n_char)],
       
@@ -239,7 +247,7 @@ void inapp_second_downpass
   }
   inapp_second_root(
     &dat[(parent_i -1) * (*n_char)], 
-    &app[(parent_i -1) * (*n_char)], inapp, end_char);
+    &upp1[(parent_i -1) * (*n_char)], inapp, end_char);
 }
 
 void inapp_second_upnode
@@ -310,7 +318,7 @@ SEXP MORPHYFITCH
  SEXP weight, SEXP inapp, SEXP inapp_chars) { 
  // Memo: the first 'inapp_chars' characters require the Morphy Treatment.
  // Memo: R plots the first-mentioned child ["left"] below the second-mentioned ["right"]
-  int *data, *appl, *actives, *n_char=INTEGER(nchar), *inappl=INTEGER(inapp), 
+  int *data, *upp1, *active_tracker, *n_char=INTEGER(nchar), *inappl=INTEGER(inapp), 
       i, n_tips=INTEGER(ntip)[0], *first_applicable=INTEGER(inapp_chars);
   int n_internal = n_tips - 1L, n_edge = (n_tips * 2) - 2L, max_node = n_edge + 1L;
   SEXP RESULT, pars, pscore, DAT, APPL, ACTIVE;
@@ -323,27 +331,27 @@ SEXP MORPHYFITCH
   for(i=0; i<*n_char; i++) INTEGER(pars)[i] = 0;
   REAL(pscore)[0] = 0.0;
   data = INTEGER(DAT);
-  appl = INTEGER(APPL);
-  actives = INTEGER(ACTIVE);
-  for(i=0; i<(*n_char * max_node); i++) actives[i] = 0;
+  upp1  = INTEGER(APPL);
+  active_tracker = INTEGER(ACTIVE);
+  for(i=0; i<(*n_char * max_node); i++) active_tracker[i] = 0;
   for(i=0; i<(*n_char * n_tips); i++) {
     data[i] = INTEGER(dat)[i];
-    // TODO for appl, make i < (*first_applicable * n_tips)
-    // The current code is inefficient - we don't need to copy appl for 
+    // TODO for upp1, make i < (*first_applicable * n_tips)
+    // The current code is inefficient - we don't need to copy upp1 for 
     // taxa that are applicable - but then we can copy data more easily. 
-    appl[i] = INTEGER(dat)[i];
-    actives[i] = INTEGER(dat)[i] & ~(*inappl); // We don't care whether inapp state is 'active'
+    upp1[i] = INTEGER(dat)[i];
+    active_tracker[i] = INTEGER(dat)[i] & ~(*inappl); // 0 if only inapplicable, 1 otherwise
   }
 
-  inapp_first_downpass(data, actives, INTEGER(parent), INTEGER(child), 
+  inapp_first_downpass(data, active_tracker, INTEGER(parent), INTEGER(child), 
                        first_applicable, n_char, inappl, &n_edge);
-  inapp_first_uppass(data, appl, INTEGER(parent_of), INTEGER(children_of),
+  inapp_first_uppass(data, upp1, INTEGER(parent_of), INTEGER(children_of),
                      first_applicable, n_char, &n_internal, inappl);
-  inapp_update_tips(data, actives, INTEGER(parent_of), &n_tips, n_char, inappl);
+  inapp_update_tips(data, upp1, active_tracker, INTEGER(parent_of), &n_tips, n_char, inappl);
   
-  inapp_second_downpass(data, appl, actives, INTEGER(parent), INTEGER(child), 
+  inapp_second_downpass(data, upp1, active_tracker, INTEGER(parent), INTEGER(child), 
                         &n_edge, n_char, first_applicable, inappl, INTEGER(pars));
-  inapp_second_uppass  (data, actives, INTEGER(parent_of), INTEGER(children_of), 
+  inapp_second_uppass  (data, active_tracker, INTEGER(parent_of), INTEGER(children_of), 
                         first_applicable, n_char, &n_internal, inappl, INTEGER(pars));
 
   app_fitch_downpass(data, INTEGER(parent), INTEGER(child),

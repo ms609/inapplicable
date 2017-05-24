@@ -135,7 +135,7 @@ SetOutgroup <- Root <- function (tree, outgroup) {
   rooted.on.ingroup <- FALSE
   # Check that outgroup is currently monophyletic, swapping with 'ingroup' if it's not
   repeat { 
-    ancestry <- Ancestors(parent, child, outgroup)
+    ancestry <- GetAncestors(parent, child, outgroup)
     if (length(outgroup) > 1) {
       common.ancestors <- Reduce(intersect, ancestry)
       outgroup.root.node <- max(common.ancestors)
@@ -221,7 +221,7 @@ siblings <- function (parent, child, node, include.self = FALSE) {
   ret
 }
 
-Ancestors <- function (parent, child, node) {
+GetAncestors <- function (parent, child, node) {
   if (length(node) == 1) {
     pvector <- numeric(max(parent))
     pvector[child] <- parent
@@ -249,7 +249,7 @@ AllAncestors <- function (parent, child) {
   res
 }
 
-Descendants <- function (tree, node, ...) {
+GetDescendants <- function (tree, node, ...) {
 # ARGUMENTS:
 #   "tree", a phydat object
 #   "node", number of an internal node

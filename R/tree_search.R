@@ -36,7 +36,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
   for (i in 1:maxit) {
     edge1 <- tree$edge[,1]
     nodes <- unique(edge1)[-1]
-    node.lengths <- sapply(Descendants(tree, nodes), length) # (10x quicker than DoDescendants)
+    node.lengths <- sapply(GetDescendants(tree, nodes), length) # (10x quicker than DoDescendants)
     candidate.nodes <- nodes[node.lengths >= smallest.sector & node.lengths <= largest.sector]
     if (trace >= 0) cat ("\n - Iteration", i, "- attempting sectorial search on node ")
     repeat {
@@ -52,7 +52,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
     } 
     if (trace >= 0) cat(' Sector OK.')
     crown <- root(AddTip(crown, 0, 'SECTOR_ROOT'), length(crown$tip.label) + 1, resolve.root=TRUE)
-    initial.p <- MorphyParsimony(crown, crown.data, ...)
+    initial.p <- InapplicableFitch(crown, crown.data, ...)
     attr(crown, 'pscore') <- initial.p
     if (trace >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
     candidate <- TreeSearch(crown, crown.data, 'SECTOR_ROOT', method=rearrangements, criterion=criterion, trace=trace-1, maxiter=maxiter, ...)
@@ -60,7 +60,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
     
     if((candidate.p + eps) < initial.p) {
       kmax <- kmax + 1
-      stump <- DropTip(tree, Descendants(tree, sector)[[1]], subtree=TRUE)
+      stump <- DropTip(tree, GetDescendants(tree, sector)[[1]], subtree=TRUE)
       stump.edge <- 1:nrow(stump$edge)
       stump$root.edge <- 1
       crown <- DropTip(candidate, 'SECTOR_ROOT')
@@ -79,7 +79,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
   if (class(data) != 'phyDat') stop("data must be a phyDat object.")
   eps <- 1e-08
-  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- MorphyParsimony(tree, data, ...)
+  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- InapplicableFitch(tree, data, ...)
   best.pars <- attr(tree, "pscore")
   if (trace >= 0) cat("* Initial pscore:", best.pars)
   if (all) forest <- vector('list', maxiter)
@@ -184,7 +184,7 @@ TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, fores
       forest.size <-1 
     }
   }
-  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- MorphyParsimony(tree, data)
+  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- InapplicableFitch(tree, data)
   best.pscore <- attr(tree, 'pscore')
   if (trace > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
   rearrange.func <- switch(method, 'TBR' = TBR, 'SPR' = SPR, 'NNI' = QuickNNI)
@@ -227,7 +227,7 @@ TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, fores
 
 SectorialSearch <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
   best.score <- attr(tree, 'pscore')
-  if (length(best.score) == 0) best.score <- MorphyParsimony(tree, data, ...)
+  if (length(best.score) == 0) best.score <- InapplicableFitch(tree, data, ...)[[1]]
   sect <- InapplicableSectorial(tree, data, cluster=cluster,
     trace=trace-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 
     largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)

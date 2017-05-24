@@ -17,3 +17,19 @@ library('inapplicable')
 ```
 
 More details will be added here when details of the algorithm are published.
+
+Here's an example of using the package to conduct tree search:
+
+```
+library(inapplicable)
+data(SigSut)
+taxa <- names(SigSut.phy)
+tree <- rtree(length(taxa), tip.label=taxa, br=NULL)
+result <- InapplicableFitch(tree, SigSut.phy)
+best <- TreeSearch(tree, SigSut.phy)
+best <- TreeSearch(best, SigSut.phy)
+best <- TreeSearch(best, SigSut.phy, method='TBR')
+best <- TreeSearch(best, SigSut.phy, maxhits=40, maxiter=100000, method='SPR', trace=3)
+best <- TreeSearch(best, SigSut.phy, maxhits=240, maxiter=100000, method='TBR', trace=3)
+plot(Root(best, 'Lingula'))
+```

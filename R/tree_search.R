@@ -135,6 +135,8 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' InapplicablePratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
 #' }
 #' @keyword  tree 
+
+#' @export
 InapplicablePratchet <- function (tree, data, all=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
   if (class(data) != 'phyDat') stop("data must be a phyDat object.")
   eps <- 1e-08
@@ -296,6 +298,7 @@ BoostrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion, 
 #' 
 #' @keyword  tree 
 #' 
+#' @export
 TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, criterion=NULL, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1
@@ -427,6 +430,7 @@ TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, fores
 #' }
 #' }
 #' @keyword  tree 
+#' @export
 SectorialSearch <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
   best.score <- attr(tree, 'pscore')
   if (length(best.score) == 0) best.score <- InapplicableFitch(tree, data, ...)[[1]]

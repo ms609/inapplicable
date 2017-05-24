@@ -37,6 +37,7 @@
 #' random.tree <- rtree(34, tip.label=names(SigSut.data), br=NULL)
 #' RearrangeTree(random.tree, SigSut.preparedata, RootedNNI)
 #' }
+#' @export
 RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
@@ -112,6 +113,7 @@ RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL
 #'   plot(RootedTBR(tree))
 #' }
 #' 
+#' @export
 RootedNNI <- function (tree) {
   edge <- matrix(tree$edge, ncol = 2)
   parent <- edge[, 1]
@@ -138,6 +140,7 @@ RootedNNI <- function (tree) {
   tree <- Renumber(phangorn:::reorderPruning(tree))  
 }
 
+#' @export
 RootedSPR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
   tip.label <- tree$tip.label
@@ -182,6 +185,7 @@ RootedSPR <- function(tree) {
   tree
 }
 
+#' @export
 RootedTBR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
   edge <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
@@ -211,6 +215,7 @@ RootedTBR <- function(tree) {
   }
 }
 
+#' @export
 QuickNNI <- function (tree) {
   n      <- sample(tree$Nnode - 1L, 1L)
   edge   <- tree$edge
@@ -227,6 +232,7 @@ QuickNNI <- function (tree) {
   Renumber(phangorn:::reorderPruning(tree))
 }
 
+#' @export
 SPR <- function(tree) {
   tip.label <- tree$tip.label
   nTips <- length(tip.label)
@@ -307,6 +313,7 @@ SPR <- function(tree) {
 #' tree <- rtree(20, br=NULL)
 #' TBR(tree)
 #' }
+#' @export
 TBR <- function(tree, edge.to.break=NULL) {
 # Improvement targets: Root; ExtractClade; DropTip
   nTips <- tree$Nnode + 1

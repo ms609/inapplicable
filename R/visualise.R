@@ -51,6 +51,7 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' }
 #' @keyword  tree 
 #' 
+#' @export
 VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 
 function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
   if (class(data) == 'phyDat') data <- MorphyData(data)

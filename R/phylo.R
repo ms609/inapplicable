@@ -51,6 +51,7 @@ Renumber <- function (tree) {
 #' @seealso \code{\link{TwoTipTree}}
 #' @examples SingleTaxonTree('Homo_sapiens')
 #' @keyword  tree 
+#' @export
 SingleTaxonTree <- function (label) {
   res <- list(edge=matrix(c(2L,1L), 1, 2), tip.label=label, Nnode=1L)
   class(res) <- 'phylo'
@@ -89,6 +90,7 @@ SingleTaxonTree <- function (label) {
 #' plot(ExtractClade(tree, 33))
 #' }
 #' 
+#' @export
 ExtractClade <- function (phy, node) {
   phy.tip.label <- phy$tip.label
   phy.edge <- phy$edge
@@ -153,6 +155,7 @@ ecr <- ExtractClade
 #' }
 #' @keyword  tree 
 #' 
+#' @export
 AddTip <- function (tree, where, label) {
   nTip <- length(tree$tip.label)
   nNode <- tree$Nnode
@@ -232,6 +235,7 @@ AddTip <- function (tree, where, label) {
 #'   plot(Root(tree, c('a', 'b')))
 #'   plot(Root(tree, 3))
 #' }
+#' @export
 SetOutgroup <- Root <- function (tree, outgroup) {
   if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
   tip <- tree$tip.label
@@ -450,7 +454,7 @@ DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.int
 #' @examples TwoTipTree('Homo', 'Pan')
 #' @keyword  tree 
 #' 
-#' 
+#' @export
 TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))
 
 #' TITLE GOES HERE

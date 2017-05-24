@@ -123,7 +123,7 @@ void inapp_first_root(int *this, int *upp1, const int *inapp, const int *end_cha
 
 void inapp_first_uppass
 (int *dat, int *upp1, int *parent_of, int *children_of, 
- const const int *end_char, const int *n_char, const int *n_internal, const int *inapp) {
+ const int *end_char, const int *n_char, const int *n_internal, const int *inapp) {
   int root_node = *n_internal + 1L;  // which is the index of the root node
   //#debug#//Rprintf(" - Calling first upnode at ROOT node %i:\n", root_node);
   inapp_first_root(&dat [(root_node) * (*n_char)], 

@@ -14,7 +14,7 @@
 #' tree <- rtree(length(taxa), tip.label=taxa, br=NULL)
 #' result <- InapplicableFitch(tree, SigSut.phy)
 #' 
-#' @value This function returns the elements from a list containing:
+#' @return This function returns the elements from a list containing:
 #'    \itemize{
 #' \item     The total parsimony score
 #' \item     The parsimony score associated with each character 

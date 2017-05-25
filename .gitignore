@@ -1,5 +1,4 @@
 *.out
 *.dll
 *.o
-*.dll
-*.o
+src-*

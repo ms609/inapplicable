@@ -1,3 +1,43 @@
+#' Rearrange phylogenetic tree
+#' \code{RearrangeTree} performs one tree rearrangement of a specified type
+#' @usage
+#' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
+#'  iter = "<unknown>", cluster = NULL, trace = 0)
+#' 
+#' \arguments{
+#'   \item{tree}{a rooted bifurcating phylogenetic tree with the desired outgroup, and the attributes
+#'     \code{pscore}, the tree's parsimony score, and 
+#'     \code{hits}, the number of times the best score has been hit in the calling function;
+#'   }
+#'   \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};}
+#'   \item{rearrange}{a rearrangement function: probably one of 
+#'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};}
+#'   \item{min.score}{trees longer than \code{min.score}, probably the score of the starting tree,
+#'     will be discarded;}
+#'   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
+#'     see \code{\link{InapplicableParsimony}};}
+#'   \item{return.single}{returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
+#'   \item{iter}{iteration number of calling function, for reporting to user only;}
+#'   \item{cluster}{a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
+#'     searches on multicore machines;}
+#'   \item{trace}{determines how much information to output to screen.}
+#' }
+#' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}
+#'  as described for argument \code{tree}.}
+#' \author{Martin R. Smith}
+#' \seealso{
+#'   \itemize{
+#'     \item \code{\link{RootedNNI}}
+#'     \item \code{\link{RootedSPR}}
+#'     \item \code{\link{RootedTBR}}
+#'   }
+#' }
+#' @examples{
+#' data('SigSut')
+#' random.tree <- rtree(34, tip.label=names(SigSut.data), br=NULL)
+#' RearrangeTree(random.tree, SigSut.preparedata, RootedNNI)
+#' }
+#' @export
 RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
@@ -28,7 +68,52 @@ RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL
   attr(trees, 'pscore') <- min.score
   trees
 }
-
+#' @name RootedNNI
+#' @alias RootedNNI
+#' @alias RootedSPR
+#' @alias RootedTBR
+#' Rearrange a rooted tree
+#' @description This function performs a rearrangement iteration on a tree, retaining the position of the root.
+#' \usage{
+#' RootedNNI(tree)
+#' RootedSPR(tree)
+#' RootedTBR(tree)
+#' }
+#' \arguments{
+#'   \item{tree}{An object of class \code{\link{phylo}}, with all nodes resolved (bifurcating).}
+#' }
+#' \details{
+#' A single \acronym{NNI}, \acronym{SPR} or \acronym{TBR} rearrangement is performed, subject to the constraint that 
+#' no taxon may be moved to the opposite side of the root node.
+#' Branch lengths are not (yet) supported.
+#' }
+#' @return{
+#' This function returns a tree, in \code{phylo} format.
+#' }
+#' \author{
+#' Martin R. Smith
+#' 
+#' @code RootedNNI} is abridged from the \pkg{phangorn} function \code{nnin
+#' }
+#' 
+#' \seealso{
+#' \itemize{
+#' \item \code{\link{SetOutgroup}}, set the outgroup of the phylogenetic tree
+#' \item \code{\link{NNI}}, unrooted \acronym{NNI} and \acronym{SPR}
+#' \item \code{\link{TBR}}, unrooted \acronym{TBR}
+#' }
+#' }
+#' @examples{
+#'   tree <- read.tree(text='(((a,b),c),(d,(e,f)));')
+#'   tree <- SetOutgroup(tree, c('e', 'f'))
+#'   plot(tree)
+#'   dev.new()
+#'   plot(RootedNNI(tree))
+#'   plot(RootedSPR(tree))
+#'   plot(RootedTBR(tree))
+#' }
+#' 
+#' @export
 RootedNNI <- function (tree) {
   edge <- matrix(tree$edge, ncol = 2)
   parent <- edge[, 1]
@@ -55,6 +140,7 @@ RootedNNI <- function (tree) {
   tree <- Renumber(phangorn:::reorderPruning(tree))  
 }
 
+#' @export
 RootedSPR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
   tip.label <- tree$tip.label
@@ -99,6 +185,7 @@ RootedSPR <- function(tree) {
   tree
 }
 
+#' @export
 RootedTBR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
   edge <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
@@ -128,6 +215,7 @@ RootedTBR <- function(tree) {
   }
 }
 
+#' @export
 QuickNNI <- function (tree) {
   n      <- sample(tree$Nnode - 1L, 1L)
   edge   <- tree$edge
@@ -144,6 +232,7 @@ QuickNNI <- function (tree) {
   Renumber(phangorn:::reorderPruning(tree))
 }
 
+#' @export
 SPR <- function(tree) {
   tip.label <- tree$tip.label
   nTips <- length(tip.label)
@@ -190,6 +279,41 @@ SPR <- function(tree) {
   tree
 }
 
+#' @name TBR
+#' @alias tbr
+#' @alias TBR
+#' 
+#'  Tree bisection and reconnection
+#' @description This function performs a single random \acronym{TBR} iteration.
+#' \usage{
+#' TBR(tree, edge.to.break = NULL)
+#' }
+#' %- maybe also 'usage' for other objects documented here.
+#' \arguments{
+#'   \item{tree}{a fully resolved tree in \code{\link{phyDat}} format;}
+#'   \item{edge.to.break}{the index of an edge to bisect, generated randomly if not specified.}
+#' }
+#' \details{
+#' Branch lengths are not (yet) supported.
+#' }
+#' @return This function returns a tree in \code{phyDat} format that has undergone one \acronym{TBR} iteration.
+#' \references{
+#' The \acronym{TBR} algorithm is summarized in
+#' 
+#' Felsenstein, J. 2004. \cite{Inferring Phylogenies.} Sinauer Associates, Sunderland, Massachusetts.
+#' }
+#' \author{
+#' Martin R. Smith
+#' }
+#' 
+#' \seealso{
+#' @code \link{RootedTBR}, useful when the position of the root node should be retained.
+#' }
+#' @examples{
+#' tree <- rtree(20, br=NULL)
+#' TBR(tree)
+#' }
+#' @export
 TBR <- function(tree, edge.to.break=NULL) {
 # Improvement targets: Root; ExtractClade; DropTip
   nTips <- tree$Nnode + 1

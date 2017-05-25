@@ -4,7 +4,7 @@
 #include <R.h> 
 #include <Rinternals.h>
 
-void order_edges(int *parent, int *child, int *n_node, int *n_edge) {
+void order_edges(int *parent, int *child, const int *n_node, const int *n_edge) {
   int i, q_pos = 0, o_node, root_node;
   int * start_p = calloc(*n_edge, sizeof(int));
   int * start_c = calloc(*n_edge, sizeof(int));
@@ -12,6 +12,7 @@ void order_edges(int *parent, int *child, int *n_node, int *n_edge) {
   int * child_r  = calloc(*n_node, sizeof(int));
   int * queue_p  = calloc(*n_node, sizeof(int));
   int * queue_c  = calloc(*n_node, sizeof(int));
+  // TODO check that calloc has returned a non-null pointer; clean-up and exit if calloc has failed
   root_node = *n_node + 2L;
   for (i = 0; i < *n_edge; i++) {
     // Initialize
@@ -44,11 +45,18 @@ void order_edges(int *parent, int *child, int *n_node, int *n_edge) {
       o_node = child_l[o_node - root_node];
     }
   }
+  free(start_p);
+  free(start_c);
+  free(child_l);
+  free(child_r);
+  free(queue_p);
+  free(queue_c);
 }
 
-void number_nodes(int *parent, int *child, int *root_node, int *n_edge) {
+void number_nodes(int *parent, int *child, const int *root_node, const int *n_edge) {
   int i, next_node, n_allnodes = *n_edge + 1L;
   int * renumber = calloc(n_allnodes, sizeof(int));
+  // TODO check that calloc has returned a non-null pointer; clean-up and exit if calloc has failed
   next_node = *root_node;
   for (i = 0; i < n_allnodes; i++) renumber[i] = i + 1L;
   for (i = 0; i < *n_edge; i++) {
@@ -58,4 +66,5 @@ void number_nodes(int *parent, int *child, int *root_node, int *n_edge) {
     parent[i] = renumber[parent[i]-1L];
     child[i] = renumber[child[i]-1L];
   }
+  free(renumber);
 }

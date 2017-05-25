@@ -1,13 +1,62 @@
-visualize.inheritance <- visualise.inheritance <- vis.in <- function (tree, data, char.no, plot.fun=plot) {
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
+VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, char.no, plot.fun=plot) {
   par(mfrow=c(1,2), mar=rep(0.5,4))
-  visualize.character(tree, data, char.no, plot.fun, inherit.ancestral=FALSE)
-  visualize.character(tree, data, char.no, plot.fun, inherit.ancestral=TRUE)
+  VisualizeCharacter(tree, data, char.no, plot.fun, inherit.ancestral=FALSE)
+  VisualizeCharacter(tree, data, char.no, plot.fun, inherit.ancestral=TRUE)
 }
-
-visualize.character <- visualise.character <- visualize.char <- visualise.char <- 
+#' @name VisualiseCharacter
+#' @alias VisualiseCharacter
+#' @alias VisualiseChar
+#' @alias VisualizeCharacter
+#' @alias VisualizeChar
+#' 
+#'  Visualize optimization for a character
+#' @description Determine and depict the possible states for a character on a tree under the most parsimonious conditions
+#' \usage{
+#' VisualiseCharacter(tree, data, char.no, plot.fun = plot)
+#' }
+#' \arguments{
+#'   \item{tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
+#'   \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};}
+#'   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;}
+#'   \item{char.no}{number of the character to be displayed;}
+#'   \item{plot.fun}{a function that plots a tree, \code{\link{plot}} by default.}
+#' }
+#' 
+#' @return{
+#' The function plots a cladogram, annotating each node with the values that could occur there at the lowest parsimony score.
+#'   Nodes highlighed in red potentially (but do not necessarily) contribute to tree length.
+#' }
+#' \author{
+#' Martin R. Smith
+#' }
+#' @examples{
+#' data('SigSut')
+#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
+#' njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
+#' VisualiseCharacter(njtree, SigSut.phy, 5, function(x) {plot(x); edgelabels();})
+#' }
+#' @keyword  tree 
+#' 
+#' @export
+VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 
 function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
-  if (class(data) == 'phyDat') data <- PrepareData(data)
-  if (class(data) != '*phyDat') stop('Invalid data type; try InapplicableFitch(tree, data <- PrepareData(valid.phyDat.object)).')
+  if (class(data) == 'phyDat') data <- MorphyData(data)
+  if (class(data) != 'morphyDat') stop('Invalid data type in VizualizeCharacter.')
+  warning("#TODO: Update to use new morphyDat data objects")
   at <- attributes(data)
   if (char.no > at$nr || char.no < 1) stop(paste0("char.no must be between 1 and ", at$nr, ' (', sum(at$weight), 'TS, ', at$nr, ' unique)'))
   char.dat <- data[char.no,]
@@ -47,13 +96,25 @@ function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
   tipcols <- rev(tipcols)
   bgcols <- tipcols[as.character(downpass.states[1,tips])]
   bgcols[is.na(bgcols)] <- '#ffffbb'
-  tiplabels(possible.tokens(at$levels, downpass.states[1,tips]), adj=c(0.3,0.5), bg=bgcols, col='#000088', cex=0.85)
-  nodelabels(possible.tokens(at$levels, downpass.states[1,nodes]), adj=rep(1.25,2), bg=tipcols[as.character(downpass.states[1,nodes])], font=ifelse(down.change, 2, 1) , col=ifelse(down.change, '#cc3333', '#880000cc'), cex=ifelse(down.change,1,0.6))
+  tiplabels(PossibleTokens(at$levels, downpass.states[1,tips]), adj=c(0.3,0.5), bg=bgcols, col='#000088', cex=0.85)
+  nodelabels(PossibleTokens(at$levels, downpass.states[1,nodes]), adj=rep(1.25,2), bg=tipcols[as.character(downpass.states[1,nodes])], font=ifelse(down.change, 2, 1) , col=ifelse(down.change, '#cc3333', '#880000cc'), cex=ifelse(down.change,1,0.6))
   
   nodelabels(ifelse(inapp.nodes[nodes], '+', '-'), adj=c(1.25,-0.75), col=ifelse(inapp.nodes[nodes], '#008800', '#880000'), frame='none')
 }
-
-possible.tokens <- function (lvls, number) {
+#' TITLE GOES HERE
+#'
+#' \code{FUNCTIONNAME} does something useful
+#'
+#' @param PARAM is a parameter you should send to it
+#' 
+#' @examples
+#' to_do <- TRUE
+#' 
+#' @return This function returns :
+#'   
+#' @author Martin Smith
+#' @export
+PossibleTokens <- function (lvls, number) {
   nTokens <- length(lvls)
   nNumber <- length(number)
   output <- function (x) {paste0(x, collapse='')}
@@ -69,55 +130,3 @@ possible.tokens <- function (lvls, number) {
   which.levels[,seq_along(binary[1,])] <- as.logical(binary)
   apply(which.levels, 1, function(x) {if (all(x)) return ('?') else y <- x; y[lvls=='-']<-TRUE; if (nTokens > 4 && all(y)) return ('+') else return (output(lvls[x]))})
 }
-
-#edge.lengths <- function (tree, data, char.no) {
-#  if (class(data) == 'phyDat') data <- PrepareData(data)
-#  if (class(data) != '*phyDat') stop('Invalid data type; try InapplicableFitch(tree, data <- PrepareData(valid.phyDat.object)).')
-#  if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")
-#  tree.edge <- tree$edge
-#  parent <- tree.edge[,1]
-#  child <- tree.edge[,2]
-#  at <- attributes(data)
-#  n.ts <- sum(at$weight)
-#  unique.ts <- at$nr
-#  nEdge <- length(parent)
-#  nTip <- length(tip.label)
-#  nNode <- nTip - 1
-#  maxNode <- nNode + nTip
-#  inapp <- at$inapp.level
-#  tips <- seq(nTip)
-#  tip.label <- tree$tip.label
-#  nodes <- nTip + seq(nNode)
-#  parentof <- parent[match((nTip + 2L):maxNode, child )] # Exclude the root, which has no parent
-#  childof <- child [c(match(nodes, parent), length(parent) + 1L - match(nodes, rev(parent)))]
-#  weight <- at$weight
-#  ret <- .Call("FITCHINAPP", data[, tip.label], as.integer(nChar), as.integer(parent), as.integer(child), as.integer(parentof), as.integer(childof), as.integer(nEdge), as.integer(nNode), as.double(weight), as.integer(maxNode), as.integer(nTip), as.integer(inapp), PACKAGE='inapplicable') # 
-#  downpass.states <- ret[[3]]
-#  down.scorers <- ret[[4]]
-#  inapp.nodes <- ret[[5]] > 0
-#  len <- rep (0, nEdge)
-#  down.change <- sapply(nEdge:1, function(n) {
-#  for (i in unique.ts) {
-#      if (is.na(parentof[parent[n]])) {
-#        # at root
-#         len[n] = len[n] + AsBinary(downpass.states[i, parent[n]]) && downpass.states[i, child[n]]) / 2
-#      }
-#      children <- child[parent==n]
-#      return (down.scorers[n] != down.scorers[children[1]] + down.scorers[children[2]])   
-#    })
-#    text(1,1,paste0('Char ', i, ' - TS', paste(which(at$index == i), collapse=', '), ': +', ret[[1]]), pos=4, cex=0.8)
-#    
-#    
-#    tipcols = c('#fafafa', '#fafafa', '#fafabb', '#ffbbbb', '#bbffbb', '#bbbbff', '#bbbbff', '#bbffbb', '#ffbbbb', '#bbddff', '#ffbbdd')
-#    names(tipcols) <- c(NA, max(downpass.states[1,]), max(downpass.states[1,])-inapp, 2^(0:7))
-#    tipcols[as.character(inapp)] <- '#999999'
-#    tipcols <- rev(tipcols)
-#    bgcols <- tipcols[as.character(downpass.states[1,tips])]
-#    bgcols[is.na(bgcols)] <- '#ffffbb'
-#    tiplabels(possible.tokens(at$levels, downpass.states[1,tips]), adj=c(0.3,0.5), bg=bgcols, col='#000088', cex=0.85)
-#    nodelabels(possible.tokens(at$levels, downpass.states[1,nodes]), adj=rep(1.25,2), bg=tipcols[as.character(downpass.states[1,nodes])], font=ifelse(down.change, 2, 1) , col=ifelse(down.change, '#cc3333', '#880000cc'), cex=ifelse(down.change,1,0.6))
-#    
-#    nodelabels(ifelse(inapp.nodes[nodes], '+', '-'), adj=c(1.25,-0.75), col=ifelse(inapp.nodes[nodes], '#008800', '#880000'), frame='none')
-#  }
-#}
-#

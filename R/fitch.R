@@ -5,7 +5,7 @@
 #'
 #' @param tree A tree of class \code{phylo}
 #' @param morphyData A \code{phyDat} or \code{morphyDat} object, perhaps generated with 
-#'  \code{\link{phyDat}} or \code{\link{MorphyData}}
+#'  \code{\link{phyDat}} or \code{\link{MorphyDat}}
 #' @param detail Leave as 1 to just return parsimony score, or specify c(1, 2, 3) for additional detail (see below)
 #' 
 #' @examples
@@ -14,7 +14,7 @@
 #' tree <- rtree(length(taxa), tip.label=taxa, br=NULL)
 #' result <- InapplicableFitch(tree, SigSut.phy)
 #' 
-#' @value This function returns the elements from a list containing:
+#' @return This function returns the elements from a list containing:
 #'    \itemize{
 #' \item     The total parsimony score
 #' \item     The parsimony score associated with each character 
@@ -24,13 +24,13 @@
 #' If a single element is requested (default) then just that element will be returned
 #' If multiple elements are requested then these will be returned in a list.
 #' 
-#' @seealso \code{\link{MorphyData}}
+#' @seealso \code{\link{MorphyDat}}
 #' @seealso \code{\link{TreeSearch}}
 #' 
 #' @author Martin Smith (using C code adapted from MorphyLib, author Martin Brazeau)
 #' @export
 
-InapplicableFitch <- function (tree, morphyData, detail=1) {
+InapplicableFitch <- function (tree, morphyData, detail=1, ...) {
   # Data
   if (class(morphyData) == 'phyDat') morphyData <- MorphyDat(morphyData)
   if (class(morphyData) != 'morphyDat') stop('Invalid data type ', class(morphyData), '; try InapplicableFitch(tree, data <- MorphyData(valid.phyDat.object)).')

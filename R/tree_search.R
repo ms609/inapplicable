@@ -64,7 +64,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
       if (length(candidate.nodes == 0)) stop('No selectable sectors contain parsimony information! Either "largest.sector" is close to "smallest.sector" or your dataset is short of parsimony information.')
     } 
     if (trace >= 0) cat(' Sector OK.')
-    crown <- root(AddTip(crown, 0, 'SECTOR_ROOT'), length(crown$tip.label) + 1, resolve.root=TRUE)
+    crown <- root(AddTip(crown, 0, 'SECTOR_ROOT'), length(crown$tip.label) + 1, resolve.root=TRUE) ## TODO use Root or add ape::root to includeFrom in NAMESPACE
     initial.p <- InapplicableFitch(crown, crown.data, ...)
     attr(crown, 'pscore') <- initial.p
     if (trace >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
@@ -99,8 +99,8 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' }
 #' \arguments{
 #'   \item{tree}{An object of class \code{phyDat} denoting the topology to begin the search from;}
-#'   \item{data}{A matrix in \code{\link{MorphyData}} format (or \code{\link{phyDat}} format,
-#'     which the function will itself pass through \code{MorphyData});}
+#'   \item{data}{A matrix opf class \code{morphyDat} format (or \code{\link{phyDat}} format,
+#'     which the function will itself pass through \code{MorphyDat});}
 #'   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
 #'     see \code{\link{InapplicableParsimony}};}
 #'   \item{all}{Set to TRUE to report all MPTs encountered during the search, perhaps to analyze consensus}
@@ -130,7 +130,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' @examples{
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' InapplicablePratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
 #' }
@@ -289,7 +289,7 @@ BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion,
 #' @examples{
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' \dontrun{
 #' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='NNI')
@@ -411,7 +411,7 @@ TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, fores
 #' @examples{
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' InapplicableSectorial(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50, largest.sector=7)
 #' @dontrun SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming

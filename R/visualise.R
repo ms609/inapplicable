@@ -54,7 +54,7 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' @export
 VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 
 function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
-  if (class(data) == 'phyDat') data <- MorphyData(data)
+  if (class(data) == 'phyDat') data <- MorphyDat(data)
   if (class(data) != 'morphyDat') stop('Invalid data type in VizualizeCharacter.')
   warning("#TODO: Update to use new morphyDat data objects")
   at <- attributes(data)

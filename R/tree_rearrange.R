@@ -5,12 +5,12 @@ ReorderPruning <- function (x) {
   parents <- as.integer(edge[, 1])
   child <- as.integer(edge[, 2])
   root <- as.integer(parents[!match(parents, child, 0)][1])
-  n_edge = length(parents)
-  max_edge = max(edge)
-  neworder = .C("phangorn_reorder", parents, child, as.integer(n_edge), 
-      as.integer(max_edge), integer(n), as.integer(root - 1L), PACKAGE = "inapplicable")[[5]]
-  x$edge = edge[neworder, ]
-  x$edge.length = x$edge.length[neworder]
+  n_edge <- length(parents)
+  max_edge <- max(edge)
+  neworder <- .C("phangorn_reorder", parents, child, as.integer(n_edge), 
+      as.integer(max_edge), integer(n_edge), as.integer(root - 1L), PACKAGE = "inapplicable")[[5]]
+  x$edge <- edge[neworder, ]
+  x$edge.length <- x$edge.length[neworder]
   attr(x, "order") <- "pruningwise"
   x
 }
@@ -248,7 +248,7 @@ QuickNNI <- function (tree) {
   ind1   <- ind1[ind1 != ind][1L]
   ind2   <- which(parent == p2)[sample(2L,1L)]
   tree$edge[c(ind1, ind2), 2L] <- child[c(ind2, ind1)]
-  Renumber(phangorn:::reorderPruning(tree))
+  Renumber(ReorderPruning(tree))
 }
 
 #' @export

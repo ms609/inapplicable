@@ -706,7 +706,7 @@ DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge =
   if (any(tip > Ntip))
     warning("Some tip numbers were higher than the number of tips")
   if (!rooted && subtree) {
-    phy <- root(phy, (1:Ntip)[-tip][1])
+    phy <- Root(phy, (1:Ntip)[-tip][1]) ## TODO modified from ape::root; check it still works.
     root.edge <- 0
   }
 

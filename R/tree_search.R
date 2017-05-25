@@ -233,7 +233,7 @@ BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion,
   v <- rep(1:length(weight), weight)
   BS <- tabulate(sample(v, replace=TRUE), length(weight)) 
   keep <- BS > 0
-  mDat <- mDat[, keep]
+  mDat <- mDat[, keep, drop=FALSE]
   attr(mDat, 'weight') <- BS[keep]
   attr(mDat, 'min.steps') <- at$min.steps[keep]
   attr(mDat, 'unique.tokens') <- at$unique.tokens[keep]

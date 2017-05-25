@@ -52,9 +52,10 @@ InapplicableFitch <- function (tree, morphyData, detail=1, ...) {
   allNodes <- (nTip + 1L):maxNode
   childOf <- child [c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
   
-  ret <- .Call("MORPHYFITCH", t(morphyData[tipLabel, ]), as.integer(nChar), as.integer(nTip), 
-               as.integer(parent), as.integer(child), as.integer(parentOf), as.integer(childOf), 
-               as.double(weight), as.integer(inappLevel), as.integer(inappChars), PACKAGE='inapplicable')
+  ret <- .Call("MORPHYFITCH", as.integer(t(morphyData[tipLabel, ])), as.integer(nChar), 
+               as.integer(nTip), as.integer(parent), as.integer(child),
+               as.integer(parentOf), as.integer(childOf), as.double(weight), 
+               as.integer(inappLevel), as.integer(inappChars), PACKAGE='inapplicable')
   
   if (length(detail) == 1) return (ret[[detail]])
   return (ret[detail])

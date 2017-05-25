@@ -26,7 +26,7 @@ ReorderPruning <- function (x) {
 #'     \code{pscore}, the tree's parsimony score, and 
 #'     \code{hits}, the number of times the best score has been hit in the calling function;
 #'   }
-#'   \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};}
+#'   \item{dataset}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};}
 #'   \item{Rearrange}{a rearrangement function: probably one of 
 #'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};}
 #'   \item{min.score}{trees longer than \code{min.score}, probably the score of the starting tree,
@@ -55,18 +55,18 @@ ReorderPruning <- function (x) {
 #' RearrangeTree(random.tree, SigSut.preparedata, RootedNNI)
 #' }
 #' @export
-RearrangeTree <- function (tree, data, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
+RearrangeTree <- function (tree, dataset, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
     trees <- list(re.tree<-Rearrange(tree))
-    min.score <- InapplicableFitch(re.tree, data)
+    min.score <- InapplicableFitch(re.tree, dataset)
     best.trees <- c(TRUE)
   } else {
     #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
     candidates <- clusterCall(cluster, Rearrange, tree)
-    scores <- vapply(candidates, InapplicableFitch, 1, data) # ~3x faster to do this in serial in r233.
+    scores <- vapply(candidates, InapplicableFitch, 1, dataset) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score
     trees <- candidates[best.trees]
@@ -235,7 +235,7 @@ RootedTBR <- function(tree) {
 
 #' @importFrom phangorn
 #' @export
-QuickNNI <- function (tree) {
+NNI <- function (tree) {
   n      <- sample(tree$Nnode - 1L, 1L)
   edge   <- tree$edge
   parent <- edge[, 1L]

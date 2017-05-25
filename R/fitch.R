@@ -34,10 +34,11 @@ InapplicableFitch <- function (tree, morphyData, detail=1, ...) {
   # Data
   if (class(morphyData) == 'phyDat') morphyData <- MorphyDat(morphyData)
   if (class(morphyData) != 'morphyDat') stop('Invalid data type ', class(morphyData), '; try InapplicableFitch(tree, data <- MorphyData(valid.phyDat.object)).')
+  treeOrder <- attr(tree, 'order')
+  if (is.null(treeOrder) || treeOrder == "cladewise") tree <- reorder(tree, "postorder")
   at <- attributes(morphyData)
   nChar  <- at$nr # strictly, transformation series patterns; these'll be upweighted later
   weight <- at$weight
-  if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")
   tree.edge <- tree$edge
   parent <- tree.edge[,1]
   child <- tree.edge[,2]

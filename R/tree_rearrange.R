@@ -1,3 +1,20 @@
+#' Reorder pruning
+#' Modified from phangorn:::reorderPruning
+ReorderPruning <- function (x) {
+  edge <- x$edge
+  parents <- as.integer(edge[, 1])
+  child <- as.integer(edge[, 2])
+  root <- as.integer(parents[!match(parents, child, 0)][1])
+  n_edge = length(parents)
+  max_edge = max(edge)
+  neworder = .C("phangorn_reorder", parents, child, as.integer(n_edge), 
+      as.integer(max_edge), integer(n), as.integer(root - 1L), PACKAGE = "inapplicable")[[5]]
+  x$edge = edge[neworder, ]
+  x$edge.length = x$edge.length[neworder]
+  attr(x, "order") <- "pruningwise"
+  x
+}
+
 #' Rearrange phylogenetic tree
 #' \code{RearrangeTree} performs one tree rearrangement of a specified type
 #' @usage
@@ -113,6 +130,7 @@ RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL
 #'   plot(RootedTBR(tree))
 #' }
 #' 
+#' @importFrom phangorn
 #' @export
 RootedNNI <- function (tree) {
   edge <- matrix(tree$edge, ncol = 2)
@@ -137,7 +155,7 @@ RootedNNI <- function (tree) {
     warning("Edge lengths have been deleted")
     tree$edge.length <- NULL
   }
-  tree <- Renumber(phangorn:::reorderPruning(tree))  
+  tree <- Renumber(ReorderPruning(tree))  
 }
 
 #' @export
@@ -215,6 +233,7 @@ RootedTBR <- function(tree) {
   }
 }
 
+#' @importFrom phangorn
 #' @export
 QuickNNI <- function (tree) {
   n      <- sample(tree$Nnode - 1L, 1L)

@@ -720,8 +720,8 @@ DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge =
     tr.edge <- tr$edge
     N <- .C("node_depth", as.integer(Ntip), as.integer(Nnode),
             as.integer(tr.edge[, 1]), as.integer(tr.edge[, 2]),
-            as.integer(Nedge), double(Ntip + Nnode),
-            DUP = FALSE, PACKAGE = "ape")[[6]]
+            as.integer(Nedge), double(Ntip + Nnode), 
+            PACKAGE = "inapplicable")[[6]]
   }
   edge1 <- phy.edge[, 1] # local copies
   edge2 <- phy.edge[, 2] #

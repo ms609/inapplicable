@@ -68,3 +68,58 @@ void number_nodes(int *parent, int *child, const int *root_node, const int *n_ed
   }
   free(renumber);
 }
+
+void tabulate
+(const int *x, const int *n, const int *nbin, int *ans) {
+    int i, tmp;
+    for (i=0; i < *nbin; i++) ans[i]=0L; 
+    for (i=0; i < *n; i++) {
+        tmp = x[i];
+        if( (tmp>0) & (tmp<(*nbin+1L)) )   
+        ans[tmp-1L] ++;
+    }
+}
+
+void phangorn_reorder
+(const int *from, const int *to, const int *n, 
+ const int *sumNode, int *neworder, int *root) { 
+    int i, j, sum=0, k, Nnode, ind, *ord, *csum, *tips, *stack, z=0;  // l, 
+    double *parent;
+    int m=sumNode[0];
+    parent = (double *) R_alloc((*n), sizeof(double));
+    tips = (int *) R_alloc(m, sizeof(int));
+    ord = (int *) R_alloc((*n), sizeof(int));
+    csum = (int *) R_alloc( (m+1), sizeof(int));
+    stack = (int *) R_alloc(m, sizeof(int));
+    for(j=0;j<(*n);j++) parent[j] = (double)from[j];
+   
+    for(j=0;j<(*n);j++) ord[j] = j;
+    for(j=0;j<m;j++) tips[j] = 0;
+        
+    rsort_with_index(parent, ord, *n);
+    tabulate(from, n, sumNode, tips);
+    csum[0]=0;
+    for(i=0;i<(*sumNode);i++){
+        sum+=tips[i];                 
+        csum[i+1] = sum;                        
+    }      
+    k = (*n)-1;
+    Nnode = 0;
+    stack[0] = *root;
+    
+    while(z > -1){
+        j=stack[z];          
+        if(tips[j]>0){   
+            for(i=csum[j];i<csum[j+1];i++){
+                ind = ord[i];                     
+                neworder[k] = ind + 1;        
+                stack[z] = to[ind]-1;
+                k -=1;
+                z++;                            
+            }         
+            Nnode += 1; 
+            }
+        z--;       
+    }                
+    root[0]=Nnode;     
+}

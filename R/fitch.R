@@ -31,7 +31,6 @@
 #' @export
 
 InapplicableFitch <- function (tree, morphyData, detail=1, ...) {
-  # Data
   if (class(morphyData) == 'phyDat') morphyData <- MorphyDat(morphyData)
   if (class(morphyData) != 'morphyDat') stop('Invalid data type ', class(morphyData), '; try InapplicableFitch(tree, data <- MorphyData(valid.phyDat.object)).')
   treeOrder <- attr(tree, 'order')

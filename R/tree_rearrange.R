@@ -27,7 +27,7 @@ ReorderPruning <- function (x) {
 #'     \code{hits}, the number of times the best score has been hit in the calling function;
 #'   }
 #'   \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};}
-#'   \item{rearrange}{a rearrangement function: probably one of 
+#'   \item{Rearrange}{a rearrangement function: probably one of 
 #'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};}
 #'   \item{min.score}{trees longer than \code{min.score}, probably the score of the starting tree,
 #'     will be discarded;}
@@ -55,17 +55,17 @@ ReorderPruning <- function (x) {
 #' RearrangeTree(random.tree, SigSut.preparedata, RootedNNI)
 #' }
 #' @export
-RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
+RearrangeTree <- function (tree, data, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
-    trees <- list(re.tree<-rearrange(tree))
+    trees <- list(re.tree<-Rearrange(tree))
     min.score <- InapplicableFitch(re.tree, data)
     best.trees <- c(TRUE)
   } else {
     #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
-    candidates <- clusterCall(cluster, rearrange, tree)
+    candidates <- clusterCall(cluster, Rearrange, tree)
     scores <- vapply(candidates, InapplicableFitch, 1, data) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score

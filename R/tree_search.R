@@ -137,10 +137,10 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' @keyword  tree 
 
 #' @export
-InapplicablePratchet <- function (tree, data, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
-  if (class(data) != 'morphyDat') stop("data must be a morphyDat object.")
+InapplicablePratchet <- function (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
+  if (class(dataset) != 'morphyDat') stop("dataset must be a morphyDat object.")
   eps <- 1e-08
-  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- InapplicableFitch(tree, data, ...)
+  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- InapplicableFitch(tree, dataset, ...)
   best.pars <- attr(tree, "pscore")
   if (trace >= 0) cat("* Initial pscore:", best.pars)
   if (keepAll) forest <- vector('list', maxiter)
@@ -148,27 +148,27 @@ InapplicablePratchet <- function (tree, data, keepAll=FALSE, outgroup=NULL, maxi
   kmax <- 0 
   for (i in 1:maxit) {
     if (trace >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
-    bstree <- BootstrapInapp(tree=tree, morphy=data, maxiter=maxiter, maxhits=maxhits, criterion=criterion, trace=trace-1, ...)
+    bstree <- BootstrapInapp(tree=tree, mDat=dataset, maxiter=maxiter, maxhits=maxhits, criterion=criterion, trace=trace-1, ...)
     
     if (trace >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new cannew candidate tree:")
     if (rearrangements == "TBR") {
-      candidate <- TreeSearch(bstree,    data, criterion=criterion, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- TreeSearch(candidate, data, criterion=criterion, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- TreeSearch(candidate, data, criterion=criterion, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- TreeSearch(candidate, dataset, criterion=criterion, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- TreeSearch(candidate, dataset, criterion=criterion, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     } else if (rearrangements == "TBR only") {            
-      candidate <- TreeSearch(bstree,    data, criterion=criterion, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='TBR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     } else if (rearrangements == "SPR") {                  
-      candidate <- TreeSearch(bstree,    data, criterion=criterion, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- TreeSearch(candidate, data, criterion=criterion, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- TreeSearch(candidate, dataset, criterion=criterion, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     } else if (rearrangements == "SPR only") {             
-      candidate <- TreeSearch(bstree,    data, criterion=criterion, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='SPR', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     } else {                                               
-      candidate <- TreeSearch(bstree,    data, criterion=criterion, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
+      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='NNI', trace=trace, maxiter=maxiter, maxhits=maxhits, ...)
     }
     #if(class(result)=="phylo") m <- 1
     #else m = length(result)
     #if(m > 0) trees[2 : (1+m)] = result[1:m]
-    #pscores <- sapply(trees, function(data) attr(data, "pscore"))
+    #pscores <- sapply(trees, function(dataset) attr(dataset, "pscore"))
     cand.pars <- attr(candidate, 'pscore')
     if((cand.pars+eps) < best.pars) {
       if (keepAll) {
@@ -227,21 +227,22 @@ PratchetConsensus <- function (tree, data, maxit=5000, maxiter=500, maxhits=20, 
 #' @export
 BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion, trace=1, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
-  at <- attributes(morphy)
+  at <- attributes(mDat)
   weight <- at$weight
+  inappls <- at$inapp.chars
   v <- rep(1:length(weight), weight)
   BS <- tabulate(sample(v, replace=TRUE), length(weight)) 
   keep <- BS > 0
-  ind <- which(keep)
-  morphy <- morphy[, ind]
-  attr(morphy, 'weight') <- BS[ind]
-  attr(morphy, 'min.steps') <- at$min.steps[keep]
-  attr(morphy, 'unique.tokens') <- at$unique.tokens[keep]
-  attr(morphy, 'nr') <- length(ind)
-  attr(morphy, 'inapp.level') <- at$inapp.level
+  mDat <- mDat[, keep]
+  attr(mDat, 'weight') <- BS[keep]
+  attr(mDat, 'min.steps') <- at$min.steps[keep]
+  attr(mDat, 'unique.tokens') <- at$unique.tokens[keep]
+  attr(mDat, 'nr') <- sum(keep)
+  attr(mDat, 'inapp.level') <- at$inapp.level
+  attr(mDat, 'inapp.chars') <- sum(BS[1:inappls])
   attr(tree, 'pscore') <- NULL
-  class(morphy) <- 'morphyDat'
-  res <- TreeSearch(tree, morphy, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
+  class(mDat) <- 'morphyDat'
+  res <- TreeSearch(tree, mDat, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   res
@@ -300,7 +301,7 @@ BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion,
 #' @keyword  tree 
 #' 
 #' @export
-TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, criterion=NULL, ...) {
+TreeSearch <- function (tree, dataset, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, criterion=NULL, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1
   if (!is.null(forest.size) && length(forest.size)) {
@@ -310,14 +311,14 @@ TreeSearch <- function (tree, data, method='NNI', maxiter=100, maxhits=20, fores
       forest.size <-1 
     }
   }
-  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- InapplicableFitch(tree, data)
+  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- InapplicableFitch(tree, dataset)
   best.pscore <- attr(tree, 'pscore')
   if (trace > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
-  rearrange.func <- switch(method, 'TBR' = TBR, 'SPR' = SPR, 'NNI' = QuickNNI)
+  rearrange.func <- switch(method, 'TBR' = TBR, 'SPR' = SPR, 'NNI' = NNI)
   return.single <- !(forest.size > 1)
   
   for (iter in 1:maxiter) {
-    trees <- RearrangeTree(tree, data, rearrange.func, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, criterion=criterion, trace=trace)
+    trees <- RearrangeTree(tree, dataset, rearrange.func, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, criterion=criterion, trace=trace)
     iter.pscore <- attr(trees, 'pscore')
     if (length(forest.size) && forest.size > 1) {
       hits <- attr(trees, 'hits')

@@ -1,0 +1,2 @@
+PKG_CFLAGS	:= -c -Wall #$(shell pkg-config --cflags glib-2.0) -I/MorphyLib
+PKG_LIBS	:= #$(shell pkg-config --libs glib-2.0)

@@ -135,6 +135,44 @@ mpl_get_numtaxa <- function(morphyobj)
 }
 
 
+#' @title Set the weight of a character in the dataset
+#'
+#' @description Sets the weight of a character in the dataset.
+#'
+#' @param charID    Number of the character (i.e. first character is number 1)
+#' @param weight    Weight to assign
+#' @param morphyobj An instance of the Morphy object.
+#' 
+#' @return An error code.
+#' 
+#' @author Martin Smith
+#' @export
+mpl_set_charac_weight <- function (charID, weight, morphyobj)
+{
+  return (.Call('_R_wrap_mpl_set_charac_weight', as.integer(charID - 1L), weight, morphyobj,
+                PACKAGE='inapplicable'))
+}
+
+#' @title Retrieve the weight of a character in the dataset
+#'
+#' @description Gets the weights of a character in the dataset.
+#'
+#' @param charID    Number of the character (i.e. first character is number 1)
+#' @param weight    
+#' @param morphyobj An instance of the Morphy object.
+#' 
+#' @return A list, detailing (item 1) the exact weight of the character; (item 2) the integer
+#'         approximation used by Morphy.
+#' 
+#' @author Martin Smith
+#' @export
+mpl_get_charac_weight <- function (charID, morphyobj)
+{
+  return (.Call('_R_wrap_mpl_get_charac_weight', as.integer(charID - 1L), 
+                morphyobj, PACKAGE='inapplicable'))
+}
+
+
 #' @title Retrieve the number of character (columns) in the dataset.
 #'
 #' @description Retrieves the number of character (columns) in the dataset.

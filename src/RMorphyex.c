@@ -181,6 +181,33 @@ SEXP _R_wrap_mpl_apply_tipdata(SEXP MorphyHandl)
     return Rret;
 }
 
+
+SEXP _R_wrap_mpl_set_charac_weight(SEXP RcharID, SEXP Rweight, SEXP MorphyHandl)
+{
+  SEXP Rret = PROTECT(allocVector(INTSXP, 1));
+  INTEGER(Rret)[0] = mpl_set_charac_weight(INTEGER(RcharID)[0], REAL(Rweight)[0],
+                                           R_ExternalPtrAddr(MorphyHandl));
+  UNPROTECT(1);
+  return Rret;
+}
+
+SEXP _R_wrap_mpl_get_charac_weight(SEXP RcharID, SEXP MorphyHandl) 
+{
+  SEXP Rret, Wapprox, Wexact;
+  PROTECT(Rret = allocVector(VECSXP, 2));
+  PROTECT(Wapprox = allocVector(INTSXP, 1));
+  PROTECT(Wexact  = allocVector(REALSXP, 1));
+  
+  double *exact_weight;
+  INTEGER(Wapprox)[0] = mpl_get_charac_weight(exact_weight, INTEGER(RcharID)[0],
+                                              R_ExternalPtrAddr(MorphyHandl));
+  REAL(Wexact)[0] = *exact_weight;
+  SET_VECTOR_ELT(Rret, 0, Wapprox);
+  SET_VECTOR_ELT(Rret, 1, Wexact);
+  UNPROTECT(3);
+  return Rret;
+}
+
 SEXP _R_wrap_mpl_first_down_recon(SEXP Rnode_id, SEXP Rleft_id, SEXP Rright_id, SEXP MorphyHandl)
 {
     SEXP Rret = PROTECT(allocVector(INTSXP, 1));

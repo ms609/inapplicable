@@ -1,8 +1,8 @@
 library(ape)
 
-## Test cases designed by Thomas Guillerme
+## Test suite designed by Thomas Guillerme
 context("correct step counting")
-test_that("InapplicableFitch generates correct tree lengths", {
+test_that("right counting", {
   ## Tree
   tree <- read.tree(text = "((((((1,2),3),4),5),6),(7,(8,(9,(10,(11,12))))));")
   characters <- c("23--1??--032", # 0,  expect score = 5

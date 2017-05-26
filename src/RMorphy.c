@@ -20,7 +20,6 @@ SEXP MORPHYLENGTH(SEXP R_descendants, SEXP R_ancestors, SEXP MorphyHandl) {
   
   // R_descendants and R_ancestors have already had one subtracted to convert them to an index 
   int *ancestor=INTEGER(R_ancestors), *left=INTEGER(R_descendants), *right=left + n_internal;  // INTEGER gives pointer to first element of length n R vector
-  Rprintf(" - %i nodes + dummy root, of which %i are internal (plus dummy root), %i are tips\n", max_node, n_internal - 1L, n_taxa);
   
   // Declare and protect result, to return to R
   SEXP Rres = PROTECT(allocVector(INTSXP, 1));
@@ -32,7 +31,6 @@ SEXP MORPHYLENGTH(SEXP R_descendants, SEXP R_ancestors, SEXP MorphyHandl) {
   *pscore_temp = 0;
    
   for (i = max_node - 1L; i > n_taxa; i--) { // First Downpass 
-    Rprintf("   - Reconstructing  node %i < %i,%i.\n", i, left[i - n_taxa], right[i - n_taxa]);
     *pscore_temp += mpl_first_down_recon(i,  left[i - n_taxa], right[i - n_taxa], handl);
   }
   mpl_update_lower_root(max_node, root_node, handl);

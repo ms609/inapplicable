@@ -138,9 +138,6 @@ LoadMorphy <- function (phy) {
   weight <- attr(phy, 'weight')
   if (any(vapply(seq_along(weight), function (x) mpl_set_charac_weight(x, weight[x], morphyObj),
       integer(1)) -> error)) stop("Error ", mpl_translate_error(min(error)), "in mpl_set_charac_weight")
-  
-  mpl_get_charac_weight(3, morphyObj)
-  
   return(morphyObj)
 }
 

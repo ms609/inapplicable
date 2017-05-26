@@ -198,10 +198,8 @@ SEXP _R_wrap_mpl_get_charac_weight(SEXP RcharID, SEXP MorphyHandl)
   PROTECT(Wapprox = allocVector(INTSXP, 1));
   PROTECT(Wexact  = allocVector(REALSXP, 1));
   
-  double *exact_weight;
-  INTEGER(Wapprox)[0] = mpl_get_charac_weight(exact_weight, INTEGER(RcharID)[0],
+  INTEGER(Wapprox)[0] = mpl_get_charac_weight(REAL(Wexact), INTEGER(RcharID)[0],
                                               R_ExternalPtrAddr(MorphyHandl));
-  REAL(Wexact)[0] = *exact_weight;
   SET_VECTOR_ELT(Rret, 0, Wapprox);
   SET_VECTOR_ELT(Rret, 1, Wexact);
   UNPROTECT(3);

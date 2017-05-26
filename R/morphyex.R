@@ -149,8 +149,8 @@ mpl_get_numtaxa <- function(morphyobj)
 #' @export
 mpl_set_charac_weight <- function (charID, weight, morphyobj)
 {
-  return (.Call('_R_wrap_mpl_set_charac_weight', as.integer(charID - 1L), as.numeric(weight), morphyobj,
-                PACKAGE='inapplicable'))
+  return (.Call('_R_wrap_mpl_set_charac_weight', as.integer(charID - 1L), as.numeric(weight),
+                morphyobj, PACKAGE='inapplicable'))
 }
 
 #' @title Retrieve the weight of a character in the dataset

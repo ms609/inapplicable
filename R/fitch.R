@@ -90,10 +90,10 @@ MorphyLength <- function (tree, morphyObj) {
   
   parentOf <- parent[match(1:maxNode, child )]
   parentOf[rootNode] <- maxNode + 1 # Root node's parent is a dummy node
-  childOf <- child[c(match(allNodes, parent), NA, length(parent) + 1L - match(allNodes, rev(parent)), NA)]
-  childOf[nTaxa * 1:2] <- rootNode
+  leftChild <- child[length(parent) + 1L - match(allNodes, rev(parent))]
+  rightChild <- child[match(allNodes, parent)]
   
-  ret <- .Call('MORPHYLENGTH', as.integer(childOf -1L), as.integer(parentOf -1L), morphyObj, 
-               PACKAGE='inapplicable')
+  ret <- .Call('MORPHYLENGTH', as.integer(parentOf -1L), as.integer(leftChild -1L), 
+               as.integer(rightChild -1L), morphyObj, PACKAGE='inapplicable')
   return(ret)
 }

@@ -13,13 +13,13 @@
 
 SEXP MORPHYLENGTH(SEXP R_descendants, SEXP R_ancestors, SEXP MorphyHandl) {
   Morphy handl = R_ExternalPtrAddr(MorphyHandl);
-  int n_taxa = mpl_get_numtaxa(handl);
-  int n_internal = mpl_get_num_internal_nodes(handl);
-  int root_node = n_taxa;
-  int max_node = n_taxa + n_internal - 1L;
+  const int n_taxa = mpl_get_numtaxa(handl); 
+  const int n_internal = mpl_get_num_internal_nodes(handl);
+  const int root_node = n_taxa;
+  const int max_node = n_taxa + n_internal - 1L;
   
   // R_descendants and R_ancestors have already had one subtracted to convert them to an index 
-  int *ancestor=INTEGER(R_ancestors), *left=INTEGER(R_descendants), *right=left + n_internal;  // INTEGER gives pointer to first element of length n R vector
+  const int *ancestor=INTEGER(R_ancestors), *left=INTEGER(R_descendants), *right=left + n_internal;  // INTEGER gives pointer to first element of length n R vector
   
   // Declare and protect result, to return to R
   SEXP Rres = PROTECT(allocVector(INTSXP, 1));

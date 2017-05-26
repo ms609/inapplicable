@@ -85,11 +85,12 @@ MorphyLength <- function (tree, morphyObj) {
   parent <- tree.edge[ ,1]
   child <- tree.edge[, 2]
   maxNode <- parent[1] #max(parent)
-  allNodes <- (nTaxa + 1L):maxNode
+  rootNode <- nTaxa + 1
+  allNodes <- rootNode:maxNode
   
   parentOf <- parent[match(1:maxNode, child )]
-  parentOf[nTaxa + 1] <- maxNode + 1 # Root node's parent is a dummy node
-  childOf <- child[c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
+  parentOf[rootNode] <- maxNode + 1 # Root node's parent is a dummy node
+  childOf <- child[c(match(allNodes, parent), rootNode, length(parent) + 1L - match(allNodes, rev(parent)), rootNode)]
   
   ret <- .Call('MORPHYLENGTH', as.integer(childOf -1L), as.integer(parentOf -1L), morphyObj, 
                PACKAGE='inapplicable')

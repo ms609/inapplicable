@@ -33,7 +33,8 @@ SEXP MORPHYLENGTH(SEXP R_descendants, SEXP R_ancestors, SEXP MorphyHandl) {
   for (i = max_node - 1; i > n_taxa; i--) { // First Downpass 
     *pscore_temp += mpl_first_down_recon(i,  left[i - n_taxa], right[i - n_taxa], handl);
   }
-  mpl_update_lower_root(max_node, root_node, handl);
+  mpl_update_lower_root(max_node, root_node, handl); // The index of the lower dummy root node = max_node/
+                                                     // TODO we can alternatively pass the root node as its own ancestor.
  
   for (i = root_node; i < max_node; i++) { // First uppass: internal nodes
     *pscore_temp += mpl_first_up_recon(i, left[i - n_taxa], right[i - n_taxa], ancestor[i], handl);

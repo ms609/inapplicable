@@ -45,10 +45,6 @@ mpl_translate_error <- function (errorCode) {
   return (mplErrorCodes[1-errorCode])
 }
 
-#dyn.load("RMorphyex.so") # MS: Commented out, because file might be ".dll" if on Windows, and 
-                          # path might be incorrect if this script is SOURCE'd from a different
-                          # working directory
-
 #' @title Creates a new instance of a Morphy object
 #'
 #' @description Creates a new empty Morphy object. All fields are unpopulated
@@ -89,7 +85,6 @@ mpl_delete_Morphy <- function(morphyobj)
 {
     return(.Call("_R_wrap_mpl_delete_Morphy", morphyobj, PACKAGE='inapplicable'))
 }
-
 
 #' @title Sets up the dimensions of the dataset.
 #'

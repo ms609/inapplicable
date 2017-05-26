@@ -135,8 +135,13 @@ LoadMorphy <- function (phy) {
   if(mpl_attach_rawdata(PhyToString(phy, ';'), morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_attach_rawdata")
   if(mpl_set_num_internal_nodes(nTax + 1L, morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_set_num_internal_nodes")
   weight <- attr(phy, 'weight')
-  if (any(vapply(seq_along(weight), function (x) mpl_set_charac_weight(x, weight[x], morphyObj),
+  if (any(vapply(seq_len(nChar), function (i) mpl_set_parsim_t(i, 'FITCH', morphyObj), integer(1)) 
+      -> error)) stop("Error ", mpl_translate_error(min(error)), "in mpl_set_parsim_t")
+  if (any(vapply(seq_len(nChar), function (i) mpl_set_charac_weight(i, weight[i], morphyObj),
       integer(1)) -> error)) stop("Error ", mpl_translate_error(min(error)), "in mpl_set_charac_weight")
+  
+  }
+
   if(mpl_apply_tipdata(morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_apply_tipdata")
   return(morphyObj)
 }

@@ -290,7 +290,8 @@ mpl_get_symbols <- function(morphyobj)
 #' @export
 mpl_set_parsim_t <- function(char_id, tname = "typename", morphyobj)
 {
-    return(.Call("_R_wrap_mpl_set_parsim_t", as.integer(char_id), tname, morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_set_parsim_t", as.integer(char_id - 1L), tname, morphyobj,
+                 PACKAGE='inapplicable'))
 }
 
 

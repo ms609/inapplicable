@@ -96,6 +96,19 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
   MorphyDat(phy)
 }
 
+PhyToString <- function (phy) {
+  at <- attributes(phy)
+  phyLevels <- at$allLevels
+  phyChars <- at$nr
+  phyContrast <- at$contrast == 1
+  outLevels <- seq_len(ncol(phyContrast)) - 1
+  if (any(inappLevel <- phyLevels == '-')) outLevels[which(phyContrast[inappLevel])] <- '-'
+  levelTranslation <- apply(phyContrast, 1, function (x)  ifelse(sum(x) == 1, as.character(outLevels[x]), paste0(c('{', outLevels[x], '}'), collapse='')))
+  if (any(ambigToken <- apply(phyContrast, 1, all))) levelTranslation[ambigToken] <- '?'
+  ret <- paste0(t(vapply(phy, function (x) levelTranslation[x], character(phyChars))), collapse='')
+  return (ret)
+}
+
 #' @name AsBinary
 #' @alias AsBinary
 #' @title Convert a number to binary

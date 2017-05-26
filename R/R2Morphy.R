@@ -2,11 +2,10 @@
 #'
 #' @description Uses the MorPhy library to calcuate the length of a phylogenetic tree
 #'
-#' @param \list {
-#'   \item{tree} A tree in \code{PhyDat} format;
-#'   \item{data} A object of class phyDat containing sequences
-#'   \item{site} return either 'pscore' or 'site' wise parsimony scores
-#' }
+#' @param tree A tree in \code{PhyDat} format;
+#' @param data A object of class phyDat containing sequences
+#' @param site return either 'pscore' or 'site' wise parsimony scores
+#' 
 #' @examples
 #' ## Load a tree and a matrix
 #' tree <- ape::read.tree(text = "((a,b),(c,d));")

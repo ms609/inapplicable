@@ -96,7 +96,16 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
   MorphyDat(phy)
 }
 
-PhyToString <- function (phy) {
+#' Extract character data from a phyDat object as a string
+#' 
+#' 
+#' @param phy an object of class \code{\link{phyDat}}
+#' @param ps text, perhaps ';', to append to the end of the string
+#' 
+#' @author Martin Smith
+#' @importFrom phangorn phyDat
+#' @export
+PhyToString <- function (phy, ps='') {
   at <- attributes(phy)
   phyLevels <- at$allLevels
   phyChars <- at$nr
@@ -105,8 +114,27 @@ PhyToString <- function (phy) {
   if (any(inappLevel <- phyLevels == '-')) outLevels[which(phyContrast[inappLevel])] <- '-'
   levelTranslation <- apply(phyContrast, 1, function (x)  ifelse(sum(x) == 1, as.character(outLevels[x]), paste0(c('{', outLevels[x], '}'), collapse='')))
   if (any(ambigToken <- apply(phyContrast, 1, all))) levelTranslation[ambigToken] <- '?'
-  ret <- paste0(t(vapply(phy, function (x) levelTranslation[x], character(phyChars))), collapse='')
+  ret <- paste0(c(t(vapply(phy, function (x) levelTranslation[x], character(phyChars))), ps), collapse='')
   return (ret)
+}
+
+#' Initialize a Morphy Object from a phyDat object
+#' 
+#' Creates a new Morphy object with the same size and characters as the phyDat object 
+#' @param phy an object of class \code{\link{phyDat}}
+#' 
+#' @author Martin Smith
+#' @importFrom phangorn phyDat
+#' @export
+LoadMorphy <- function (phy) {
+  nTax <- length(phy)
+  nChar <- length(phy[[1]])
+  morphyObj <- mpl_new_Morphy()
+  if(mpl_init_Morphy(nTax, nChar, morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_init_Morphy")
+  if(mpl_attach_rawdata(PhyToString(phy, ';'), morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_attach_rawdata")
+  if(mpl_set_num_internal_nodes(nTax + 1L, morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_set_num_internal_nodes")
+  if(mpl_apply_tipdata(morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_apply_tipdata")
+  return(morphyObj)
 }
 
 #' @name AsBinary

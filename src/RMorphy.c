@@ -9,7 +9,7 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <Rmath.h>
-#include "../../src/mpl.h"
+#include "mpl.h"
 #include "RMorphyUtils.h"
 
 

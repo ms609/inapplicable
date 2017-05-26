@@ -1,4 +1,4 @@
-#include "../../src/mpl.h"
+#include "MorphyLib/mpl.h"
 #include "RMorphyUtils.h"
 
 MPLchtype _R_mpl_str2chtype(const char *chtypename)

@@ -150,9 +150,23 @@ LoadMorphy <- function (phy) {
     stop("Error ", mpl_translate_error(min(error)), "in mpl_set_charac_weight")
   }
   if(mpl_apply_tipdata(morphyObj) -> error) {
-    stop("Error ", mpl_translate_error(error), " in mpl_apply_tipdata")
+    stop("Error ", mpl_translate_error(error), "in mpl_apply_tipdata")
   }
   return(morphyObj)
+}
+
+#' @name Destroy a Morphy Object
+#'
+#' @param morphyObj Morphy object constructed using \code{\link{LoadMorphy}} 
+#' @return Morphy error code, deciperhable using \code{\link{mpl_translate_error}}
+#' @author Martin R. Smith
+#' @export
+UnloadMorphy <- function (morphyObj) {
+  if (class(morphyObj) != 'externalptr') stop ("Object is not a valid pointer; cannot destroy.")
+  if (mpl_delete_Morphy(morphyObj) -> error) {
+    stop("Error ", mpl_translate_error(error), "in mpl_delete_Morphy")
+  }
+  return (error)
 }
 
 #' @name AsBinary

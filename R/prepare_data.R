@@ -122,18 +122,25 @@ PhyToString <- function (phy, ps='') {
 #' 
 #' Creates a new Morphy object with the same size and characters as the phyDat object 
 #' @param phy an object of class \code{\link{phyDat}}
+#' @return a pointer to a Morphy object, with the attribute "weight" corres
 #' 
 #' @author Martin Smith
 #' @importFrom phangorn phyDat
 #' @export
 LoadMorphy <- function (phy) {
+  morphyObj <- mpl_new_Morphy()
   nTax <- length(phy)
   nChar <- length(phy[[1]])
-  morphyObj <- mpl_new_Morphy()
   if(mpl_init_Morphy(nTax, nChar, morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_init_Morphy")
   if(mpl_attach_rawdata(PhyToString(phy, ';'), morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_attach_rawdata")
   if(mpl_set_num_internal_nodes(nTax + 1L, morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_set_num_internal_nodes")
   if(mpl_apply_tipdata(morphyObj) -> error) stop("Error ", mpl_translate_error(error), " in mpl_apply_tipdata")
+  weight <- attr(phy, 'weight')
+  if (any(vapply(seq_along(weight), function (x) mpl_set_charac_weight(x, weight[x], morphyObj),
+      integer(1)) -> error)) stop("Error ", mpl_translate_error(min(error)), "in mpl_set_charac_weight")
+  
+  mpl_get_charac_weight(3, morphyObj)
+  
   return(morphyObj)
 }
 

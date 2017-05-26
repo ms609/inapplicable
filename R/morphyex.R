@@ -149,7 +149,7 @@ mpl_get_numtaxa <- function(morphyobj)
 #' @export
 mpl_set_charac_weight <- function (charID, weight, morphyobj)
 {
-  return (.Call('_R_wrap_mpl_set_charac_weight', as.integer(charID - 1L), weight, morphyobj,
+  return (.Call('_R_wrap_mpl_set_charac_weight', as.integer(charID - 1L), as.numeric(weight), morphyobj,
                 PACKAGE='inapplicable'))
 }
 

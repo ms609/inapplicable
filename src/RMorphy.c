@@ -16,7 +16,7 @@ SEXP MORPHYLENGTH(SEXP R_descendants, SEXP R_ancestors, SEXP MorphyHandl) {
   const int n_taxa = mpl_get_numtaxa(handl); 
   const int n_internal = mpl_get_num_internal_nodes(handl);
   const int root_node = n_taxa;
-  const int max_node = n_taxa + n_internal - 1L;
+  const int max_node = n_taxa + n_internal - 1;
   
   // R_descendants and R_ancestors have already had one subtracted to convert them to an index 
   const int *ancestor=INTEGER(R_ancestors), *left=INTEGER(R_descendants), *right=left + n_internal;  // INTEGER gives pointer to first element of length n R vector
@@ -30,7 +30,7 @@ SEXP MORPHYLENGTH(SEXP R_descendants, SEXP R_ancestors, SEXP MorphyHandl) {
   pscore_temp = INTEGER(Rres);
   *pscore_temp = 0;
    
-  for (i = max_node - 1L; i > n_taxa; i--) { // First Downpass 
+  for (i = max_node - 1; i > n_taxa; i--) { // First Downpass 
     *pscore_temp += mpl_first_down_recon(i,  left[i - n_taxa], right[i - n_taxa], handl);
   }
   mpl_update_lower_root(max_node, root_node, handl);
@@ -42,7 +42,7 @@ SEXP MORPHYLENGTH(SEXP R_descendants, SEXP R_ancestors, SEXP MorphyHandl) {
     mpl_update_tip(i, ancestor[i], handl);
   }
   
-  for (i = max_node - 1L; i > n_taxa; i--) { // Second Downpass 
+  for (i = max_node - 1; i > n_taxa; i--) { // Second Downpass 
     *pscore_temp += mpl_second_down_recon(i, left[i - n_taxa], right[i - n_taxa], handl);
   }
  

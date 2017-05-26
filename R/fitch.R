@@ -64,3 +64,34 @@ InapplicableFitch <- function (tree, morphyData, detail=1, ...) {
   if (length(detail) == 1) return (ret[[detail]])
   return (ret[detail])
 }
+
+#' @title Calculate parsimony score with inapplicable data
+#' 
+#' @param tree Phylogenetic tree (of class \code{phylo})
+#' @param morphyObj Morphy object containing character data, constructed using \code{\link{LoadMorphy}}
+#' @return The length of the tree (after weighting)
+#'
+#' @seealso LoadMorphy
+#'
+#' @author Martin R. Smith
+#' @export
+MorphyLength <- function (tree, morphyObj) {
+  nTaxa <- mpl_get_numtaxa(morphyObj)
+  if (nTaxa < 1) stop("Error: ", mpl_translate_error(nTaxa))
+  if (nTaxa != length(tree$tip.label)) stop ("Number of taxa in morphy object (", nTaxa, ") not equal to number of tips in tree")
+  treeOrder <- attr(tree, 'order')
+  if (is.null(treeOrder) || treeOrder == "cladewise") tree <- reorder(tree, "postorder")
+  tree.edge <- tree$edge
+  parent <- tree.edge[ ,1]
+  child <- tree.edge[, 2]
+  maxNode <- parent[1] #max(parent)
+  allNodes <- (nTaxa + 1L):maxNode
+  
+  parentOf <- parent[match(1:maxNode, child )]
+  parentOf[nTaxa + 1] <- maxNode + 1 # Root node's parent is a dummy node
+  childOf <- child[c(match(allNodes, parent), length(parent) + 1L - match(allNodes, rev(parent)))]
+  
+  ret <- .Call('MORPHYLENGTH', as.integer(childOf -1L), as.integer(parentOf -1L), morphyObj, 
+               PACKAGE='inapplicable')
+  return(ret)
+}

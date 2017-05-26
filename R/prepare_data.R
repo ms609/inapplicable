@@ -129,16 +129,18 @@ StringToPhyDat <- function (x, tips, byTaxon = TRUE) {
 #' 
 #' @param phy an object of class \code{\link{phyDat}}
 #' @param ps text, perhaps ';', to append to the end of the string
+#' @param useIndex (default: TRUE) Print duplicate characters multiple 
+#'        times, as they appeared in the original matrix
 #' 
 #' @author Martin Smith
 #' @importFrom phangorn phyDat
 #' @export
-PhyToString <- function (phy, ps='') {
+PhyToString <- function (phy, ps='', useIndex=TRUE) {
   at <- attributes(phy)
   phyLevels <- at$allLevels
   phyChars <- at$nr
   phyContrast <- at$contrast == 1
-  phyIndex <- at$index
+  phyIndex <- if (useIndex) at$index else seq_len(phyChars)
   outLevels <- seq_len(ncol(phyContrast)) - 1
   if (any(inappLevel <- phyLevels == '-')) outLevels[which(phyContrast[inappLevel])] <- '-'
   levelTranslation <- apply(phyContrast, 1, function (x)  ifelse(sum(x) == 1, as.character(outLevels[x]), paste0(c('{', outLevels[x], '}'), collapse='')))
@@ -159,17 +161,17 @@ PhyToString <- function (phy, ps='') {
 LoadMorphy <- function (phy) {
   morphyObj <- mpl_new_Morphy()
   nTax <- length(phy)
-  nChar <- length(phy[[1]])
+  weight <- attr(phy, 'weight')
+  nChar <- attr(phy, 'nr')
   if(mpl_init_Morphy(nTax, nChar, morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), " in mpl_init_Morphy")
   }
-  if(mpl_attach_rawdata(PhyToString(phy, ';'), morphyObj) -> error) {
+  if(mpl_attach_rawdata(PhyToString(phy, ';', useIndex=FALSE), morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), " in mpl_attach_rawdata")
   }
   if(mpl_set_num_internal_nodes(nTax, morphyObj) -> error) { # One is the 'dummy root'
     stop("Error ", mpl_translate_error(error), " in mpl_set_num_internal_nodes")
   }
-  weight <- attr(phy, 'weight')
   if (any(vapply(seq_len(nChar), function (i) mpl_set_parsim_t(i, 'FITCH', morphyObj), integer(1)) 
       -> error)) {
       stop("Error ", mpl_translate_error(min(error)), "in mpl_set_parsim_t")

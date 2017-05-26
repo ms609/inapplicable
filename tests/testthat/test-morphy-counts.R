@@ -54,9 +54,9 @@ test_that("Morphy generates correct lengths", {
     phy <- StringToPhyDat(characters[test], tree$tip.label)
     morphyObj <- LoadMorphy(phy)
     tree_length <- MorphyLength(tree, morphyObj)
-    if (tree_length != expected_results[test]) cat("Test case", test - 1, characters[test], "unequal: Morphy calcluates",
-      tree_length, "instead of", expected_results[test],"\n")
-    #expect_equal(tree_length, expected_results[test])
+    #if (tree_length != expected_results[test]) cat("Test case", test - 1, characters[test], "unequal: Morphy calcluates",
+    #  tree_length, "instead of", expected_results[test],"\n")
+    expect_equal(tree_length, expected_results[test])
     UnloadMorphy(morphyObj)
   }
   ## Test combined matrix

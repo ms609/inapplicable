@@ -60,9 +60,9 @@ test_that("Morphy generates correct lengths", {
     UnloadMorphy(morphyObj)
   }
   ## Test combined matrix
-  morphyDat <- StringToMorphy(paste0(characters, collapse='\n'), tree$tip.label, byTaxon=FALSE)
-  output <- InapplicableFitch(tree, morphyDat)
-  tree_length <- output[[1]]
+  phy <- StringToPhyDat(paste0(characters, collapse='\n'), tree$tip.label, byTaxon=FALSE)
+  morphyObj <- LoadMorphy(phy)
+  tree_length <- MorphyLength(tree, morphyObj)
   expect_equal(tree_length, sum(expected_results))
 
   ## Run the bigger tree tests
@@ -73,9 +73,13 @@ test_that("Morphy generates correct lengths", {
   expected_results <- c(3)
 
   ## Run the tests
-  for(test in 1:length(characters)) { 
-    output <- InapplicableFitch(tree, StringToMorphy(characters[test], tree$tip.label))
-    tree_length <- output[[1]]
+  for(test in 1:length(characters)) {
+    phy <- StringToPhyDat(characters[test], tree$tip.label)
+    morphyObj <- LoadMorphy(phy)
+    tree_length <- MorphyLength(tree, morphyObj)
+    #if (tree_length != expected_results[test]) cat("Test case", test - 1, characters[test], "unequal: Morphy calcluates",
+    #  tree_length, "instead of", expected_results[test],"\n")
     expect_equal(tree_length, expected_results[test])
+    UnloadMorphy(morphyObj)
   }
 })

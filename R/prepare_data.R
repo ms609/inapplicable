@@ -138,11 +138,12 @@ PhyToString <- function (phy, ps='') {
   phyLevels <- at$allLevels
   phyChars <- at$nr
   phyContrast <- at$contrast == 1
+  phyIndex <- at$index
   outLevels <- seq_len(ncol(phyContrast)) - 1
   if (any(inappLevel <- phyLevels == '-')) outLevels[which(phyContrast[inappLevel])] <- '-'
   levelTranslation <- apply(phyContrast, 1, function (x)  ifelse(sum(x) == 1, as.character(outLevels[x]), paste0(c('{', outLevels[x], '}'), collapse='')))
   if (any(ambigToken <- apply(phyContrast, 1, all))) levelTranslation[ambigToken] <- '?'
-  ret <- paste0(c(t(vapply(phy, function (x) levelTranslation[x], character(phyChars))), ps), collapse='')
+  ret <- paste0(c(t(vapply(phy, function (x) levelTranslation[x[phyIndex]], character(length(phyIndex)))), ps), collapse='')
   return (ret)
 }
 

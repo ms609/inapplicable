@@ -2,3 +2,6 @@
 *.dll
 *.o
 src-*
+src/*.o
+src/*.so
+src/*.dll

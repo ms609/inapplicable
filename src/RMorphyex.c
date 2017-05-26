@@ -1,6 +1,6 @@
 #include <R.h>
 #include <Rinternals.h>
-#include "MorphyLib/mpl.h"
+#include "mpl.h"
 #include "RMorphyUtils.h"
 
 SEXP _R_wrap_mpl_new_Morphy(void)

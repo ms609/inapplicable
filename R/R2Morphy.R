@@ -6,7 +6,7 @@
 #'   \item{tree} A tree in \code{PhyDat} format;
 #'   \item{data} A object of class phyDat containing sequences
 #'   \item{site} return either 'pscore' or 'site' wise parsimony scores
-#' 
+#' }
 #' @examples
 #' ## Load a tree and a matrix
 #' tree <- ape::read.tree(text = "((a,b),(c,d));")

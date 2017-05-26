@@ -138,7 +138,7 @@ LoadMorphy <- function (phy) {
 }
 
 #' @name AsBinary
-#' @alias AsBinary
+#' @aliases AsBinary
 #' @title Convert a number to binary
 #' @description Provides a (reversed) binary representation of a decimal integer
 #' @usage AsBinary(x)

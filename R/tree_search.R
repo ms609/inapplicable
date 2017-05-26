@@ -90,7 +90,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 }  # InapplicableSectorial
 
 #' @name InapplicablePratchet
-#' @alias InapplicablePratchet
+#' @aliases InapplicablePratchet
 #'  Parsimony ratchet
 #' @description This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
 #' \usage{
@@ -134,7 +134,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' InapplicablePratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
 #' }
-#' @keyword  tree 
+#' @keywords  tree 
 
 #' @export
 InapplicablePratchet <- function (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, trace=0, rearrangements="NNI", criterion=NULL, ...) {
@@ -249,7 +249,7 @@ BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion,
 }
 
 #' @name TreeSearch
-#' @alias TreeSearch
+#' @aliases TreeSearch
 #'  Search for most parsimonious trees
 #' @description Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR}) to search for a more parsimonious tree.
 #' \usage{
@@ -298,7 +298,7 @@ BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion,
 #' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='TBR')}
 #' }
 #' 
-#' @keyword  tree 
+#' @keywords  tree 
 #' 
 #' @export
 TreeSearch <- function (tree, dataset, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, trace=1, criterion=NULL, ...) {
@@ -353,10 +353,9 @@ TreeSearch <- function (tree, dataset, method='NNI', maxiter=100, maxhits=20, fo
 }
 
 #' @name SectorialSearch
-#' @alias SectorialSearch
-#' @alias InapplicableSectorial
-#'  InapplicableSectorial search
-#' @description Performs a sectorial search on a tree, preserving the position of the root.
+#' @aliases SectorialSearch InapplicableSectorial 
+#' 
+#' \code{SectorialSearch} performs a sectorial search on a tree, preserving the position of the root.
 #' \usage{
 #' SectorialSearch(tree, data, outgroup, concavity = NULL, rearrangements = "NNI",
 #'   maxiter = 2000, cluster = NULL, trace = 3)
@@ -380,8 +379,8 @@ TreeSearch <- function (tree, dataset, method='NNI', maxiter=100, maxhits=20, fo
 #'   \item{rearrangements}{method to use when rearranging subtrees: NNI, SPR or TBR;}
 #'   \item{\dots}{other arguments to pass to subsequent functions.}
 #' }
-#' \details{
-#' @code InapplicableSectorial performs a sectorial search on the tree specified. A sectorial search 
+#' @details{
+#' /code{InapplicableSectorial} performs a sectorial search on the tree specified. A sectorial search 
 #' detaches a random part of the tree, performs rearrangments on this subtree, then reattaches it 
 #' to the main tree (Goloboff, 1999).
 #' The improvement to local \var{pscore} hopefully (but not necessarily) improves the overall \var{pscore}.
@@ -389,12 +388,11 @@ TreeSearch <- function (tree, dataset, method='NNI', maxiter=100, maxhits=20, fo
 #' rearrangements and only retained if the ultimate parsimony score is better than 
 #' that of the original tree.
 #' 
-#' @code SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial followed by a few rounds
+#' \code {SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial} followed by a few rounds
 #' of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
 #' }
-#' @return{
-#' These functions return a rooted tree of class \code{phylo}.
-#' }
+#' @return a rooted tree of class \code{phylo}.
+#' 
 #' \references{
 #' Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:\href{http://dx.doi.org/10.1006/clad.1999.0122}{10.1006/clad.1999.0122}
 #' }
@@ -415,7 +413,7 @@ TreeSearch <- function (tree, dataset, method='NNI', maxiter=100, maxhits=20, fo
 #' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' InapplicableSectorial(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50, largest.sector=7)
-#' @dontrun SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming
+#' \dontrun {SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming}
 #' 
 #' ## SectorialSearch is currently defined as
 #' function (start.tree, data, outgroup, rearrangements='NNI') {
@@ -431,7 +429,7 @@ TreeSearch <- function (tree, dataset, method='NNI', maxiter=100, maxhits=20, fo
 #'   } else return (SetOutgroup(start.tree, outgroup))
 #' }
 #' }
-#' @keyword  tree 
+#' @keywords  tree 
 #' @export
 SectorialSearch <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, trace=3) {
   best.score <- attr(tree, 'pscore')

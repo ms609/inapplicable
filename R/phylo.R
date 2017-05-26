@@ -42,15 +42,14 @@ Renumber <- function (tree) {
 }
 
 #' @name SingleTaxonTree
-#' @alias SingleTaxonTree
 #'  Single taxon tree
 #' @description Create a phylogenetic 'tree' that comprises a single taxon.
 #' @usage SingleTaxonTree(label)
-#' @arguments   \item{label}{a character vector specifying the label of the tip.}
+#' @param   label a character vector specifying the label of the tip.
 #' @return This function returns a \code{phylo} object containing a single tip with the specified label.
 #' @seealso \code{\link{TwoTipTree}}
 #' @examples SingleTaxonTree('Homo_sapiens')
-#' @keyword  tree 
+#' @keywords  tree 
 #' @export
 SingleTaxonTree <- function (label) {
   res <- list(edge=matrix(c(2L,1L), 1, 2), tip.label=label, Nnode=1L)
@@ -59,7 +58,7 @@ SingleTaxonTree <- function (label) {
 }
 
 #' @name ExtractClade
-#' @alias ExtractClade
+#' @aliases ExtractClade
 #'  Extract a clade
 #' @description Safely extracts a clade from a phylogenetic tree.
 #' \usage{
@@ -72,7 +71,7 @@ SingleTaxonTree <- function (label) {
 #' \details{
 #' Modified from the \pkg{ape} function \code{\link{extract.clade}}, which sometimes behaves erratically.  
 #' The function is intended for use with the function \code{\link{TBR}}, and features present in 
-#' @code extract.clade but unnecessary for this goal have been removed. Unlike extract.clade, 
+#' \code extract.clade but unnecessary for this goal have been removed. Unlike extract.clade, 
 #' this function supports the extraction of 'clades' that constitute a single tip.
 #' }
 #' @return{
@@ -81,9 +80,8 @@ SingleTaxonTree <- function (label) {
 #' \author{
 #' Martin R. Smith
 #' }
-#' \seealso{
-#' @code \link{extract.clade}
-#' }
+#' @seealso extract.clade
+#'
 #' @examples{
 #' tree <- rtree(20, br=NULL)
 #' plot(tree); nodelabels(); nodelabels(33, 33, bg='yellow'); dev.new()
@@ -124,7 +122,7 @@ ExtractClade <- function (phy, node) {
 ecr <- ExtractClade
 
 #' @name AddTip
-#' @alias AddTip
+#' @aliases AddTip
 #'  Add a tip to a phylogenetic tree
 #' @description This function adds a tip to a phylogenetic tree at a specified location.
 #' \usage{
@@ -153,7 +151,7 @@ ecr <- ExtractClade
 #'   plot(tree <- rtree(10, br=NULL)); nodelabels(); nodelabels(15, 15, bg='green'); dev.new()
 #'   plot(AddTip(tree, 15, 'NEW_TIP'))
 #' }
-#' @keyword  tree 
+#' @keywords  tree 
 #' 
 #' @export
 AddTip <- function (tree, where, label) {
@@ -211,8 +209,8 @@ AddTip <- function (tree, where, label) {
 }
 
 #' @name SetOutgroup
-#' @alias SetOutgroup
-#' @alias Root
+#' @aliases SetOutgroup
+#' @aliases Root
 #'  Root a phylogenetic tree
 #' @description Sets the root of a phylogenetic tree, such that one child of the root node is \code{outgroup}.
 #' @usage SetOutgroup(tree, outgroup)
@@ -225,10 +223,9 @@ AddTip <- function (tree, where, label) {
 #' Martin R. Smith
 #' }
 #' 
-#' \seealso{
-#' @code \link{root} ought to produce the same result as this function,
+#' @seealso root ought to produce the same result as this function,
 #'  but does not always do so in practice.
-#' }
+#' 
 #' @examples{
 #'   tree <- read.tree(text='(((a,b),c),(d,e));')
 #'   plot(tree)
@@ -438,7 +435,7 @@ DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.int
 }
 
 #' @name TwoTipTree
-#' @alias TwoTipTree
+#' @aliases TwoTipTree
 #'  Two-tipped tree
 #' @description This function generates a tree of class \code{\link{phylo}} containing two tips.
 #' @usage TwoTipTree(tip1, tip2)
@@ -449,10 +446,10 @@ DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.int
 #' @return This function returns a \code{phylo object with a single root node and two tips with
 #' the specified labels.}
 #' @author Martin R. Smith
-#' @seealso \code{\link{SingleTaxonTree}
-#' @code \link{bind.tree}}
+#' @seealso SingleTaxonTree
+#' @seealso bind.tree
 #' @examples TwoTipTree('Homo', 'Pan')
-#' @keyword  tree 
+#' @keywords  tree 
 #' 
 #' @export
 TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))

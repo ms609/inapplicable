@@ -86,9 +86,9 @@ RearrangeTree <- function (tree, dataset, Rearrange, min.score=NULL, concavity=N
   trees
 }
 #' @name RootedNNI
-#' @alias RootedNNI
-#' @alias RootedSPR
-#' @alias RootedTBR
+#' @aliases RootedNNI
+#' @aliases RootedSPR
+#' @aliases RootedTBR
 #' Rearrange a rooted tree
 #' @description This function performs a rearrangement iteration on a tree, retaining the position of the root.
 #' \usage{
@@ -104,16 +104,13 @@ RearrangeTree <- function (tree, dataset, Rearrange, min.score=NULL, concavity=N
 #' no taxon may be moved to the opposite side of the root node.
 #' Branch lengths are not (yet) supported.
 #' }
-#' @return{
-#' This function returns a tree, in \code{phylo} format.
-#' }
-#' \author{
-#' Martin R. Smith
+#' @return This function returns a tree, in \code{phylo} format.
+#'
+#' @author Martin R. Smith
 #' 
-#' @code RootedNNI} is abridged from the \pkg{phangorn} function \code{nnin
-#' }
+#' \code{RootedNNI} is abridged from the \pkg{phangorn} function \code{nnin}
 #' 
-#' \seealso{
+#' @seealso{
 #' \itemize{
 #' \item \code{\link{SetOutgroup}}, set the outgroup of the phylogenetic tree
 #' \item \code{\link{NNI}}, unrooted \acronym{NNI} and \acronym{SPR}
@@ -130,7 +127,6 @@ RearrangeTree <- function (tree, dataset, Rearrange, min.score=NULL, concavity=N
 #'   plot(RootedTBR(tree))
 #' }
 #' 
-#' @importFrom phangorn
 #' @export
 RootedNNI <- function (tree) {
   edge <- matrix(tree$edge, ncol = 2)
@@ -233,7 +229,6 @@ RootedTBR <- function(tree) {
   }
 }
 
-#' @importFrom phangorn
 #' @export
 NNI <- function (tree) {
   n      <- sample(tree$Nnode - 1L, 1L)
@@ -299,35 +294,28 @@ SPR <- function(tree) {
 }
 
 #' @name TBR
-#' @alias tbr
-#' @alias TBR
+#' @aliases tbr
+#' @aliases TBR
 #' 
 #'  Tree bisection and reconnection
 #' @description This function performs a single random \acronym{TBR} iteration.
 #' \usage{
 #' TBR(tree, edge.to.break = NULL)
 #' }
-#' %- maybe also 'usage' for other objects documented here.
-#' \arguments{
-#'   \item{tree}{a fully resolved tree in \code{\link{phyDat}} format;}
-#'   \item{edge.to.break}{the index of an edge to bisect, generated randomly if not specified.}
-#' }
-#' \details{
-#' Branch lengths are not (yet) supported.
-#' }
+#' @param tree a fully resolved tree in \code{\link{phyDat}} format;
+#' @param edge.to.break the index of an edge to bisect, generated randomly if not specified.
+#' 
+#' @details Branch lengths are not (yet) supported.
+#' 
 #' @return This function returns a tree in \code{phyDat} format that has undergone one \acronym{TBR} iteration.
-#' \references{
-#' The \acronym{TBR} algorithm is summarized in
-#' 
+#' @references The \acronym{TBR} algorithm is summarized in
 #' Felsenstein, J. 2004. \cite{Inferring Phylogenies.} Sinauer Associates, Sunderland, Massachusetts.
-#' }
-#' \author{
-#' Martin R. Smith
-#' }
 #' 
-#' \seealso{
-#' @code \link{RootedTBR}, useful when the position of the root node should be retained.
-#' }
+#' 
+#' @author Martin R. Smith
+#' 
+#' @seealso RootedTBR useful when the position of the root node should be retained.
+#' 
 #' @examples{
 #' tree <- rtree(20, br=NULL)
 #' TBR(tree)

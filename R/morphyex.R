@@ -16,6 +16,14 @@
 # object that was initialised in R through the functions below.
 #
 
+#' @title Converts a numeric error code to human-readable format
+#' 
+#' @param errorCode Non-positive integer to be converted
+#' @return A character string corresponding to the provided error code
+#' @examples mpl_translate_error(-1) # "ERR_INVALID_SYMBOL"
+#' @author Martin Smith
+#' @export
+
 mpl_translate_error <- function (errorCode) {
   mplErrorCodes <- rev(c(
       "ERR_EX_DATA_CONF     ",

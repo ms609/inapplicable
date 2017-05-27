@@ -16,7 +16,7 @@ SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl)
   const int n_taxa = mpl_get_numtaxa(handl); 
   const int n_internal = mpl_get_num_internal_nodes(handl);
   const int root_node = n_taxa;
-  const int max_node = n_taxa + n_internal - 1;
+  const int max_node = n_taxa + n_internal;
   
   // R_descendants and R_ancestors have already had one subtracted to convert them to an index 
   const int *ancestor=INTEGER(R_ancestors), *left=INTEGER(R_left), 

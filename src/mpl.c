@@ -31,6 +31,7 @@ int mpl_delete_Morphy(Morphy m)
     // TODO: All Morphy destructors
     free(m1->char_t_matrix);
     m1->char_t_matrix = NULL;
+    mpl_delete_mpl_matrix(&m1->inmatrix);
     mpl_destroy_symbolset(m1);
     mpl_delete_charac_info(m1);
     mpl_delete_all_partitions(m1);
@@ -208,8 +209,8 @@ int mpl_attach_rawdata(const char* rawmatrix, Morphy m)
     // Check validity of preprocessed matrix
     MPL_ERR_T err = ERR_NO_ERROR;
     err = mpl_check_nexus_matrix_dimensions(mpl_get_preprocessed_matrix(m1),
-                                                mpl_get_numtaxa(m1),
-                                                mpl_get_num_charac(m1));
+                                            mpl_get_numtaxa(m1),
+                                            mpl_get_num_charac(m1));
     
     if (err) {
         mpl_delete_rawdata(m1);
@@ -297,7 +298,7 @@ int mpl_set_charac_weight(const int charID, const double weight, Morphy m)
     }
     
     Morphyp mi = (Morphyp)m;
-//    mi->charinfo[charID].usrweight = weight;
+//    mi->charinfo[charID].realweight = weight;
     mpl_set_new_weight_public(weight, charID, mi);
     
     return ERR_NO_ERROR;
@@ -348,10 +349,10 @@ int mpl_set_parsim_t(const int charID, const MPLchtype chtype, Morphy m)
     
     // Setting a character to 'NONE_T' should exclude it from use.
     if (chtype == NONE_T) {
-        handl->charinfo[charID].included = false;
+        handl->charinfo[charID].realweight = 0.0;
     }
     else {
-        handl->charinfo[charID].included = true;
+        handl->charinfo[charID].realweight = handl->wtbase;
     }
     
     // TODO: Update any data partitionings.
@@ -488,7 +489,8 @@ int mpl_second_up_recon
     for (i = 0; i < numparts; ++i) {
         upfxn = handl->partitions[i]->inappupfxn;
         if (upfxn) {
-            res += upfxn(lstates, rstates, nstates, astates, handl->partitions[i]);
+            res += upfxn(lstates, rstates, nstates, astates,
+                         handl->partitions[i]);
         }
     }
     
@@ -572,7 +574,7 @@ int mpl_update_lower_root(const int l_root_id, const int root_id, Morphy m)
 //int     mpl_get_insertcost_max(const int srcID, const int tgt1ID, const int tgt2ID, Morphy m);
 //int     mpl_get_insertcost_min(const int srcID, const int tgt1ID, const int tgt2ID, Morphy m);
 //
-int mpl_get_packed_states
+unsigned int mpl_get_packed_states
 (const int nodeID, const int character, const int passnum, const Morphy m)
 {
     if (!m) {
@@ -605,6 +607,36 @@ const char* mpl_get_stateset
     // structures.
     MPLstate result = mpl_get_packed_states(nodeID, character, passnum, m);
     char* ret = mpl_translate_state2char(result, (Morphyp)m);
+  
+    Morphyp mi = (Morphyp)m;
+    
+    
+    mpl_allocate_stset_stringptrs(mpl_get_num_charac(m), mi->statesets[nodeID]);
+    
+    if (passnum == 1) {
+        if (mi->statesets[nodeID]->downp1str[character]) {
+            free(mi->statesets[nodeID]->downp1str[character]);
+        }
+        mi->statesets[nodeID]->downp1str[character] = ret;
+    }
+    else if (passnum == 2) {
+        if (mi->statesets[nodeID]->upp1str[character]) {
+            free(mi->statesets[nodeID]->upp1str[character]);
+        }
+        mi->statesets[nodeID]->upp1str[character] = ret;
+    }
+    else if (passnum == 3) {
+        if (mi->statesets[nodeID]->downp2str[character]) {
+            free(mi->statesets[nodeID]->downp2str[character]);
+        }
+        mi->statesets[nodeID]->downp2str[character] = ret;
+    }
+    else if (passnum == 4) {
+        if (mi->statesets[nodeID]->upp2str[character]) {
+            free(mi->statesets[nodeID]->upp2str[character]);
+        }
+        mi->statesets[nodeID]->upp2str[character] = ret;
+    }
     
     return ret;
 }

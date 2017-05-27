@@ -23,6 +23,7 @@ int mpl_wagner_downpass
     MPLstate* right = rset->downpass1;
     MPLstate* n     = nset->downpass1;
     
+    unsigned long* weights = part->intwts;
     for (i = 0; i < nchars; ++i) {
         
         j = indices[i];
@@ -46,7 +47,7 @@ int mpl_wagner_downpass
             temp = max & ~(max-1);
             n[j] = temp;
             while (!(n[j] & min)) {
-                ++steps;
+                steps += weights[i];
                 n[j] |= temp >> steps;
             }
             // TODO: Multiply by weights BEFORE next j

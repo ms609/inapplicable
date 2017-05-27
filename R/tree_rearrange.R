@@ -52,6 +52,7 @@ ReorderPruning <- function (x) {
 #' random.tree <- rtree(34, tip.label=names(SigSut.data), br=NULL)
 #' RearrangeTree(random.tree, SigSut.preparedata, RootedNNI)
 #' 
+#' @importFrom parallel clusterCall
 #' @export
 RearrangeTree <- function (tree, dataset, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
@@ -292,8 +293,6 @@ SPR <- function(tree) {
 }
 
 #' @name TBR
-#' @aliases tbr
-#' @aliases TBR
 #' 
 #'  Tree bisection and reconnection
 #' @description This function performs a single random \acronym{TBR} iteration.

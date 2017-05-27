@@ -193,6 +193,8 @@ int mpl_NA_fitch_second_downpass
     MPLstate* racts   = rset->subtree_actives;
     MPLstate temp = 0;
     
+    unsigned long* weights = part->intwts;
+    
     for (i = 0; i < nchars; ++i) {
         
 //        temp = 0;
@@ -211,9 +213,9 @@ int mpl_NA_fitch_second_downpass
                 npre[j] = (left[j] | right[j]) & ISAPPLIC;
                 
                 if (left[j] & ISAPPLIC && right[j] & ISAPPLIC) {
-                    ++steps;
+                    steps += weights[i];
                 } else if (lacts[j] && racts[j]) {
-                    ++steps;
+                    steps += weights[i];
                 }
             }
         }
@@ -246,6 +248,7 @@ int mpl_NA_fitch_second_uppass
     MPLstate* anc   = ancset->uppass2;
     MPLstate* lacts = lset->subtree_actives;
     MPLstate* racts = rset->subtree_actives;
+    unsigned long* weights = part->intwts;
     
     for (i = 0; i < nchars; ++i) {
         
@@ -283,7 +286,7 @@ int mpl_NA_fitch_second_uppass
             nfin[j] = npre[j];
             
             if (lacts[j] && racts[j]) {
-                ++steps;
+                steps += weights[i];
             }
         }
         assert(nfin[j]);

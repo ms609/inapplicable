@@ -48,7 +48,7 @@ test_that("Morphy generates correct lengths", {
   ## Results
   expected_results <- c(5, 2, 3, 2, 1, 5, 5, 2, 5, 2, 2, 4, 3, 2, 5, 0, 5, 2, 4, 5, 2, 4, 3, 3, 2, 5, 1, 4, 4, 0, 5, 5, 4, 5, 2, 1, 3, 5, 2)
 
-  plot(tree); nodelabels(12:22); tiplabels(0:11)
+  ##plot(tree); nodelabels(12:22); tiplabels(0:11)
   ## Run the tests
   for(test in seq_along(characters)) {
     phy <- StringToPhyDat(characters[test], tree$tip.label)
@@ -57,26 +57,12 @@ test_that("Morphy generates correct lengths", {
     #if (tree_length != expected_results[test]) cat("Test case", test - 1, characters[test], "unequal: Morphy calcluates",
     #  tree_length, "instead of", expected_results[test],"\n")
     expect_equal(tree_length, expected_results[test])
-    UnloadMorphy(morphyObj)
+    morphyObj <- UnloadMorphy(morphyObj)
   }
   ## Test combined matrix
   bigPhy <- StringToPhyDat(paste0(characters, collapse='\n'), tree$tip.label, byTaxon=FALSE)
-  phyString <- PhyToString(bigPhy)
-  expect_equal(paste0(characters, collapse=''), phyString)
   morphyObj <- LoadMorphy(bigPhy)
   tree_length <- MorphyLength(tree, morphyObj)
-  ws <- vapply(1:mpl_get_num_charac(morphyObj), function(i) mpl_get_charac_weight(i, morphyObj), list(1, 1))
-  expect_equal(all(matrix(unlist(ws), nrow=2)[1, ] == attr(bigPhy, 'weight')), TRUE)
-  bigMat <- matrix(unlist(bigPhy), length(tree$tip.label), byrow=TRUE)
-  bigInd <- attr(bigPhy, 'index')
-  
-  for (i in seq_along(characters)) {
-    phy <- StringToPhyDat(characters[bigInd[i]], tree$tip.label)
-    cat(i, ',')
-    expect_equal(unlist(phy, use.names=FALSE), bigMat[, bigInd[i]])
-  }
-  
-  
   expect_equal(tree_length, sum(expected_results))
 
   ## Run the bigger tree tests

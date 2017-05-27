@@ -303,7 +303,25 @@ int     mpl_excl_charac
          Morphy     m);
 
 
-// TODO: Document
+/*!
+    
+ @brief Sets the weight for a specified character.
+ 
+ @discussion Sets a weight for a specified character. The function takes a 
+ floating point value. However, in the current implementation, fractional values 
+ will be interpreted and estimated using an approximation of the rational 
+ factors. In the current version, MorphyLib uses this method to circumvent any
+ floating point calculations that aren't absolutely necessary.
+ 
+ @param charID The index of the character to be weighted.
+ 
+ @param weight The weight requested for the character.
+ 
+ @param m An instance of the Morphy object.
+ 
+ @return A Morphy error code.
+ 
+ */
 int     mpl_set_charac_weight
 
         (const int      charID,
@@ -611,7 +629,29 @@ int     mpl_get_insertcost
          int        cutoff,
          Morphy     m);
 
+/*!
 
+ @brief Returns the state set for a character at a given node as set bits in an
+ unsigned integer.
+ 
+ @discussion If the caller requires the internal state representation of a nodal
+ set used by MorphyLib, this function can be called to retrieve it. The caller
+ needs to specify the node index, the character number, and the pass number 
+ (1-based, because these are not indices in a C array).
+
+ @param nodeID The index of the node set required.
+
+ @param character The character number to be queried.
+
+ @param passnum The traversal iteration corresponding to the set required. These
+ range from 1 to 4 and represent first downpass, first uppass, second downpass
+ and second uppass respectively.
+
+ @return An unsigned integer with bits set corresponding to values used by
+ MorphyLib.
+ 
+ */
+unsigned
 int     mpl_get_packed_states
 
         (const int  nodeID,

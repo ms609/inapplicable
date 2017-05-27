@@ -33,6 +33,7 @@ typedef unsigned int MPLstate;
 #define DEFAULTGAP      '-'
 #define DEFAULTMISSING  '?'
 #define DEFAULCHARTYPE  FITCH_T
+#define DEFAULTWTBASE   1
 #define NACUTOFF        2   // The max number of NA tokens that can be ignored
                             // in a column
 #define MPLCHARMAX      INT_MAX
@@ -98,9 +99,9 @@ typedef struct charinfo_s {
     
     int         charindex;
     int         ninapplics;
-    bool        included;
+//    bool        included;
     MPLchtype   chtype;
-    double      usrweight;
+    double      realweight;
     unsigned long        basewt;
     unsigned long        intwt;
     Mflt        fltwt;

@@ -18,7 +18,7 @@ ReorderPruning <- function (x) {
 #' Rearrange phylogenetic tree
 #' @details \code{RearrangeTree} performs one tree rearrangement of a specified type
 #' @usage #' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
-#'  iter = "<unknown>", cluster = NULL, trace = 0)
+#'  iter = "<unknown>", cluster = NULL, verbosity = 0)
 #' 
 #' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, and the attributes
 #'     \code{pscore}, the tree's parsimony score, and 
@@ -35,7 +35,7 @@ ReorderPruning <- function (x) {
 #'   \item{iter}{iteration number of calling function, for reporting to user only;
 #' @param  cluster a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
 #'     searches on multicore machines;
-#' @param trace determines how much information to output to screen.
+#' @param verbosity determines how much information to output to screen.
 #' 
 #' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}
 #'  as described for argument \code{tree}.}
@@ -54,30 +54,30 @@ ReorderPruning <- function (x) {
 #' 
 #' @importFrom parallel clusterCall
 #' @export
-RearrangeTree <- function (tree, dataset, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
+RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, verbosity=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
     trees <- list(re.tree<-Rearrange(tree))
-    min.score <- InapplicableFitch(re.tree, dataset)
+    min.score <- MorphyLength(re.tree, morphyObj)
     best.trees <- c(TRUE)
   } else {
     #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
     candidates <- clusterCall(cluster, Rearrange, tree)
-    scores <- vapply(candidates, InapplicableFitch, 1, dataset) # ~3x faster to do this in serial in r233.
+    scores <- vapply(candidates, MorphyLength, 1, morphyObj) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score
     trees <- candidates[best.trees]
   }
   if (best.score < min.score) {
-    if (trace > 3) cat("\n    . Iteration", iter, '- Min score', min.score, ">", best.score)
+    if (verbosity > 3) cat("\n    . Iteration", iter, '- Min score', min.score, ">", best.score)
   } else if (best.score == min.score) {
     hits <- hits + sum(best.trees)
-    if (trace > 2) cat("\n    - Iteration", iter, "- Best score", min.score, "hit", hits, "times")
+    if (verbosity > 2) cat("\n    - Iteration", iter, "- Best score", min.score, "hit", hits, "times")
   } else {
     hits <- sum(best.trees)
-    if (trace > 1) cat("\n    * Iteration", iter, "- New best score", min.score, "found on", hits, "trees")
+    if (verbosity > 1) cat("\n    * Iteration", iter, "- New best score", min.score, "found on", hits, "trees")
   }
   if (length(return.single) && return.single) trees <- sample(trees, 1)[[1]]
   attr(trees, 'hits') <- hits

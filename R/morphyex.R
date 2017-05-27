@@ -270,8 +270,8 @@ mpl_get_symbols <- function(morphyobj)
 #' morphydefs.h header file. Setting the character to type NONE_T will also
 #' cause it to be excluded from any further calculations.
 #'
-#' @param charID The index of the character (transformation series) as defined
-#' in the input matrix.  The first character is numbered 0 (zero).
+#' @param charID The number of the character (transformation series) as defined
+#' in the input matrix.  The first character is numbered 1 (one).
 #' @param chtype The parsimony function type as defined in morphydefs.h
 #' @param morphyobj An instance of the Morphy object.
 #' 

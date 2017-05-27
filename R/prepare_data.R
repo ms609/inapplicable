@@ -120,7 +120,7 @@ StringToPhyDat <- function (x, tips, byTaxon = TRUE) {
   x <- strsplit(x, '')[[1]]
   x <- matrix(x[x != '\n'], nrow=length(tips), byrow=byTaxon)
   rownames(x) <- tips
-  phy <- phyDat(x, levels=c(0:9, '-'), type='USER')
+  phy <- phyDat(x, levels=c(which(as.character(0:9) %in% x) - 1, '-'), type='USER')
   phy
 }
 
@@ -131,11 +131,13 @@ StringToPhyDat <- function (x, tips, byTaxon = TRUE) {
 #' @param ps text, perhaps ';', to append to the end of the string
 #' @param useIndex (default: TRUE) Print duplicate characters multiple 
 #'        times, as they appeared in the original matrix
+#' @param byTaxon If TRUE, write one taxon followed by the next.
+        #'If FALSE, write one character followed by the next
 #' 
 #' @author Martin Smith
 #' @importFrom phangorn phyDat
 #' @export
-PhyToString <- function (phy, ps='', useIndex=TRUE) {
+PhyToString <- function (phy, ps='', useIndex=TRUE, byTaxon=TRUE) {
   at <- attributes(phy)
   phyLevels <- at$allLevels
   phyChars <- at$nr
@@ -145,8 +147,32 @@ PhyToString <- function (phy, ps='', useIndex=TRUE) {
   if (any(inappLevel <- phyLevels == '-')) outLevels[which(phyContrast[inappLevel])] <- '-'
   levelTranslation <- apply(phyContrast, 1, function (x)  ifelse(sum(x) == 1, as.character(outLevels[x]), paste0(c('{', outLevels[x], '}'), collapse='')))
   if (any(ambigToken <- apply(phyContrast, 1, all))) levelTranslation[ambigToken] <- '?'
-  ret <- paste0(c(t(vapply(phy, function (x) levelTranslation[x[phyIndex]], character(length(phyIndex)))), ps), collapse='')
+  ret <- vapply(phy, function (x) levelTranslation[x[phyIndex]], character(length(phyIndex)))
+  if (!byTaxon) ret <- t(ret)
+  ret <- paste0(c(ret, ps), collapse='')
   return (ret)
+}
+
+#' Details the attributes of a morphy object
+#'
+#' @param morphyObj A morphy object created with \code{\link{LoadMorphy}}
+#' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
+#' @author Martin R. Smith
+#' @export
+summary.morphyPtr <- function (morphyObj) {
+  ans <- list()
+  class(ans) <- "summary.morphyPtr"
+  nTax <- mpl_get_numtaxa(morphyObj)
+  nChar <- mpl_get_num_charac(morphyObj)
+  charWeights <- vapply(seq_len(nChar), mpl_get_charac_weight, list(0, 0), morphyobj=morphyObj)
+  dimnames(charWeights) <- list(c("exact", "approx"), NULL)
+
+  ans$nTax <- nTax 
+  ans$nChar <- nChar 
+  ans$nInternal <- mpl_get_num_internal_nodes(morphyObj)
+  ans$charWeights <- charWeights
+  ans$allStates <- mpl_get_symbols(morphyObj)
+  return(ans)
 }
 
 #' Initialize a Morphy Object from a phyDat object
@@ -183,6 +209,7 @@ LoadMorphy <- function (phy) {
   if(mpl_apply_tipdata(morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), "in mpl_apply_tipdata")
   }
+  class(morphyObj) <- 'morphyPtr'
   return(morphyObj)
 }
 
@@ -191,14 +218,17 @@ LoadMorphy <- function (phy) {
 #' @param morphyObj Morphy object constructed using \code{\link{LoadMorphy}} 
 #' @return Morphy error code, deciperhable using \code{\link{mpl_translate_error}}
 #' @author Martin R. Smith
-#' @export
 UnloadMorphy <- function (morphyObj) {
-  if (class(morphyObj) != 'externalptr') stop ("Object is not a valid pointer; cannot destroy.")
+  if (class(morphyObj) != 'morphyPtr') stop ("Object is not a valid pointer; cannot destroy.")
   if (mpl_delete_Morphy(morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), "in mpl_delete_Morphy")
   }
   return (error)
 }
+
+#' @name Unload library
+#' @export
+UnloadInapplicable <- function () detach("package:inapplicable", unload=TRUE)
 
 #' @name AsBinary
 #' @aliases AsBinary

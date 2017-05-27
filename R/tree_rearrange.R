@@ -368,3 +368,12 @@ TBR <- function(tree, edge.to.break=NULL) {
   }
   Renumber(ret)
 }
+
+#' Generate random tree topology from dataset
+#' 
+#' @param dataset A dataset in \code{phyDat} format
+#' 
+#' @author Martin R. Smith 
+#' @importFrom ape rtree
+#' @export
+RandomTree <- function (dataset) rtree(length(dataset), tip.label=names(dataset), br=NULL)

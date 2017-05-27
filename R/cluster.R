@@ -10,11 +10,13 @@
 #' 
 #' @author Martin R. Smith
 #' 
-#' @examples{
-#'   \dontrun{
+#' @examples
+#' \dontrun{
 #'   prepare.cluster(4)
-#'   }
 #' }
+#' 
+#' @importFrom parallel setDefaultCluster clusterEvalQ makeCluster
+#' @export
 PrepareCluster <- function (cores) {
   cl <- makeCluster(getOption("cl.cores", cores))
   clusterEvalQ(cl, {library(inapplicable); NULL})

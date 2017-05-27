@@ -29,8 +29,7 @@
 #' 
 #' @author Martin Smith (using C code adapted from MorphyLib, author Martin Brazeau)
 #' importFrom phangorn phyDat
-#' importFrom ape tiplabels nodelabels read.tree is.rooted .PlotPhyloEnv
-#' importFrom parallel makeCluster clusterCall clusterEvalQ setDefaultCluster
+#' importFrom ape tiplabels nodelabels read.tree is.rooted .PlotPhyloEnv rtree
 #' importFrom graphics plot locator par text
 #' importFrom stats runif reorder na.omit
 #' @export

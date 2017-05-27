@@ -50,11 +50,12 @@ mpl_translate_error <- function (errorCode) {
 #' @description Creates a new empty Morphy object. All fields are unpopulated
 #' and uninitialised.
 #'
-#' @param NULL
 #' 
 #' @return A void pointer to the Morphy instance. NULL if unsuccessful.
 #' 
-#' @examples
+#' @examples morphyObj <- mpl_new_Morphy() # Create new object
+#' ## Do some stuff ... ##
+#' mpl_delete_Morphy(morphyObj) # Delete when done
 #'
 #' @seealso
 #' 
@@ -153,7 +154,6 @@ mpl_set_charac_weight <- function (charID, weight, morphyobj)
 #' @description Gets the weights of a character in the dataset.
 #'
 #' @param charID    Number of the character (i.e. first character is number 1)
-#' @param weight    
 #' @param morphyobj An instance of the Morphy object.
 #' 
 #' @return A list, detailing (item 1) the exact weight of the character; (item 2) the integer

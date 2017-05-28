@@ -1,7 +1,9 @@
 #' Details the attributes of a morphy object
 #'
 #' @param morphyObj A morphy object created with \code{\link{LoadMorphy}}
+#' 
 #' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
+#'
 #' @author Martin R. Smith
 #' @export
 summary.morphyPtr <- function (morphyObj, ...) {
@@ -9,8 +11,7 @@ summary.morphyPtr <- function (morphyObj, ...) {
   class(ans) <- "summary.morphyPtr"
   nTax <- mpl_get_numtaxa(morphyObj)
   nChar <- mpl_get_num_charac(morphyObj)
-  charWeights <- vapply(seq_len(nChar), mpl_get_charac_weight, list(0, 0), morphyobj=morphyObj)
-  dimnames(charWeights) <- list(c("exact", "approx"), NULL)
+  charWeights <- MorphyWeights(morphyObj)
 
   ans$nTax <- nTax 
   ans$nChar <- nChar 
@@ -19,6 +20,22 @@ summary.morphyPtr <- function (morphyObj, ...) {
   ans$allStates <- mpl_get_symbols(morphyObj)
   return(ans)
 }
+
+#' Report the character weightings associated with a Morphy object
+#'
+#' @param morphyObj A morphy object created with \code{\link{LoadMorphy}}
+#' @return a matrix of dimensions (2, number of characters); row 1 lists the
+#'         exact rates specified by the user; row 2 the approximate (integral)
+#'         weights used by MorphyLib
+#'
+#' @author Martin R. Smith
+#' @export
+MorphyWeights <- function(morphyObj) {
+ charWeights <- vapply(seq_len(mpl_get_num_charac(morphyObj)), mpl_get_charac_weight, list(0, 0), morphyobj=morphyObj)
+ imnames(charWeights) <- list(c("exact", "approx"), NULL)
+ charWeights
+}
+  
 
 #' Initialize a Morphy Object from a phyDat object
 #' 

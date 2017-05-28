@@ -16,110 +16,102 @@ ReorderPruning <- function (x) {
 }
 
 #' Rearrange phylogenetic tree
-#' \code{RearrangeTree} performs one tree rearrangement of a specified type
-#' @usage
-#' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
-#'  iter = "<unknown>", cluster = NULL, trace = 0)
+#' @details \code{RearrangeTree} performs one tree rearrangement of a specified type
+#' @usage #' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
+#'  iter = "<unknown>", cluster = NULL, verbosity = 0)
 #' 
-#' \arguments{
-#'   \item{tree}{a rooted bifurcating phylogenetic tree with the desired outgroup, and the attributes
+#' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, and the attributes
 #'     \code{pscore}, the tree's parsimony score, and 
 #'     \code{hits}, the number of times the best score has been hit in the calling function;
-#'   }
-#'   \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};}
-#'   \item{rearrange}{a rearrangement function: probably one of 
-#'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};}
-#'   \item{min.score}{trees longer than \code{min.score}, probably the score of the starting tree,
-#'     will be discarded;}
-#'   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
-#'     see \code{\link{InapplicableParsimony}};}
-#'   \item{return.single}{returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
-#'   \item{iter}{iteration number of calling function, for reporting to user only;}
-#'   \item{cluster}{a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
-#'     searches on multicore machines;}
-#'   \item{trace}{determines how much information to output to screen.}
-#' }
+#'   
+#' @param dataset a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};
+#' @param Rearrange a rearrangement function: probably one of 
+#'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};
+#' @param  min.score trees longer than \code{min.score}, probably the score of the starting tree,
+#'     will be discarded;
+#' @param concavity concavity constant for implied weighting (not currently implemented!); 
+#'     see \code{\link{InapplicableParsimony}};
+#' @param  return.single returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
+#'   \item{iter}{iteration number of calling function, for reporting to user only;
+#' @param  cluster a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
+#'     searches on multicore machines;
+#' @param verbosity determines how much information to output to screen.
+#' 
 #' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}
 #'  as described for argument \code{tree}.}
-#' \author{Martin R. Smith}
-#' \seealso{
+#' @author Martin R. Smith
+#' @seealso
 #'   \itemize{
 #'     \item \code{\link{RootedNNI}}
 #'     \item \code{\link{RootedSPR}}
 #'     \item \code{\link{RootedTBR}}
 #'   }
-#' }
-#' @examples{
+#' 
+#' @examples
 #' data('SigSut')
 #' random.tree <- rtree(34, tip.label=names(SigSut.data), br=NULL)
 #' RearrangeTree(random.tree, SigSut.preparedata, RootedNNI)
-#' }
+#' 
+#' @importFrom parallel clusterCall
 #' @export
-RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, trace=0) {
+RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, verbosity=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
-    trees <- list(re.tree<-rearrange(tree))
-    min.score <- InapplicableFitch(re.tree, data)
+    trees <- list(re.tree<-Rearrange(tree))
+    min.score <- MorphyLength(re.tree, morphyObj)
     best.trees <- c(TRUE)
   } else {
     #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
-    candidates <- clusterCall(cluster, rearrange, tree)
-    scores <- vapply(candidates, InapplicableFitch, 1, data) # ~3x faster to do this in serial in r233.
+    candidates <- clusterCall(cluster, Rearrange, tree)
+    scores <- vapply(candidates, MorphyLength, 1, morphyObj) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score
     trees <- candidates[best.trees]
   }
   if (best.score < min.score) {
-    if (trace > 3) cat("\n    . Iteration", iter, '- Min score', min.score, ">", best.score)
+    if (verbosity > 3) cat("\n    . Iteration", iter, '- Min score', min.score, ">", best.score)
   } else if (best.score == min.score) {
     hits <- hits + sum(best.trees)
-    if (trace > 2) cat("\n    - Iteration", iter, "- Best score", min.score, "hit", hits, "times")
+    if (verbosity > 2) cat("\n    - Iteration", iter, "- Best score", min.score, "hit", hits, "times")
   } else {
     hits <- sum(best.trees)
-    if (trace > 1) cat("\n    * Iteration", iter, "- New best score", min.score, "found on", hits, "trees")
+    if (verbosity > 1) cat("\n    * Iteration", iter, "- New best score", min.score, "found on", hits, "trees")
   }
   if (length(return.single) && return.single) trees <- sample(trees, 1)[[1]]
   attr(trees, 'hits') <- hits
   attr(trees, 'pscore') <- min.score
   trees
 }
-#' @name RootedNNI
-#' @alias RootedNNI
-#' @alias RootedSPR
-#' @alias RootedTBR
+
 #' Rearrange a rooted tree
-#' @description This function performs a rearrangement iteration on a tree, retaining the position of the root.
-#' \usage{
-#' RootedNNI(tree)
-#' RootedSPR(tree)
-#' RootedTBR(tree)
-#' }
-#' \arguments{
-#'   \item{tree}{An object of class \code{\link{phylo}}, with all nodes resolved (bifurcating).}
-#' }
-#' \details{
+#'
+#' This function performs a rearrangement iteration on a tree, retaining the position of the root.
+#'
 #' A single \acronym{NNI}, \acronym{SPR} or \acronym{TBR} rearrangement is performed, subject to the constraint that 
 #' no taxon may be moved to the opposite side of the root node.
 #' Branch lengths are not (yet) supported.
-#' }
-#' @return{
-#' This function returns a tree, in \code{phylo} format.
-#' }
-#' \author{
-#' Martin R. Smith
 #' 
-#' @code RootedNNI} is abridged from the \pkg{phangorn} function \code{nnin
-#' }
+#' @usage
+#' RootedNNI(tree)
+#' RootedSPR(tree)
+#' RootedTBR(tree)
+#'
+#' @param tree An object of class \code{\link{phylo}}, with all nodes resolved (bifurcating).
 #' 
-#' \seealso{
+#' @return This function returns a tree, in \code{phylo} format.
+#'
+#' @author Martin R. Smith
+#' \code{RootedNNI} is abridged from the \pkg{phangorn} function \code{nnin}
+#' 
+#' @seealso
 #' \itemize{
 #' \item \code{\link{SetOutgroup}}, set the outgroup of the phylogenetic tree
 #' \item \code{\link{NNI}}, unrooted \acronym{NNI} and \acronym{SPR}
 #' \item \code{\link{TBR}}, unrooted \acronym{TBR}
 #' }
-#' }
+#' 
 #' @examples{
 #'   tree <- read.tree(text='(((a,b),c),(d,(e,f)));')
 #'   tree <- SetOutgroup(tree, c('e', 'f'))
@@ -130,7 +122,10 @@ RearrangeTree <- function (tree, data, rearrange, min.score=NULL, concavity=NULL
 #'   plot(RootedTBR(tree))
 #' }
 #' 
-#' @importFrom phangorn
+#'
+#' @aliases RootedNNI
+#' @aliases RootedSPR
+#' @aliases RootedTBR
 #' @export
 RootedNNI <- function (tree) {
   edge <- matrix(tree$edge, ncol = 2)
@@ -233,22 +228,44 @@ RootedTBR <- function(tree) {
   }
 }
 
-#' @importFrom phangorn
+#' Perform one NNI rearrangement at a given branch
+#'
+#' @param tree A tree of class \code{phylo}
+#'
+#' @return One of the two trees resulting when a NNI rearrangement is 
+#'         performed at a random internal edge
 #' @export
-QuickNNI <- function (tree) {
-  n      <- sample(tree$Nnode - 1L, 1L)
-  edge   <- tree$edge
-  parent <- edge[, 1L]
-  child  <- edge[, 2L]
-  k      <- min(parent) - 1L
-  ind    <- which(child > k)[n]
-  p1     <- parent[ind]
-  p2     <- child[ind]
-  ind1   <- which(parent == p1)
-  ind1   <- ind1[ind1 != ind][1L]
-  ind2   <- which(parent == p2)[sample(2L,1L)]
-  tree$edge[c(ind1, ind2), 2L] <- child[c(ind2, ind1)]
-  Renumber(ReorderPruning(tree))
+NNI <- function (tree) {
+    edge    <- tree$edge
+    parent  <- edge[, 1]
+    child   <- edge[, 2]
+    lengths <- tree$edge.length
+    nb.tip  <- length(tree$tip.label)
+    ind     <- sample(which(child > nb.tip), 1)
+    if(is.na(ind)) return(NULL)
+    nb.edge <- length(parent)
+    nb.node <- tree$Nnode
+    if (nb.node == 1) return(tree)
+    p1      <- parent[ind]
+    p2      <- child[ind]
+    ind1    <- which(parent == p1)
+    ind1    <- ind1[ind1 != ind][1]
+    ind2    <- which(parent == p2)[sample(2, 1)]
+    new_ind <- c(ind2, ind1)
+    old_ind <- c(ind1, ind2)
+    child_swap <- child[new_ind]
+    edge [old_ind, 2L] <- child_swap
+    child[old_ind] <- child_swap
+    neworder <- .C(neworder_phylo, as.integer(nb.tip), as.integer(parent), 
+                   as.integer(child), as.integer(nb.edge), integer(nb.edge), 
+                   as.integer(2), NAOK = TRUE)[[5]] # from .reorder_ape
+    tree$edge <- edge[neworder, ]
+    if (!is.null(tree$edge.length)) {
+        lengths[old_ind] <- lengths[new_ind]
+        tree$edge.length <- lengths[neworder]
+    }
+    attr(tree, "order") <- "postorder"
+    tree
 }
 
 #' @export
@@ -298,36 +315,29 @@ SPR <- function(tree) {
   tree
 }
 
-#' @name TBR
-#' @alias tbr
-#' @alias TBR
+#' TBR
 #' 
-#'  Tree bisection and reconnection
-#' @description This function performs a single random \acronym{TBR} iteration.
-#' \usage{
+#' Tree bisection and reconnection
+#'
+#' \code{TBR} performs a single random \acronym{TBR} iteration.
+#'
+#' @usage
 #' TBR(tree, edge.to.break = NULL)
-#' }
-#' %- maybe also 'usage' for other objects documented here.
-#' \arguments{
-#'   \item{tree}{a fully resolved tree in \code{\link{phyDat}} format;}
-#'   \item{edge.to.break}{the index of an edge to bisect, generated randomly if not specified.}
-#' }
-#' \details{
-#' Branch lengths are not (yet) supported.
-#' }
+#' 
+#' @param tree a fully resolved tree in \code{\link{phyDat}} format;
+#' @param edge.to.break the index of an edge to bisect, generated randomly if not specified.
+#' 
+#' @details Branch lengths are not (yet) supported.
+#' 
 #' @return This function returns a tree in \code{phyDat} format that has undergone one \acronym{TBR} iteration.
-#' \references{
-#' The \acronym{TBR} algorithm is summarized in
-#' 
+#' @references The \acronym{TBR} algorithm is summarized in
 #' Felsenstein, J. 2004. \cite{Inferring Phylogenies.} Sinauer Associates, Sunderland, Massachusetts.
-#' }
-#' \author{
-#' Martin R. Smith
-#' }
 #' 
-#' \seealso{
-#' @code \link{RootedTBR}, useful when the position of the root node should be retained.
-#' }
+#' 
+#' @author Martin R. Smith
+#' 
+#' @seealso RootedTBR useful when the position of the root node should be retained.
+#' 
 #' @examples{
 #' tree <- rtree(20, br=NULL)
 #' TBR(tree)
@@ -383,3 +393,12 @@ TBR <- function(tree, edge.to.break=NULL) {
   }
   Renumber(ret)
 }
+
+#' Generate random tree topology from dataset
+#' 
+#' @param dataset A dataset in \code{phyDat} format
+#' 
+#' @author Martin R. Smith 
+#' @importFrom ape rtree
+#' @export
+RandomTree <- function (dataset) rtree(length(dataset), tip.label=names(dataset), br=NULL)

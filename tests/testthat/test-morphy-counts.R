@@ -2,7 +2,7 @@ library(ape)
 
 ## Test cases designed by Thomas Guillerme
 context("correct step counting")
-test_that("InapplicableFitch generates correct tree lengths", {
+test_that("Morphy generates correct lengths", {
   ## Tree
   tree <- read.tree(text = "((((((1,2),3),4),5),6),(7,(8,(9,(10,(11,12))))));")
   characters <- c("23--1??--032", # 0,  expect score = 5
@@ -48,16 +48,21 @@ test_that("InapplicableFitch generates correct tree lengths", {
   ## Results
   expected_results <- c(5, 2, 3, 2, 1, 5, 5, 2, 5, 2, 2, 4, 3, 2, 5, 0, 5, 2, 4, 5, 2, 4, 3, 3, 2, 5, 1, 4, 4, 0, 5, 5, 4, 5, 2, 1, 3, 5, 2)
 
+  ##plot(tree); nodelabels(12:22); tiplabels(0:11)
   ## Run the tests
-  for(test in 1:length(characters)) {
-    output <- InapplicableFitch(tree, StringToMorphy(characters[test], tree$tip.label))
-    tree_length <- output[[1]]
+  for(test in seq_along(characters)) {
+    phy <- StringToPhyDat(characters[test], tree$tip.label)
+    morphyObj <- LoadMorphy(phy)
+    tree_length <- MorphyLength(tree, morphyObj)
+    #if (tree_length != expected_results[test]) cat("Test case", test - 1, characters[test], "unequal: Morphy calcluates",
+    #  tree_length, "instead of", expected_results[test],"\n")
     expect_equal(tree_length, expected_results[test])
+    morphyObj <- UnloadMorphy(morphyObj)
   }
   ## Test combined matrix
-  morphyDat <- StringToMorphy(paste0(characters, collapse='\n'), tree$tip.label, byTaxon=FALSE)
-  output <- InapplicableFitch(tree, morphyDat)
-  tree_length <- output[[1]]
+  bigPhy <- StringToPhyDat(paste0(characters, collapse='\n'), tree$tip.label, byTaxon=FALSE)
+  morphyObj <- LoadMorphy(bigPhy)
+  tree_length <- MorphyLength(tree, morphyObj)
   expect_equal(tree_length, sum(expected_results))
 
   ## Run the bigger tree tests
@@ -68,9 +73,13 @@ test_that("InapplicableFitch generates correct tree lengths", {
   expected_results <- c(3)
 
   ## Run the tests
-  for(test in 1:length(characters)) { 
-    output <- InapplicableFitch(tree, StringToMorphy(characters[test], tree$tip.label))
-    tree_length <- output[[1]]
+  for(test in 1:length(characters)) {
+    phy <- StringToPhyDat(characters[test], tree$tip.label)
+    morphyObj <- LoadMorphy(phy)
+    tree_length <- MorphyLength(tree, morphyObj)
+    #if (tree_length != expected_results[test]) cat("Test case", test - 1, characters[test], "unequal: Morphy calcluates",
+    #  tree_length, "instead of", expected_results[test],"\n")
     expect_equal(tree_length, expected_results[test])
+    UnloadMorphy(morphyObj)
   }
 })

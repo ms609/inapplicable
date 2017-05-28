@@ -96,8 +96,65 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
   MorphyDat(phy)
 }
 
+#' @title String to phyDat
+#'
+#' @description Converts a PhyDat object to allow processing by MorphyDat
+#'
+#' @param string a string of tokens, optionally containing newlines, with no terminating semi-colon.  Polytomies not (yet) supported; each character must correspond to a unique state, ?, or the inapplicable token (-)
+#' @param tips, a character vector corresponding to the names (in order) of each taxon in the matrix
+#' @param byTaxon = TRUE, string is one TAXON's coding at a time; FALSE: one CHARACTER's coding at a time
+#' 
+#' @examples
+#' morphy <- StringToPhyDat("-?01231230?-", c('Lion', 'Gazelle'), byTaxon=TRUE)
+#' # encodes the following matrix:
+#' # Lion     -?0123
+#' # Gazelle  1230?-
+#' 
+#' @return This function returns a matrix of class \code{morphyDat}; see \code{\link{MorphyData}}
+#' @seealso \code{\link{phyDat}}
+#' 
+#' @author Martin Smith
+#' @importFrom phangorn phyDat
+#' @export
+StringToPhyDat <- function (x, tips, byTaxon = TRUE) {
+  x <- strsplit(x, '')[[1]]
+  x <- matrix(x[x != '\n'], nrow=length(tips), byrow=byTaxon)
+  rownames(x) <- tips
+  phy <- phyDat(x, levels=c(which(as.character(0:9) %in% x) - 1, '-'), type='USER')
+  phy
+}
+
+#' Extract character data from a phyDat object as a string
+#' 
+#' 
+#' @param phy an object of class \code{\link{phyDat}}
+#' @param ps text, perhaps ';', to append to the end of the string
+#' @param useIndex (default: TRUE) Print duplicate characters multiple 
+#'        times, as they appeared in the original matrix
+#' @param byTaxon If TRUE, write one taxon followed by the next.
+        #'If FALSE, write one character followed by the next
+#' 
+#' @author Martin Smith
+#' @importFrom phangorn phyDat
+#' @export
+PhyToString <- function (phy, ps='', useIndex=TRUE, byTaxon=TRUE) {
+  at <- attributes(phy)
+  phyLevels <- at$allLevels
+  phyChars <- at$nr
+  phyContrast <- at$contrast == 1
+  phyIndex <- if (useIndex) at$index else seq_len(phyChars)
+  outLevels <- seq_len(ncol(phyContrast)) - 1
+  if (any(inappLevel <- phyLevels == '-')) outLevels[which(phyContrast[inappLevel])] <- '-'
+  levelTranslation <- apply(phyContrast, 1, function (x)  ifelse(sum(x) == 1, as.character(outLevels[x]), paste0(c('{', outLevels[x], '}'), collapse='')))
+  if (any(ambigToken <- apply(phyContrast, 1, all))) levelTranslation[ambigToken] <- '?'
+  ret <- vapply(phy, function (x) levelTranslation[x[phyIndex]], character(length(phyIndex)))
+  if (!byTaxon) ret <- t(ret)
+  ret <- paste0(c(ret, ps), collapse='')
+  return (ret)
+}
+
 #' @name AsBinary
-#' @alias AsBinary
+#' @aliases AsBinary
 #' @title Convert a number to binary
 #' @description Provides a (reversed) binary representation of a decimal integer
 #' @usage AsBinary(x)

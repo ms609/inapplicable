@@ -228,21 +228,44 @@ RootedTBR <- function(tree) {
   }
 }
 
+#' Perform one NNI rearrangement at a given branch
+#'
+#' @param tree A tree of class \code{phylo}
+#'
+#' @return One of the two trees resulting when a NNI rearrangement is 
+#'         performed at a random internal edge
 #' @export
 NNI <- function (tree) {
-  n      <- sample(tree$Nnode - 1L, 1L)
-  edge   <- tree$edge
-  parent <- edge[, 1L]
-  child  <- edge[, 2L]
-  k      <- min(parent) - 1L
-  ind    <- which(child > k)[n]
-  p1     <- parent[ind]
-  p2     <- child[ind]
-  ind1   <- which(parent == p1)
-  ind1   <- ind1[ind1 != ind][1L]
-  ind2   <- which(parent == p2)[sample(2L,1L)]
-  tree$edge[c(ind1, ind2), 2L] <- child[c(ind2, ind1)]
-  Renumber(ReorderPruning(tree))
+    edge    <- tree$edge
+    parent  <- edge[, 1]
+    child   <- edge[, 2]
+    lengths <- tree$edge.length
+    nb.tip  <- length(tree$tip.label)
+    ind     <- sample(which(child > nb.tip), 1)
+    if(is.na(ind)) return(NULL)
+    nb.edge <- length(parent)
+    nb.node <- tree$Nnode
+    if (nb.node == 1) return(tree)
+    p1      <- parent[ind]
+    p2      <- child[ind]
+    ind1    <- which(parent == p1)
+    ind1    <- ind1[ind1 != ind][1]
+    ind2    <- which(parent == p2)[sample(2, 1)]
+    new_ind <- c(ind2, ind1)
+    old_ind <- c(ind1, ind2)
+    child_swap <- child[new_ind]
+    edge [old_ind, 2L] <- child_swap
+    child[old_ind] <- child_swap
+    neworder <- .C(neworder_phylo, as.integer(nb.tip), as.integer(parent), 
+                   as.integer(child), as.integer(nb.edge), integer(nb.edge), 
+                   as.integer(2), NAOK = TRUE)[[5]] # from .reorder_ape
+    tree$edge <- edge[neworder, ]
+    if (!is.null(tree$edge.length)) {
+        lengths[old_ind] <- lengths[new_ind]
+        tree$edge.length <- lengths[neworder]
+    }
+    attr(tree, "order") <- "postorder"
+    tree
 }
 
 #' @export

@@ -50,6 +50,7 @@ InapplicableFitch <- function (tree, dataset, ...) {
 #' @seealso LoadMorphy
 #'
 #' @author Martin R. Smith
+#' @export
 MorphyLength <- function (tree, morphyObj) {
   nTaxa <- mpl_get_numtaxa(morphyObj)
   if (nTaxa < 1) stop("Error: ", mpl_translate_error(nTaxa))

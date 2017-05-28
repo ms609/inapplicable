@@ -211,6 +211,7 @@ AddTip <- function (tree, where, label) {
 #' @name SetOutgroup
 #' @aliases SetOutgroup
 #' @aliases Root
+#' 
 #'  Root a phylogenetic tree
 #' @description Sets the root of a phylogenetic tree, such that one child of the root node is \code{outgroup}.
 #' @usage SetOutgroup(tree, outgroup)
@@ -232,7 +233,7 @@ AddTip <- function (tree, where, label) {
 #'   plot(Root(tree, c('a', 'b')))
 #'   plot(Root(tree, 3))
 #' }
-#' @export
+#' @export SetOutgroup Root
 SetOutgroup <- Root <- function (tree, outgroup) {
   if (class(tree) != 'phylo') stop ('"tree" must be of class "phylo"')
   tip <- tree$tip.label

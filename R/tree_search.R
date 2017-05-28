@@ -1,6 +1,6 @@
-#' TITLE GOES HERE
+#' Sectorial Search with inapplicable data
 #'
-#' \code{FUNCTIONNAME} does something useful
+#' \code{InapplicableSectorial} does something useful
 #'
 #' @param PARAM is a parameter you should send to it
 #' 
@@ -97,22 +97,23 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' InapplicablePratchet(tree, data, concavity = NULL, all = FALSE, outgroup = NULL, maxit = 100, 
 #'   maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, rearrangements = "NNI", ...)
 #' }
-#' \arguments{
-#'   \item{tree}{An object of class \code{phyDat} denoting the topology to begin the search from;}
-#'   \item{data}{A matrix opf class \code{morphyDat} format (or \code{\link{phyDat}} format,
-#'     which the function will itself pass through \code{MorphyDat});}
-#'   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
-#'     see \code{\link{InapplicableParsimony}};}
-#'   \item{all}{Set to TRUE to report all MPTs encountered during the search, perhaps to analyze consensus}
-#'   \item{outgroup}{a vector specifying all tips in the outgroup; if unspecified then identical trees with different roots will be considered unique;}
-#'   \item{maxit}{maximum ratchet iterations to perform;}
-#'   \item{maxiter}{maximum rearrangements to perform on each bootstrap or ratchet iteration;}
-#'   \item{maxhits}{maximum times to hit best score before terminating a tree search within a pratchet iteration;}
-#'   \item{k}{stop when k ratchet iterations have found the same best score;}
-#'   \item{verbosity}{larger numbers provides more verbose feedback to the user;}
-#'   \item{rearrangements}{method to use when rearranging trees: NNI, SPR or TBR;}
-#'   \item{\dots}{other arguments to pass to subsequent functions.}
-#' }
+#'
+#' @param tree An object of class \code{phyDat} denoting the topology to begin the search from;
+#' @param data A matrix of class \code{\link{phyDat}},
+#'             
+#' @param concavity concavity constant for implied weighting (not currently implemented!); 
+#'                  \code{\link{InapplicableParsimony}};
+#' @param all Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus
+#' @param outgroup a vector specifying all tips in the outgroup; if unspecified then identical trees with different roots will be considered unique;
+#' @param maxit   maximum ratchet iterations to perform;
+#' @param maxiter maximum rearrangements to perform on each bootstrap or ratchet iteration;
+#' @param maxhits maximum times to hit best score before terminating a tree search within a pratchet iteration;
+#' @param k stop when k ratchet iterations have found the same best score;
+#' @param verbosity larger numbers provides more verbose feedback to the user;
+#' @param rearrangements method(s) to use when rearranging trees: 
+#'        a vector containing any combination of the strings "NNI", "SPR" or "TBR";
+#' @param \dots other arguments to pass to subsequent functions.
+#' 
 #' @return This function returns a tree modified by parsimony ratchet iteration, retaining the position of the root.
 #' @references Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}
 #' \author{
@@ -137,7 +138,9 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' @keywords  tree 
 
 #' @export
-InapplicablePratchet <- function (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, ...) {
+InapplicablePratchet <- function 
+(tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, 
+maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   eps <- 1e-0
@@ -150,28 +153,17 @@ InapplicablePratchet <- function (tree, dataset, keepAll=FALSE, outgroup=NULL, m
 
   kmax <- 0 
   for (i in 1:maxit) {
-    if (verbosity >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
-    bstree <- BootstrapTree(tree=tree, mDat=dataset, maxiter=maxiter, maxhits=maxhits, criterion=criterion, verbosity=verbosity-1, ...)
+    if (verbosity >= 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
+    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxiter=maxiter, maxhits=maxhits, criterion=criterion, verbosity=verbosity-1, ...)
     
-    if (verbosity >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new cannew candidate tree:")
-    if (rearrangements == "TBR") {
-      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='TBR', verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- TreeSearch(candidate, dataset, criterion=criterion, method='SPR', verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- TreeSearch(candidate, dataset, criterion=criterion, method='NNI', verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
-    } else if (rearrangements == "TBR only") {            
-      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='TBR', verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
-    } else if (rearrangements == "SPR") {                  
-      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='SPR', verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
-      candidate <- TreeSearch(candidate, dataset, criterion=criterion, method='NNI', verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
-    } else if (rearrangements == "SPR only") {             
-      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='SPR', verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
-    } else {                                               
-      candidate <- TreeSearch(bstree,    dataset, criterion=criterion, method='NNI', verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
+    for (method in rearrangements) {
+      if (method %in% c('TBR', 'SPR', 'NNI')) {
+        if (verbosity >= 0) cat ("\n - Running", method, "rearrangements from new candidate tree:")
+        candidate <- DoTreeSearch(candidate, morphyObj, criterion=criterion, method=method, verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
+      } else {
+        warning("Method", method, "unknown; try SPR, TBR or NNI")
+      }
     }
-    #if(class(result)=="phylo") m <- 1
-    #else m = length(result)
-    #if(m > 0) trees[2 : (1+m)] = result[1:m]
-    #pscores <- sapply(trees, function(dataset) attr(dataset, "pscore"))
     cand.pars <- attr(candidate, 'pscore')
     if((cand.pars+eps) < best.pars) {
       if (keepAll) {
@@ -188,7 +180,7 @@ InapplicablePratchet <- function (tree, dataset, keepAll=FALSE, outgroup=NULL, m
         if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
       }
     }
-    if (verbosity >= 0) cat("\n* Best pscore after", i, "/", maxit, "pratchet iterations:", best.pars, "( hit", kmax, "/", k, ")")
+    if (verbosity >= 0) cat("\n* Best pscore after", i, "/", maxit, "Ratchet iterations:", best.pars, "( hit", kmax, "/", k, ")")
     if (kmax >= k) break()
   } # for
   if (verbosity >= 0)
@@ -204,6 +196,7 @@ InapplicablePratchet <- function (tree, dataset, keepAll=FALSE, outgroup=NULL, m
     ret <- tree
     attr(ret, 'hits') <- NULL
   }
+  morphyObj <- UnloadMorphy(morphyObj)
   return (ret)
 }
 #' TITLE GOES HERE
@@ -239,11 +232,13 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
   BS <- tabulate(sample(v, replace=TRUE), length(startWeights))
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
+  mpl_apply_tipdata(morphyObj)
   res <- DoTreeSearch(tree, morphyObj, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, verbosity=verbosity-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, startWeights[i], morphyObj), integer(1))
+  mpl_apply_tipdata(morphyObj)
   res
 }
 
@@ -254,9 +249,10 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
 #' Does the hard work of searching for a most parsimonious tree.
 #' End-users are expected to access this function through its wrapper, TreeSearch
 #' It is also called directly by Ratchet and Sectorial functions
-#' TODO remove export line
 #'
 #' @author Martin R. Smith
+#' 
+#' @keywords internal
 #' @export
 
 DoTreeSearch <- function (tree, morphyObj, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, verbosity=1, criterion=NULL, ...) {

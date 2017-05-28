@@ -89,10 +89,9 @@ InapplicableSectorial <- function (tree, data, maxit=100,
   tree
 }  # InapplicableSectorial
 
-#' @name InapplicablePratchet
-#' @aliases InapplicablePratchet
-#'  Parsimony ratchet
-#' @description This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
+#' Parsimony Ratchet
+#'
+#' This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
 #' \usage{
 #' InapplicablePratchet(tree, data, concavity = NULL, all = FALSE, outgroup = NULL, maxit = 100, 
 #'   maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, rearrangements = "NNI", ...)
@@ -138,7 +137,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' @keywords  tree 
 
 #' @export
-InapplicablePratchet <- function 
+Ratchet <- function 
 (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, 
 maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
@@ -158,7 +157,7 @@ maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
     
     for (method in rearrangements) {
       if (method %in% c('TBR', 'SPR', 'NNI')) {
-        if (verbosity >= 0) cat ("\n - Running", method, "rearrangements from new candidate tree:")
+        if (verbosity >= 0) cat ("\n - Running", method, "rearrangements from new candidate tree...")
         candidate <- DoTreeSearch(candidate, morphyObj, criterion=criterion, method=method, verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
       } else {
         warning("Method", method, "unknown; try SPR, TBR or NNI")
@@ -201,9 +200,10 @@ maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
   morphyObj <- UnloadMorphy(morphyObj)
   return (ret)
 }
-#' TITLE GOES HERE
+
+#' Consensus of Ratchet iterations
 #'
-#' \code{FUNCTIONNAME} does something useful
+#' \code{FUNCTIONNAME} does something useful but undocumented
 #'
 #' @param PARAM is a parameter you should send to it
 #' 
@@ -213,9 +213,10 @@ maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
 #' @return This function returns :
 #'   
 #' @author Martin Smith
+#' @alias Ratchet
 #' @export
-PratchetConsensus <- function (tree, data, maxit=5000, maxiter=500, maxhits=20, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) InapplicablePratchet(tree, data, maxit, maxiter, maxhits, k=1, verbosity, rearrangements, criterion=criterion, ...))
+RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, nSearch=10, ...) {
+  trees <- lapply(1:nSearch, function (x) InapplicablePratchet(tree, dataset, maxit, maxiter, maxhits, k=1, verbosity, rearrangements, criterion=criterion, ...))
   scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
   trees <- unique(trees[scores == min(scores)])
   cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')
@@ -363,7 +364,7 @@ TreeSearch <- function
 (tree, dataset, method='NNI', maxiter=100, maxhits=20, forest.size=1, 
  cluster=NULL, verbosity=1, criterion=NULL, ...) {
   # Initialize morphy object
-  if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not", class(dataset))
+  if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   ret <- DoTreeSearch(tree, morphyObj, method, maxiter, maxhits, forest.size, cluster, 
                       verbosity, criterion, ...)

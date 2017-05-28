@@ -138,9 +138,12 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 
 #' @export
 InapplicablePratchet <- function (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, maxhits=40, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, ...) {
-  if (class(dataset) != 'morphyDat') stop("dataset must be a morphyDat object.")
-  eps <- 1e-08
-  if (is.null(attr(tree, "pscore"))) attr(tree, "pscore") <- InapplicableFitch(tree, dataset, ...)
+  if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
+  morphyObj <- LoadMorphy(dataset)
+  eps <- 1e-0
+  if (is.null(attr(tree, "pscore"))) {
+    attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
+  }
   best.pars <- attr(tree, "pscore")
   if (verbosity >= 0) cat("* Initial pscore:", best.pars)
   if (keepAll) forest <- vector('list', maxiter)
@@ -148,7 +151,7 @@ InapplicablePratchet <- function (tree, dataset, keepAll=FALSE, outgroup=NULL, m
   kmax <- 0 
   for (i in 1:maxit) {
     if (verbosity >= 0) cat ("\n - Running NNI on bootstrapped dataset. ")
-    bstree <- BootstrapInapp(tree=tree, mDat=dataset, maxiter=maxiter, maxhits=maxhits, criterion=criterion, verbosity=verbosity-1, ...)
+    bstree <- BootstrapTree(tree=tree, mDat=dataset, maxiter=maxiter, maxhits=maxhits, criterion=criterion, verbosity=verbosity-1, ...)
     
     if (verbosity >= 0) cat ("\n - Running", ifelse(is.null(rearrangements), "NNI", rearrangements), "from new cannew candidate tree:")
     if (rearrangements == "TBR") {
@@ -224,27 +227,23 @@ PratchetConsensus <- function (tree, data, maxit=5000, maxiter=500, maxhits=20, 
   return (trees)
 }
 
+#' Bootstrap tree search with inapplicable data
+#' 
+#' @return A tree that is optimal under a random sampling of the original characters
 #' @export
-BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion, verbosity=1, ...) {
+BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterion, verbosity=1, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
-  at <- attributes(mDat)
-  weight <- at$weight
-  inappls <- at$inapp.chars
-  v <- rep(1:length(weight), weight)
-  BS <- tabulate(sample(v, replace=TRUE), length(weight)) 
-  keep <- BS > 0
-  mDat <- mDat[, keep, drop=FALSE]
-  attr(mDat, 'weight') <- BS[keep]
-  attr(mDat, 'min.steps') <- at$min.steps[keep]
-  attr(mDat, 'unique.tokens') <- at$unique.tokens[keep]
-  attr(mDat, 'nr') <- sum(keep)
-  attr(mDat, 'inapp.level') <- at$inapp.level
-  attr(mDat, 'inapp.chars') <- sum(BS[1:inappls])
-  attr(tree, 'pscore') <- NULL
-  class(mDat) <- 'morphyDat'
-  res <- TreeSearch(tree, mDat, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, verbosity=verbosity-1, ...)
+  startWeights <- MorphyWeights(morphyObj)[1, ]
+  eachChar <- seq_along(startWeights)
+  v <- rep(eachChar, startWeights)
+  BS <- tabulate(sample(v, replace=TRUE), length(startWeights))
+  vapply(eachChar, function (i) 
+         mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
+  res <- DoTreeSearch(tree, morphyObj, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, verbosity=verbosity-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
+  vapply(eachChar, function (i) 
+         mpl_set_charac_weight(i, startWeights[i], morphyObj), integer(1))
   res
 }
 
@@ -255,10 +254,10 @@ BootstrapInapp <- function (tree, morphy, maxiter, maxhits, criterion=criterion,
 #' Does the hard work of searching for a most parsimonious tree.
 #' End-users are expected to access this function through its wrapper, TreeSearch
 #' It is also called directly by Ratchet and Sectorial functions
+#' TODO remove export line
 #'
 #' @author Martin R. Smith
 #' @export
-#' TODO remove export line
 
 DoTreeSearch <- function (tree, morphyObj, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, verbosity=1, criterion=NULL, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
@@ -325,7 +324,7 @@ DoTreeSearch <- function (tree, morphyObj, method='NNI', maxiter=100, maxhits=20
 #'   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;
 #' @param outgroup a vector listing the taxa in the outgroup;
 #' @param concavity concavity constant for implied weighting (not currently implemented!); 
-#'        see \code{\link{InapplicableParsimony}};}
+#'        see \code{\link{InapplicableParsimony}};
 #' @param method rearrangements to perform; one of \kbd{NNI}, \kbd{SPR}, or \kbd{TBR};
 #' @param maxiter the maximum number of iterations to perform before abandoning the search;
 #' @param maxhits the maximum times to hit the best pscore before abandoning the search;

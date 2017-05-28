@@ -176,6 +176,7 @@ maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
     } else {
       if (best.pars+eps > cand.pars) { # i.e. best == cand, allowing for floating point error
         kmax <- kmax + 1
+        candidate$tip.label <- names(dataset)
         tree <- candidate
         if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
       }
@@ -194,6 +195,7 @@ maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
     if (is.null(outgroup)) warning('"outgroup" not specified, so some "unique" trees may have same topology but distinct roots.')
   } else {
     ret <- tree
+    ret$tip.label <- names(dataset)
     attr(ret, 'hits') <- NULL
   }
   morphyObj <- UnloadMorphy(morphyObj)
@@ -366,6 +368,7 @@ TreeSearch <- function
   ret <- DoTreeSearch(tree, morphyObj, method, maxiter, maxhits, forest.size, cluster, 
                       verbosity, criterion, ...)
   morphyObj <- UnloadMorphy(morphyObj)
+  ret$tip.label <- names(dataset)
   return (ret)
 }
 

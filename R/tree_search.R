@@ -92,10 +92,11 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' Parsimony Ratchet
 #'
 #' This function uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
-#' \usage{
+#'
+#' @usage
 #' InapplicablePratchet(tree, data, concavity = NULL, all = FALSE, outgroup = NULL, maxit = 100, 
 #'   maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, rearrangements = "NNI", ...)
-#' }
+#' 
 #'
 #' @param tree An object of class \code{phyDat} denoting the topology to begin the search from;
 #' @param data A matrix of class \code{\link{phyDat}},
@@ -114,19 +115,17 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' @param \dots other arguments to pass to subsequent functions.
 #' 
 #' @return This function returns a tree modified by parsimony ratchet iteration, retaining the position of the root.
+#'
 #' @references Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}
-#' \author{
-#' Martin R. Smith
+#'
+#' @author Martin R. Smith
 #' 
 #' Adapted from \code{\link{pratchet}} in the \pkg{phangorn} package, which does not preserve the position of the root.
-#' }
-#' \seealso{
-#' \itemize{
-#' \item \code{\link{pratchet}}
-#' \item \code{\link{TreeSearch}}
-#' \item \code{\link{SectorialSearch}}
-#' }
-#' }
+#' 
+#' @seealso \code{\link{pratchet}}
+#' @seealso \code{\link{TreeSearch}}
+#' @seealso \code{\link{SectorialSearch}}
+#' 
 #' @examples{
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
@@ -213,7 +212,6 @@ maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
 #' @return This function returns :
 #'   
 #' @author Martin Smith
-#' @alias Ratchet
 #' @export
 RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, nSearch=10, ...) {
   trees <- lapply(1:nSearch, function (x) InapplicablePratchet(tree, dataset, maxit, maxiter, maxhits, k=1, verbosity, rearrangements, criterion=criterion, ...))
@@ -373,35 +371,11 @@ TreeSearch <- function
   return (ret)
 }
 
-#' @name SectorialSearch
-#' @aliases SectorialSearch InapplicableSectorial 
-#' 
+#' Sectorial Search
+#'
 #' \code{SectorialSearch} performs a sectorial search on a tree, preserving the position of the root.
-#' \usage{
-#' SectorialSearch(tree, data, outgroup, concavity = NULL, rearrangements = "NNI",
-#'   maxiter = 2000, cluster = NULL, verbosity = 3)
-#' InapplicableSectorial(tree, data, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
-#'   verbosity = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
-#' }
-#' \arguments{
-#'   \item{tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}
-#'   \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}}
-#'               (\code{phyDat} format also accepted);}
-#'   \item{outgroup}{a vector listing the taxa that form the outgroup;}
-#'   \item{concavity}{concavity constant for implied weighting (not currently implemented!); 
-#'     see \code{\link{InapplicableParsimony}};}
-#'   \item{maxit}{maximum number of sectorial iterations to perform;}
-#'   \item{maxiter}{maximum number of rearrangements to perform on each sectorial iteration;}
-#'   \item{cluster}{a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;}
-#'   \item{k}{stop when \code{k} searches have improved their sectorial score;}
-#'   \item{verbosity}{integer determining how verbose the reporting to stdout will be;}
-#'   \item{smallest.sector}{sectors with fewer than \code{smallest.sector} taxa will not be selected; \kbd{4} is the smallest sensible value;}
-#'   \item{largest.sector}{sectors with more than \code{largest.sector} taxa will not be selected;}
-#'   \item{rearrangements}{method to use when rearranging subtrees: NNI, SPR or TBR;}
-#'   \item{\dots}{other arguments to pass to subsequent functions.}
-#' }
-#' @details{
-#' /code{InapplicableSectorial} performs a sectorial search on the tree specified. A sectorial search 
+#'
+#' \code{InapplicableSectorial} performs a sectorial search on the tree specified. A sectorial search 
 #' detaches a random part of the tree, performs rearrangments on this subtree, then reattaches it 
 #' to the main tree (Goloboff, 1999).
 #' The improvement to local \var{pscore} hopefully (but not necessarily) improves the overall \var{pscore}.
@@ -409,24 +383,38 @@ TreeSearch <- function
 #' rearrangements and only retained if the ultimate parsimony score is better than 
 #' that of the original tree.
 #' 
-#' \code {SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial} followed by a few rounds
+#' \code{SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial} followed by a few rounds
 #' of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
-#' }
+#' 
+#' @usage
+#' SectorialSearch(tree, data, outgroup, concavity = NULL, rearrangements = "NNI",
+#'   maxiter = 2000, cluster = NULL, verbosity = 3)
+#' InapplicableSectorial(tree, data, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
+#'   verbosity = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
+#' 
+#' @param tree a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;
+#' @param data a data matrix \code{phyDat} format;
+#' @param outgroup a vector listing the taxa that form the outgroup;
+#' @param concavity concavity constant for implied weighting (not currently implemented!); 
+#'        see \code{\link{InapplicableParsimony}};
+#' @param maxit maximum number of sectorial iterations to perform;
+#' @param maxiter maximum number of rearrangements to perform on each sectorial iteration;
+#' @param cluster a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;
+#' @param k stop when \code{k} searches have improved their sectorial score;
+#' @param verbosity integer determining how verbose the reporting to stdout will be;
+#' @param smallest.sector sectors with fewer than \code{smallest.sector} taxa will not be selected; \kbd{4} is the smallest sensible value;
+#' @param largest.sector sectors with more than \code{largest.sector} taxa will not be selected;
+#' @param rearrangements method to use when rearranging subtrees: NNI, SPR or TBR;
+#' @param \dots other arguments to pass to subsequent functions.
+#' 
 #' @return a rooted tree of class \code{phylo}.
 #' 
-#' \references{
-#' Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:\href{http://dx.doi.org/10.1006/clad.1999.0122}{10.1006/clad.1999.0122}
-#' }
-#' \author{
-#' Martin R. Smith
-#' }
+#' @references Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:\href{http://dx.doi.org/10.1006/clad.1999.0122}{10.1006/clad.1999.0122}
 #' 
-#' \seealso{
-#' \itemize{ 
-#' \item \code{\link{TreeSearch}}
-#' \item \code{\link{InapplicablePratchet}}
-#' }
-#' }
+#' @author Martin R. Smith
+#' 
+#' @seealso \code{\link{TreeSearch}}
+#' @seealso \code{\link{Ratchet}}
 #' 
 #' @examples{
 #' data('SigSut')
@@ -434,7 +422,7 @@ TreeSearch <- function
 #' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' InapplicableSectorial(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50, largest.sector=7)
-#' \dontrun {SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming}
+#' \dontrun{SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming}
 #' 
 #' ## SectorialSearch is currently defined as
 #' function (start.tree, data, outgroup, rearrangements='NNI') {
@@ -450,6 +438,8 @@ TreeSearch <- function
 #'   } else return (SetOutgroup(start.tree, outgroup))
 #' }
 #' }
+#' 
+#' @aliases SectorialSearch InapplicableSectorial 
 #' @keywords  tree 
 #' @export
 SectorialSearch <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, verbosity=3) {

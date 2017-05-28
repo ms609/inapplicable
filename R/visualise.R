@@ -1,6 +1,6 @@
-#' TITLE GOES HERE
+#' Visualize Inheritance
 #'
-#' \code{FUNCTIONNAME} does something useful
+#' \code{VisualiseInheritance} does something useful
 #'
 #' @param PARAM is a parameter you should send to it
 #' 
@@ -16,11 +16,8 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
   VisualizeCharacter(tree, data, char.no, plot.fun, inherit.ancestral=FALSE)
   VisualizeCharacter(tree, data, char.no, plot.fun, inherit.ancestral=TRUE)
 }
-#' @name VisualiseCharacter
-#' @aliases VisualiseCharacter
-#' @aliases VisualiseChar
-#' @aliases VisualizeCharacter
-#' @aliases VisualizeChar
+#' VisualiseCharacter
+#' 
 #' Visualize optimization for a character
 #' 
 #' @description Determine and depict the possible states for a character on a tree under the most parsimonious conditions
@@ -46,6 +43,10 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' VisualiseCharacter(njtree, SigSut.phy, 5, function(x) {plot(x); edgelabels();})
 #' }
 #' @keywords  tree 
+#' @aliases VisualiseCharacter
+#' @aliases VisualiseChar
+#' @aliases VisualizeCharacter
+#' @aliases VisualizeChar
 #' 
 #' @export
 VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 

@@ -49,7 +49,7 @@ MorphyWeights <- function(morphyObj) {
 #' @export
 SetMorphyWeights <- function (weight, morphyObj, checkInput = TRUE) {
   if (checkInput) if (length(weight) != mpl_get_num_charac(morphyObj)) stop("Number of weights not equal to number of character entries")
-  errors <- vapply(seq_along(weight), function (i) 
+  errors <- vapply(seq_along(weight), function (i)
     mpl_set_charac_weight(i, weight[i], morphyObj), integer(1))
   if(any(errors != 0)) warning("Morphy Error encountered: ", mpl_translate_error(errors[errors<0]))
   mpl_apply_tipdata(morphyObj)
@@ -111,6 +111,6 @@ UnloadMorphy <- function (morphyObj) {
   return (error)
 }
 
-#' @name Unload library
+#' Unload this library
 #' @export
 UnloadInapplicable <- function () detach("package:inapplicable", unload=TRUE)

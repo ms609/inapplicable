@@ -84,38 +84,34 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity
   attr(trees, 'pscore') <- min.score
   trees
 }
-#' @name RootedNNI
-#' @aliases RootedNNI
-#' @aliases RootedSPR
-#' @aliases RootedTBR
+
 #' Rearrange a rooted tree
-#' @description This function performs a rearrangement iteration on a tree, retaining the position of the root.
-#' \usage{
-#' RootedNNI(tree)
-#' RootedSPR(tree)
-#' RootedTBR(tree)
-#' }
-#' \arguments{
-#'   \item{tree}{An object of class \code{\link{phylo}}, with all nodes resolved (bifurcating).}
-#' }
-#' \details{
+#'
+#' This function performs a rearrangement iteration on a tree, retaining the position of the root.
+#'
 #' A single \acronym{NNI}, \acronym{SPR} or \acronym{TBR} rearrangement is performed, subject to the constraint that 
 #' no taxon may be moved to the opposite side of the root node.
 #' Branch lengths are not (yet) supported.
-#' }
+#' 
+#' @usage
+#' RootedNNI(tree)
+#' RootedSPR(tree)
+#' RootedTBR(tree)
+#'
+#' @param tree An object of class \code{\link{phylo}}, with all nodes resolved (bifurcating).
+#' 
 #' @return This function returns a tree, in \code{phylo} format.
 #'
 #' @author Martin R. Smith
-#' 
 #' \code{RootedNNI} is abridged from the \pkg{phangorn} function \code{nnin}
 #' 
-#' @seealso{
+#' @seealso
 #' \itemize{
 #' \item \code{\link{SetOutgroup}}, set the outgroup of the phylogenetic tree
 #' \item \code{\link{NNI}}, unrooted \acronym{NNI} and \acronym{SPR}
 #' \item \code{\link{TBR}}, unrooted \acronym{TBR}
 #' }
-#' }
+#' 
 #' @examples{
 #'   tree <- read.tree(text='(((a,b),c),(d,(e,f)));')
 #'   tree <- SetOutgroup(tree, c('e', 'f'))
@@ -126,6 +122,10 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity
 #'   plot(RootedTBR(tree))
 #' }
 #' 
+#'
+#' @aliases RootedNNI
+#' @aliases RootedSPR
+#' @aliases RootedTBR
 #' @export
 RootedNNI <- function (tree) {
   edge <- matrix(tree$edge, ncol = 2)
@@ -315,13 +315,15 @@ SPR <- function(tree) {
   tree
 }
 
-#' @name TBR
+#' TBR
 #' 
-#'  Tree bisection and reconnection
-#' @description This function performs a single random \acronym{TBR} iteration.
-#' \usage{
+#' Tree bisection and reconnection
+#'
+#' \code{TBR} performs a single random \acronym{TBR} iteration.
+#'
+#' @usage
 #' TBR(tree, edge.to.break = NULL)
-#' }
+#' 
 #' @param tree a fully resolved tree in \code{\link{phyDat}} format;
 #' @param edge.to.break the index of an edge to bisect, generated randomly if not specified.
 #' 

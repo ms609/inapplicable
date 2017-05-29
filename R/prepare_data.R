@@ -101,7 +101,7 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
 #'
 #' @description Converts a PhyDat object to allow processing by MorphyDat
 #'
-#' @param string a string of tokens, optionally containing newlines, with no terminating semi-colon.  Polytomies not (yet) supported; each character must correspond to a unique state, ?, or the inapplicable token (-)
+#' @param string a string of tokens, optionally containing whitespace, with no terminating semi-colon.  Polytomies not (yet) supported; each character must correspond to a unique state, ?, or the inapplicable token (-)
 #' @param tips, a character vector corresponding to the names (in order) of each taxon in the matrix
 #' @param byTaxon = TRUE, string is one TAXON's coding at a time; FALSE: one CHARACTER's coding at a time
 #' 
@@ -115,10 +115,11 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
 #' @seealso \code{\link{phyDat}}
 #' 
 #' @author Martin R. Smith
+#' @aliases StringToPhydat
 #' @importFrom phangorn phyDat
 #' @export
-StringToPhyDat <- function (x, tips, byTaxon = TRUE) {
-  x <- strsplit(x, '')[[1]]
+StringToPhyDat <- StringToPhydat <- function (x, tips, byTaxon = TRUE) {
+  x <- strsplit(gsub('\\s+', '', x), '')[[1]]
   x <- matrix(x[x != '\n'], nrow=length(tips), byrow=byTaxon)
   rownames(x) <- tips
   phy <- phyDat(x, levels=c(which(as.character(0:9) %in% x) - 1, '-'), type='USER')

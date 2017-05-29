@@ -1,6 +1,6 @@
 #' Details the attributes of a morphy object
 #'
-#' <%= morphyParam %>
+#' @template morphyObjParam
 #' 
 #' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
 #'
@@ -23,7 +23,7 @@ summary.morphyPtr <- function (morphyObj, ...) {
 
 #' Report the character weightings associated with a Morphy object
 #'
-#' <%= morphyParam %>
+#' @template morphyObjParam
 #' @return a matrix of dimensions (2, number of characters); row 1 lists the
 #'         exact rates specified by the user; row 2 the approximate (integral)
 #'         weights used by MorphyLib
@@ -39,7 +39,7 @@ MorphyWeights <- function(morphyObj) {
 #' Set the character weightings associated with a Morphy object
 #'
 #' @param weight A vector listing the new weights to be applied to each character
-#' @param morphyObj A morphy object created with \code{\link{LoadMorphy}}
+#' @template morphyObjParam
 #' @param checkInput Whether to sanity-check input data before applying. 
 #'         Defaults to TRUE to protect the user from crashes.
 #'
@@ -99,7 +99,7 @@ LoadMorphy <- function (phy) {
 #' Failure to do so will cause a crash if UnloadMorphy is called on an object that 
 #' has already been destroyed
 #'
-#' @param morphyObj Morphy object constructed using \code{\link{LoadMorphy}} 
+#' @template morphyObjParam
 #' @return Morphy error code, deciperhable using \code{\link{mpl_translate_error}}
 #' @author Martin R. Smith
 #' @export

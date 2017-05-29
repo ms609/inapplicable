@@ -3,7 +3,7 @@
 #' @description Uses code modified from the Morphy library to calculate a parsimony score 
 #' in datasets that contain inapplicable data
 #'
-#' <%= treeParam %>
+#' @template treeParam 
 #' @param morphyData A \code{phyDat} or \code{morphyDat} object, perhaps generated with 
 #'  \code{\link{phyDat}} or \code{\link{MorphyDat}}
 #' @param detail Leave as 1 to just return parsimony score, or specify c(1, 2, 3) for additional detail (see below)
@@ -38,11 +38,12 @@ InapplicableFitch <- function (tree, dataset, ...) {
   result
 }
 
-#' @title Calculate parsimony score with inapplicable data
+#' Calculate parsimony score with inapplicable data
 #' 
-#' <%= treeParam %>, whose $tip.labels follow
+#' @param tree A tree of class \code{\link{phylo}}, whose $tip.labels follow
 #'             the same order as the characters loaded into the Morphy Object
-#' <%= morphyParam %>
+#' @template morphyObjParam
+#'
 #' @return The length of the tree (after weighting)
 #'
 #' @seealso LoadMorphy

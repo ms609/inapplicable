@@ -99,7 +99,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #'   maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, rearrangements = "NNI", ...)
 #' 
 #'
-#' <%= treeParam %>
+#' @template treeParam 
 #' @param data A matrix of class \code{\link{phyDat}},
 #'             
 #' @param concavity concavity constant for implied weighting (not currently implemented!); 
@@ -225,10 +225,10 @@ RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20
 
 #' Bootstrap tree search with inapplicable data
 #' 
-#' <%= treeParam %>, whose \code{$tip.labels} are 
+#' @param tree A tree of class \code{\link{phylo}}, whose \code{$tip.labels} are 
 #'             sorted (perhaps with function \code{\link{ReorderTip}} to
 #'             correspond to the character order in \code{morphyObj}
-#' <%= morphyParam %>
+#' @template morphyObjParam
 #'
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @export

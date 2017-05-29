@@ -2,7 +2,7 @@
 #'
 #' \code{Renumber} numbers the nodes and tips in a tree to conform with the phylo standards.
 #'
-#' <%= treeParam %>
+#' @template treeParam 
 #' 
 #' @examples
 #' library('ape')
@@ -131,7 +131,7 @@ ecr <- ExtractClade
 #'
 #' @usage AddTip(tree, where, label)
 #' 
-#' <%= treeParam %>
+#' @template treeParam 
 #' @param where The node or tip that should form the sister taxon to the new node.  To add a new tip at the root, use "where = 0";
 #' @param label A character string providing the label the new tip.
 #' 
@@ -212,7 +212,7 @@ AddTip <- function (tree, where, label) {
 #'
 #' @usage SetOutgroup(tree, outgroup)
 #' 
-#' <%= treeParam %>, with all nodes resolved;
+#' @param tree A tree of class \code{\link{phylo}}, with all nodes resolved;
 #' @param outgroup a vector of mode numeric or character specifying the new outgroup.
 #' 
 #' @return This function returns a rooted tree with the new outgroup.
@@ -471,7 +471,7 @@ TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, 
 #' @return This function returns :
 #'   
 #' @author Martin Smith
-#' importFrom graphics locator
+#' @importFrom graphics locator
 #' @export
 BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
 ## Copied from ape:::bind.tree; the only change is that I use (x|y).edge in place of (x|y)$edge.
@@ -819,7 +819,7 @@ DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge =
 #' @return This function returns :
 #'   
 #' @author Martin R. Smith
-#' importFrom ape is.rooted 
+#' @importFrom ape is.rooted 
 #' @export
 DropTipNoSubtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
 # Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.

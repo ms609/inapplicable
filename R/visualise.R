@@ -11,7 +11,7 @@
 #'   
 #' @author Martin R. Smith
 #'
-#' importFrom par
+#' @importFrom graphics par
 #' @export
 VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, char.no, plot.fun=plot) {
   par(mfrow=c(1,2), mar=rep(0.5,4))
@@ -50,7 +50,7 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' @aliases VisualizeChar
 #' 
 #' @importFrom ape .PlotPhyloEnv tiplabels nodelabels 
-#' importFrom graphics text
+#' @importFrom graphics text
 #' @export
 VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 
 function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {

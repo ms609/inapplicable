@@ -22,31 +22,67 @@ ReorderPruning <- function (x) {
 #' 
 #' A wrapper for \code{\link{.reorder_ape}}
 #'
-#' <%= treeParam %>
+#' @template treeParam
 #' @param nTaxa (optional) number of tips in the tree
+#' @param edge (optional) the value of tree$edge
 #'
 #' @return A tree with nodes numbered in postorder
+#' @author Modified from \code{\link{ape:::.reorder_ape}} by Martin R. Smith
 #' @keywords internal
-#' @importFrom ape .reorder_ape
 #' @export
-Cladewise <- function (tree, nTaxa = NULL) {
+Cladewise <- function (tree, nTaxa = NULL, edge = tree$edge) {
+  if (!is.null(attr(tree, "order")) && attr(tree, "order") == "cladewise") return(tree)
   if (is.null(nTaxa)) nTaxa <- length(tree$tip.label)
-  .reorder_ape(tree, "cladewise", FALSE, nTaxa, 1)
+  if (is.null(edge)) edge <- tree$edge
+  nb.edge <- dim(edge)[1]
+  nb.node <- tree$Nnode
+  if (nb.node == 1) return(tree)
+  if (nb.node >= nTaxa) stop("tree apparently badly conformed")
+  
+  neworder <- .C(neworder_phylo, as.integer(nTaxa), as.integer(edge[, 1]),
+                 as.integer(edge[, 2]), as.integer(nb.edge), 
+                 integer(nb.edge), as.integer(1), NAOK = TRUE)[[5]]
+                 
+  tree$edge <- edge[neworder, ]
+  if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[neworder]
+  attr(tree, "order") <- "cladewise"
+  tree
 }
+
 
 #' @describeIn Cladewise Reorder tree in Postorder
 #' @export
-Postorder <- function (tree, nTaxa = NULL) {
-  if (is.null(nTaxa)) nTaxa <- length(tree$tip.label)
-  .reorder_ape(tree, "postorder", FALSE, nTaxa, 2)
+Postorder <- function (tree, nTaxa = length(tree$tip.label), edge = tree$edge) {
+  if (!is.null(attr(tree, "order")) && attr(tree, "order") == "postorder") return(tree)
+  nb.edge <- dim(edge)[1]
+  nb.node <- tree$Nnode
+  if (nb.node == 1) return(tree)
+  if (nb.node >= nTaxa) stop("tree apparently badly conformed")
+  neworder <- .C(neworder_phylo, as.integer(nTaxa), as.integer(edge[, 1]),
+                 as.integer(edge[, 2]), as.integer(nb.edge), 
+                 integer(nb.edge), as.integer(2), NAOK = TRUE)[[5]]
+  tree$edge <- edge[neworder, ]
+  if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[neworder]
+  attr(tree, "order") <- "postorder"
+  tree
 }
-
 
 #' @describeIn Cladewise Reorder tree Pruningwise
 #' @export
-Pruningwise <- function (tree, nTaxa = NULL) {
-  if (is.null(nTaxa)) nTaxa <- length(tree$tip.label)
-  .reorder_ape(tree, "pruningwise", FALSE, nTaxa, 3)
+Pruningwise <- function (tree, nTaxa = length(tree$tip.label), edge = tree$edge) {
+  if (!is.null(attr(tree, "order")) && attr(tree, "order") == 'pruningwise') return(tree)
+  nb.edge <- dim(edge)[1]
+  nb.node <- tree$Nnode
+  if (nb.node == 1) return(tree)
+  if (nb.node >= nTaxa) stop("tree apparently badly conformed")
+  tree <- Cladewise(tree, nTaxa, edge)
+  neworder <- .C(neworder_pruningwise, as.integer(nTaxa), as.integer(nb.node), 
+                 as.integer(tree$edge[, 1]), as.integer(tree$edge[, 2]),
+                 as.integer(nb.edge), integer(nb.edge))[[6]]
+  tree$edge <- tree$edge[neworder, ]
+  if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[neworder]
+  attr(tree, "order") <- 'pruningwise'
+  tree
 }
 
 
@@ -56,7 +92,7 @@ Pruningwise <- function (tree, nTaxa = NULL) {
 #' such that the indices in \code{tree$edge[, 2]} correspond to the order of
 #' tips given in \code{tipOrder}
 #'
-#' <%= treeParam %>
+#' @template treeParam
 #' @param tipOrder A character vector containing the values of 
 #'        \code{tree$tip.label} in the desired sort order
 #' 
@@ -162,7 +198,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity
 #' RootedSPR(tree)
 #' RootedTBR(tree)
 #'
-#' <%= treeParam %>, with all nodes resolved (bifurcating).
+#' <%= treeParam =>, with all nodes resolved (bifurcating).
 #' 
 #' @return This function returns a tree, in \code{phylo} format.
 #'
@@ -219,8 +255,8 @@ RootedNNI <- function (tree) {
   tree <- Renumber(ReorderPruning(tree))  
 }
 
-#' importFrom ape is.rooted 
-#' importFrom stats runif 
+#' @importFrom ape is.rooted 
+#' @importFrom stats runif 
 #' @export
 RootedSPR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
@@ -266,8 +302,8 @@ RootedSPR <- function(tree) {
   tree
 }
 
-#' importFrom ape is.rooted
-#' importFrom stats runif 
+#' @importFrom ape is.rooted
+#' @importFrom stats runif 
 #' @export
 RootedTBR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
@@ -300,7 +336,7 @@ RootedTBR <- function(tree) {
 
 #' Perform one NNI rearrangement at a given branch
 #'
-#' <%= treeParam %>
+#' @template treeParam
 #'
 #' @return One of the two trees resulting when a NNI rearrangement is 
 #'         performed at a random internal edge
@@ -391,10 +427,9 @@ SPR <- function(tree) {
 #'
 #' \code{TBR} performs a single random \acronym{TBR} iteration.
 #'
-#' @usage
-#' TBR(tree, edge.to.break = NULL)
+#' @usage TBR(tree, edge.to.break = NULL)
 #' 
-#' <%= treeParam %>, with all nodes resolved
+#' <%= treeParam =>, with all nodes resolved
 #' @param edge.to.break the index of an edge to bisect, generated randomly if not specified.
 #' 
 #' @details Branch lengths are not (yet) supported.

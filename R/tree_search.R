@@ -224,9 +224,7 @@ RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20
 
 #' Bootstrap tree search with inapplicable data
 #' 
-#' @param tree A tree of class \code{\link{phylo}}, whose \code{$tip.labels} are 
-#'             sorted (perhaps with function \code{\link{RenumberTips}} to
-#'             correspond to the character order in \code{morphyObj}
+#' @template labelledTreeParam
 #' @template morphyObjParam
 #'
 #' @return A tree that is optimal under a random sampling of the original characters
@@ -256,6 +254,9 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
 #' Does the hard work of searching for a most parsimonious tree.
 #' End-users are expected to access this function through its wrapper, TreeSearch
 #' It is also called directly by Ratchet and Sectorial functions
+#'
+#' @param labelledTreeParam
+#' @template morphyObjParam
 #'
 #' @author Martin R. Smith
 #' 

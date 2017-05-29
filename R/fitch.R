@@ -38,8 +38,7 @@ InapplicableFitch <- function (tree, dataset, ...) {
 
 #' Calculate parsimony score with inapplicable data
 #' 
-#' @param tree A tree of class \code{\link{phylo}}, whose $tip.labels follow
-#'             the same order as the characters loaded into the Morphy Object
+#' @template labelledTreeParam
 #' @template morphyObjParam
 #'
 #' @return The length of the tree (after weighting)

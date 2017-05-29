@@ -1,24 +1,24 @@
 #' Details the attributes of a morphy object
 #'
-#' @template morphyObjParam
+#' @param object A Morphy object
 #' 
 #' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
 #'
 #' @author Martin R. Smith
-#' @s3method
+#' @method summary morphyPtr
 #' @export
-summary.morphyPtr <- function (morphyObj, ...) {
+summary.morphyPtr <- function (object, ...) {
   ans <- list()
   class(ans) <- "summary.morphyPtr"
-  nTax <- mpl_get_numtaxa(morphyObj)
-  nChar <- mpl_get_num_charac(morphyObj)
-  charWeights <- MorphyWeights(morphyObj)
+  nTax <- mpl_get_numtaxa(object)
+  nChar <- mpl_get_num_charac(object)
+  charWeights <- MorphyWeights(object)
 
   ans$nTax <- nTax 
   ans$nChar <- nChar 
-  ans$nInternal <- mpl_get_num_internal_nodes(morphyObj)
+  ans$nInternal <- mpl_get_num_internal_nodes(object)
   ans$charWeights <- charWeights
-  ans$allStates <- mpl_get_symbols(morphyObj)
+  ans$allStates <- mpl_get_symbols(object)
   return(ans)
 }
 

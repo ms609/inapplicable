@@ -23,7 +23,7 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' Visualize optimization for a character
 #' 
 #' @description Determine and depict the possible states for a character on a tree under the most parsimonious conditions
-#' @usage VisualiseCharacter(tree, data, char.no, plot.fun = plot)
+#' @usage VisualiseCharacter(tree, dataset, char.no, plot.fun = plot, inherit.ancestral = FALSE)
 #' 
 #' @param tree a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;
 #' @template datasetParam

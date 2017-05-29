@@ -1,1 +1,1 @@
-#' @param tree A tree of class \code{\link{phylo}}
+#' @param concavity concavity constant for implied weighting (not currently implemented!)

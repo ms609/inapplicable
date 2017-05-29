@@ -95,13 +95,12 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #'
 #' \code{Ratchet} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
 #'
-#' @usage
-#' Ratchet(tree, data, concavity = NULL, all = FALSE, outgroup = NULL, maxit = 100, 
-#'   maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, rearrangements = "NNI", ...)
-#' 
+#' @usage Ratchet(tree, dataset, concavity = NULL, keepAll = FALSE, outgroup = NULL, maxit = 100, 
+#'                maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, 
+#'                rearrangements = c('TBR', 'SPR', 'NNI'), concavity = NULL, ...)
 #'
 #' @template treeParam 
-#' @tempate datasetParam
+#' @template datasetParam
 #' @template concavityParam
 #' @param all Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus
 #' @param outgroup a vector specifying all tips in the outgroup; if unspecified then identical trees with different roots will be considered unique;
@@ -225,7 +224,7 @@ RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20
 #' Bootstrap tree search with inapplicable data
 #' 
 #' @param tree A tree of class \code{\link{phylo}}, whose \code{$tip.labels} are 
-#'             sorted (perhaps with function \code{\link{ReorderTip}} to
+#'             sorted (perhaps with function \code{\link{ReorderTips}} to
 #'             correspond to the character order in \code{morphyObj}
 #' @template morphyObjParam
 #'
@@ -318,7 +317,7 @@ DoTreeSearch <- function (tree, morphyObj, method='NNI', maxiter=100, maxhits=20
 #' Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR}) 
 #' to search for a more parsimonious tree.
 #' 
-#' @usage TreeSearch(tree, data, outgroup, concavity = NULL, method = "NNI", maxiter = 100, 
+#' @usage TreeSearch(tree, dataset, method = "NNI", maxiter = 100, 
 #'   maxhits = 20, forest.size = 1, cluster = NULL, verbosity = 1, ...)
 #' 
 #' 

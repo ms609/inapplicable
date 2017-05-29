@@ -333,10 +333,6 @@ mpl_apply_tipdata <- function(morphyobj)
 #' 
 #' @return The integral parsimony length (right now)
 #' 
-#' @examples
-#'
-#' @seealso
-#' 
 #' @author Martin Brazeau
 #' @export
 mpl_first_down_recon <- function(node_id, left_id, right_id, morphyobj)

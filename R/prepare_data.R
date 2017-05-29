@@ -5,6 +5,7 @@
 #' @param phydat A \code{phyDat} object
 #' 
 #' @examples
+#' data(SigSut)
 #' morphy <- MorphyDat(SigSut.phy)
 #' 
 #' @return This function returns a matrix of class \code{*phyDat}.

@@ -1,10 +1,10 @@
 #'  Prepare a cluster for use in tree search functions
 #' 
-#' @details \code{prepare.cluster} creates a cluster of multiple cores and prepares it to analyse phylogenetic trees.
-#' @usage prepare.cluster(cores)
+#' \code{PrepareCluster} creates a cluster of multiple cores and prepares it to analyse phylogenetic trees.
+#'
+#' @usage PrepareCluster(cores)
 #' 
-#' @param cores Number of cores to include in the cluster.
-#' 
+#' @param cores Number of cores to include in the cluster. 
 #' 
 #' @return Returns a reference to a cluster.
 #' 
@@ -12,7 +12,7 @@
 #' 
 #' @examples
 #' \dontrun{
-#'   prepare.cluster(4)
+#'   PrepareCluster(4)
 #' }
 #' 
 #' @importFrom parallel setDefaultCluster clusterEvalQ makeCluster

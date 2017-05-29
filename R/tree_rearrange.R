@@ -27,7 +27,7 @@ ReorderPruning <- function (x) {
 #' @param edge (optional) the value of tree$edge
 #'
 #' @return A tree with nodes numbered in postorder
-#' @author Modified by Martin R. Smith from \code{\link[ape]{.reorder_ape}} (Emmanuel Paradis)
+#' @author Modified by Martin R. Smith from \code{.reorder_ape} in \pkg{ape} (Emmanuel Paradis)
 #'
 #' @keywords internal
 #' @export
@@ -119,7 +119,7 @@ ReorderTips <- function (tree, tipOrder) {
 #' Rearrange phylogenetic tree
 #' @details \code{RearrangeTree} performs one tree rearrangement of a specified type
 #' @usage #' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
-#'  iter = "<unknown>", cluster = NULL, verbosity = 0)
+#'  iter = '?', cluster = NULL, verbosity = 0)
 #' 
 #' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, and the attributes
 #'     \code{pscore}, the tree's parsimony score, and 
@@ -153,7 +153,7 @@ ReorderTips <- function (tree, tipOrder) {
 #' 
 #' @importFrom parallel clusterCall
 #' @export
-RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='<unknown>', cluster=NULL, criterion=NULL, verbosity=0) {
+RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='?', cluster=NULL, criterion=NULL, verbosity=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
@@ -251,10 +251,11 @@ RootedNNI <- function (tree) {
   tree <- Renumber(ReorderPruning(tree))  
 }
 
-#' Perform SPR operation, retaining position of root
+#' Rooted SPR rearrangement
+#'
 #' @importFrom ape is.rooted 
 #' @importFrom stats runif 
-#' @describeIn SPR
+#' @describeIn SPR Perform \acronym{SPR} operation, retaining position of root
 #' @export
 RootedSPR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
@@ -300,8 +301,8 @@ RootedSPR <- function(tree) {
   tree
 }
 
-#' Perform TBR rearrangement, retaining position of root
-#' @describeIn TBR
+#' Rooted TBR 
+#' @describeIn TBR Perform \acronym{TBR} rearrangement, retaining position of root
 #' @importFrom ape is.rooted
 #' @importFrom stats runif
 #' @export
@@ -364,7 +365,7 @@ NNI <- function (tree) {
     child[old_ind] <- child_swap
     neworder <- .C('neworder_phylo', as.integer(nb.tip), as.integer(parent), 
                    as.integer(child), as.integer(nb.edge), integer(nb.edge), 
-                   as.integer(2), NAOK = TRUE, package='inapplicable')[[5]] # from .reorder_ape
+                   as.integer(2), NAOK = TRUE, PACKAGE='inapplicable')[[5]] # from .reorder_ape
     tree$edge <- edge[neworder, ]
     if (!is.null(tree$edge.length)) {
         lengths[old_ind] <- lengths[new_ind]
@@ -374,6 +375,11 @@ NNI <- function (tree) {
     tree
 }
 
+#' Subtree Pruning and Rearrangement 
+#'
+#' Perform one \acronym{SPR} rearrangement on a tree
+#'
+#' @template treeParam
 #' @export
 SPR <- function(tree) {
   tip.label <- tree$tip.label

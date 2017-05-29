@@ -128,7 +128,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' @examples{
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' Ratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
 #' }
@@ -340,23 +340,24 @@ DoTreeSearch <- function (tree, morphyObj, method='NNI', maxiter=100, maxhits=20
 #' }
 #' @author Martin R. Smith
 #'
-#' @seealso{
+#' @seealso
 #' \itemize{
 #' \item \code{\link{InapplicableFitch}}, calculates parsimony score, supports inapplicable tokens;
 #' \item \code{\link{RootedNNI}}, conducts tree rearrangements;
 #' \item \code{\link{SectorialSearch}}, alternative heuristic, useful for larger trees;
 #' \item \code{\link{Ratchet}}, alternative heuristic, useful to escape local optima.
-#' }}
-#' @examples{
+#' }
+#'
+#' @examples
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 #' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
+#'
 #' \dontrun{
 #' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='NNI')
 #' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='SPR')
 #' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='TBR')}
-#' }
 #' 
 #' @keywords  tree 
 #' 

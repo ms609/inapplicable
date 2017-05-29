@@ -122,9 +122,10 @@ RenumberTips <- function (tree, tipOrder) {
 #' @usage #' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
 #'  iter = '?', cluster = NULL, verbosity = 0)
 #' 
-#' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, and the attributes
-#'     \code{pscore}, the tree's parsimony score, and 
-#'     \code{hits}, the number of times the best score has been hit in the calling function;
+#' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, with its labels
+#'             in an order that matches the Morphy object, and the attributes
+#'             \code{pscore}, the tree's parsimony score, and 
+#'             \code{hits}, the number of times the best score has been hit in the calling function;
 #' @template morphyObjParam
 #' @param Rearrange a rearrangement function: probably one of 
 #'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};
@@ -138,7 +139,7 @@ RenumberTips <- function (tree, tipOrder) {
 #' @param verbosity determines how much information to output to screen.
 #' 
 #' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}
-#'  as described for argument \code{tree}.}
+#'  as described for argument \code{tree}, and with tip labels ordered to match morphyObj.}
 #' @author Martin R. Smith
 #' @seealso
 #'   \itemize{

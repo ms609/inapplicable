@@ -373,7 +373,7 @@ TreeSearch <- function
  cluster=NULL, verbosity=1, criterion=NULL, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
-  tree <- ReorderTips(tree, names(dataset))
+  tree <- RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
   ret <- DoTreeSearch(tree, morphyObj, method, maxiter, maxhits, forest.size, cluster, 
                       verbosity, criterion, ...)

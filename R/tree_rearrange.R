@@ -89,7 +89,7 @@ Pruningwise <- function (tree, nTaxa = length(tree$tip.label), edge = tree$edge)
 
 #' Reorder tips
 #'
-#' \code{ReorderTips(tree, tipOrder)} sorts the tips of a phylogenetic tree 
+#' \code{RenumberTips(tree, tipOrder)} sorts the tips of a phylogenetic tree 
 #' such that the indices in \code{tree$edge[, 2]} correspond to the order of
 #' tips given in \code{tipOrder}
 #'
@@ -100,11 +100,11 @@ Pruningwise <- function (tree, nTaxa = length(tree$tip.label), edge = tree$edge)
 #' @examples
 #' Data(SigSut) # Loads the phyDat object SigSut.phy
 #' tree <- RandomTree(SigSut.phy) # 
-#' tree <- ReorderTips(tree, names(SigSut.phy))
+#' tree <- RenumberTips(tree, names(SigSut.phy))
 #'
 #' @author Martin R. Smith
 #' @export
-ReorderTips <- function (tree, tipOrder) {
+RenumberTips <- function (tree, tipOrder) {
   startOrder <- tree$tip.label
   if (identical(startOrder, tipOrder)) return (tree)
   
@@ -157,14 +157,17 @@ ReorderTips <- function (tree, tipOrder) {
 RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='?', cluster=NULL, criterion=NULL, verbosity=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
+  tipOrder <- tree$tip.label
   if (is.null(cluster)) {
-    trees <- list(re.tree<-Rearrange(tree))
-    min.score <- MorphyLength(re.tree, morphyObj)
+    trees <- list(rearrangedTree<-RenumberTips(Rearrange(tree), tipOrder))
+    min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)
   } else {
     #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
+    warning("Not tested; likely to fail.")
     candidates <- clusterCall(cluster, Rearrange, tree)
+    candidates <- lapply(candidates, RenumberTips, tipOrder)
     scores <- vapply(candidates, MorphyLength, 1, morphyObj) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score

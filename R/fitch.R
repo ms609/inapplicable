@@ -29,7 +29,7 @@
 #' @export
 InapplicableFitch <- function (tree, dataset, ...) {
   if (class(dataset) != 'phyDat') stop('Invalid data type ', class(dataset), '; should be phyDat.')
-  tree <- ReorderTips(tree, names(dataset))
+  tree <- RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
   result <- MorphyLength(tree, morphyObj)
   morphyObj <- UnloadMorphy(morphyObj)

@@ -16,7 +16,7 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
     maxiter=500, k=5, verbosity=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", criterion=NULL, ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be a phyDat object.")
   if (is.null(tree)) stop("a starting tree must be provided")
-  tree <- ReorderTips(tree, names(dataset))
+  tree <- RenumberTips(tree, names(dataset))
   if (verbosity >= 0) cat('InapplicableSectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
   SectorData <- function (X, tips) {
@@ -141,7 +141,7 @@ Ratchet <- function
 maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
-  tree <- ReorderTips(tree, names(dataset))
+  tree <- RenumberTips(tree, names(dataset))
   eps <- 1e-0
   if (is.null(attr(tree, "pscore"))) {
     attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
@@ -225,7 +225,7 @@ RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20
 #' Bootstrap tree search with inapplicable data
 #' 
 #' @param tree A tree of class \code{\link{phylo}}, whose \code{$tip.labels} are 
-#'             sorted (perhaps with function \code{\link{ReorderTips}} to
+#'             sorted (perhaps with function \code{\link{RenumberTips}} to
 #'             correspond to the character order in \code{morphyObj}
 #' @template morphyObjParam
 #'
@@ -275,11 +275,11 @@ DoTreeSearch <- function (tree, morphyObj, method='NNI', maxiter=100, maxhits=20
   if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- MorphyLength(tree, morphyObj)
   best.pscore <- attr(tree, 'pscore')
   if (verbosity > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
-  rearrange.func <- switch(method, 'TBR' = TBR, 'SPR' = SPR, 'NNI' = NNI)
+  RearrangeFunc <- switch(method, 'TBR' = TBR, 'SPR' = SPR, 'NNI' = NNI)
   return.single <- !(forest.size > 1)
   
   for (iter in 1:maxiter) {
-    trees <- RearrangeTree(tree, morphyObj, rearrange.func, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, criterion=criterion, verbosity=verbosity)
+    trees <- RearrangeTree(tree, morphyObj, RearrangeFunc, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, criterion=criterion, verbosity=verbosity)
     iter.pscore <- attr(trees, 'pscore')
     if (length(forest.size) && forest.size > 1) {
       hits <- attr(trees, 'hits')
@@ -447,7 +447,7 @@ TreeSearch <- function
 #' @export
 SectorialSearch <- function (tree, dataset, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, verbosity=3, ...) {
   best.score <- attr(tree, 'pscore')
-  tree <- ReorderTips(tree, names(dataset))
+  tree <- RenumberTips(tree, names(dataset))
   if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
   sect <- InapplicableSectorial(tree, dataset, cluster=cluster,
     verbosity=verbosity-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 

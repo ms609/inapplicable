@@ -20,7 +20,7 @@ ReorderPruning <- function (x) {
 
 #' Reorder tree Cladewise
 #' 
-#' A wrapper for \code{\link{.reorder_ape}}
+#' A wrapper for \code{ape:::.reorder_ape}
 #'
 #' @template treeParam
 #' @param nTaxa (optional) number of tips in the tree

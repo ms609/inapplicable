@@ -42,6 +42,7 @@ begin data;
   [Babinka: 0->x]
   [Chaetoderma, 47: 1>x, per 22]
   [Pedanochiton, 42: ?>1, per 48]
+  [r: {0,1}, s: {1,2}, t: {1,2,3}, u: {2,3}]
 end;
 
 BEGIN TAXA;

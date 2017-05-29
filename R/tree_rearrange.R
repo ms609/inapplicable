@@ -15,6 +15,35 @@ ReorderPruning <- function (x) {
   x
 }
 
+#' Reorder tips
+#'
+#' \code{ReorderTips(tree, tipOrder)} sorts the tips of a phylogenetic tree 
+#' such that the indices in \code{tree$edge[, 2]} correspond to the order of
+#' tips given in \code{tipOrder}
+#'
+#' @param tree An object of class \code{phylo}
+#' @param tipOrder A character vector containing the values of 
+#'        \code{tree$tip.label} in the desired sort order
+#' 
+#' @example 
+#' Data(SigSut) # Loads the phyDat object SigSut.phy
+#' tree <- RandomTree(SigSut.phy) # 
+#' tree <- ReorderTips(tree, names(SigSut.phy))
+#'
+#' @author Martin R. Smith
+#' @export
+
+ReorderTips <- function (tree, tipOrder) {
+  startOrder <- tree$tip.label
+  nTip <- length(startOrder)
+  child <- tree$edge[, 2]
+  tips <- child <= nTip
+  
+  tree$edge[tips, 2] <- match(startOrder, tipOrder)
+  tree$tip.label <- tipOrder
+  tree
+}
+
 #' Rearrange phylogenetic tree
 #' @details \code{RearrangeTree} performs one tree rearrangement of a specified type
 #' @usage #' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,

@@ -34,7 +34,8 @@
 #' importFrom stats runif reorder na.omit
 #' @export
 InapplicableFitch <- function (tree, dataset, ...) {
-  if (class(dataset) != 'phyDat') stop('Invalid data type ', class(phyData), '; should be phyDat.')
+  if (class(dataset) != 'phyDat') stop('Invalid data type ', class(dataset), '; should be phyDat.')
+  tree <- ReorderTips(tree, names(dataset)
   morphyObj <- LoadMorphy(dataset)
   result <- MorphyLength(tree, morphyObj)
   morphyObj <- UnloadMorphy(morphyObj)
@@ -43,7 +44,8 @@ InapplicableFitch <- function (tree, dataset, ...) {
 
 #' @title Calculate parsimony score with inapplicable data
 #' 
-#' @param tree Phylogenetic tree (of class \code{phylo})
+#' @param tree Phylogenetic tree (of class \code{phylo}), whose $tip.labels follow
+#'             the same order as the characters loaded into the Morphy Object
 #' @param morphyObj Morphy object containing character data, constructed using \code{\link{LoadMorphy}}
 #' @return The length of the tree (after weighting)
 #'

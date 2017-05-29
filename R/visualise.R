@@ -1,6 +1,6 @@
-#' Visualize Inheritance
+#' TITLE GOES HERE
 #'
-#' \code{VisualiseInheritance} does something useful
+#' \code{FUNCTIONNAME} does something useful
 #'
 #' @param PARAM is a parameter you should send to it
 #' 
@@ -16,25 +16,32 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
   VisualizeCharacter(tree, data, char.no, plot.fun, inherit.ancestral=FALSE)
   VisualizeCharacter(tree, data, char.no, plot.fun, inherit.ancestral=TRUE)
 }
-#' VisualiseCharacter
+#' @name VisualiseCharacter
+#' @alias VisualiseCharacter
+#' @alias VisualiseChar
+#' @alias VisualizeCharacter
+#' @alias VisualizeChar
 #' 
-#' Visualize optimization for a character
-#' 
+#'  Visualize optimization for a character
 #' @description Determine and depict the possible states for a character on a tree under the most parsimonious conditions
-#' @usage VisualiseCharacter(tree, data, char.no, plot.fun = plot)
-#' 
-#' @param tree a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;
-#' @param data a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};
-#'   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;
-#' @param char.no number of the character to be displayed;
-#' @param plot.fun a function that plots a tree, \code{\link{plot}} by default.
+#' \usage{
+#' VisualiseCharacter(tree, data, char.no, plot.fun = plot)
+#' }
+#' \arguments{
+#'   \item{tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
+#'   \item{data}{a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};}
+#'   alternatively as a \code{\link{phyDat}} object.  May contain inapplicable data;}
+#'   \item{char.no}{number of the character to be displayed;}
+#'   \item{plot.fun}{a function that plots a tree, \code{\link{plot}} by default.}
+#' }
 #' 
 #' @return{
 #' The function plots a cladogram, annotating each node with the values that could occur there at the lowest parsimony score.
 #'   Nodes highlighed in red potentially (but do not necessarily) contribute to tree length.
 #' }
-#' @author Martin R. Smith
-#' 
+#' \author{
+#' Martin R. Smith
+#' }
 #' @examples{
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
@@ -42,11 +49,7 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' VisualiseCharacter(njtree, SigSut.phy, 5, function(x) {plot(x); edgelabels();})
 #' }
-#' @keywords  tree 
-#' @aliases VisualiseCharacter
-#' @aliases VisualiseChar
-#' @aliases VisualizeCharacter
-#' @aliases VisualizeChar
+#' @keyword  tree 
 #' 
 #' @export
 VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 

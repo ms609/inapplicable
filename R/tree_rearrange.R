@@ -27,7 +27,7 @@ ReorderPruning <- function (x) {
 #' @param edge (optional) the value of tree$edge
 #'
 #' @return A tree with nodes numbered in postorder
-#' @author Modified by Martin R. Smith from \code{\link{ape:::.reorder_ape}}, (Emmanuel Paradis)
+#' @author Modified by Martin R. Smith from \code{\link{ape:::.reorder_ape}} (Emmanuel Paradis)
 #'
 #' @keywords internal
 #' @export
@@ -42,7 +42,7 @@ Cladewise <- function (tree, nTaxa = NULL, edge = tree$edge) {
   
   neworder <- .C('ape_neworder_phylo', as.integer(nTaxa), as.integer(edge[, 1]),
                  as.integer(edge[, 2]), as.integer(nb.edge), 
-                 integer(nb.edge), as.integer(1), NAOK = TRUE)[[5]]
+                 integer(nb.edge), as.integer(1), NAOK = TRUE, PACKAGE='inapplicable')[[5]]
                  
   tree$edge <- edge[neworder, ]
   if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[neworder]
@@ -61,7 +61,7 @@ Postorder <- function (tree, nTaxa = length(tree$tip.label), edge = tree$edge) {
   if (nb.node >= nTaxa) stop("tree apparently badly conformed")
   neworder <- .C('ape_neworder_phylo', as.integer(nTaxa), as.integer(edge[, 1]),
                  as.integer(edge[, 2]), as.integer(nb.edge), 
-                 integer(nb.edge), as.integer(2), NAOK = TRUE)[[5]]
+                 integer(nb.edge), as.integer(2), NAOK = TRUE, PACKAGE='inapplicable')[[5]]
   tree$edge <- edge[neworder, ]
   if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[neworder]
   attr(tree, "order") <- "postorder"
@@ -79,7 +79,7 @@ Pruningwise <- function (tree, nTaxa = length(tree$tip.label), edge = tree$edge)
   tree <- Cladewise(tree, nTaxa, edge)
   neworder <- .C('ape_neworder_pruningwise', as.integer(nTaxa), as.integer(nb.node), 
                  as.integer(tree$edge[, 1]), as.integer(tree$edge[, 2]),
-                 as.integer(nb.edge), integer(nb.edge))[[6]]
+                 as.integer(nb.edge), integer(nb.edge), PACKAGE='inapplicable')[[6]]
   tree$edge <- tree$edge[neworder, ]
   if (!is.null(tree$edge.length)) tree$edge.length <- tree$edge.length[neworder]
   attr(tree, "order") <- 'pruningwise'

@@ -4,9 +4,7 @@
 #' in datasets that contain inapplicable data
 #'
 #' @template treeParam 
-#' @param morphyData A \code{phyDat} or \code{morphyDat} object, perhaps generated with 
-#'  \code{\link{phyDat}} or \code{\link{MorphyDat}}
-#' @param detail Leave as 1 to just return parsimony score, or specify c(1, 2, 3) for additional detail (see below)
+#' @template datasetParam
 #' 
 #' @examples
 #' data(SigSut)
@@ -26,7 +24,7 @@
 #' @seealso \code{\link{MorphyDat}}
 #' @seealso \code{\link{TreeSearch}}
 #' 
-#' @author Martin Smith (using C code adapted from MorphyLib, author Martin Brazeau)
+#' @author Martin R. Smith (using C code adapted from MorphyLib, author Martin Brazeau)
 #' @importFrom phangorn phyDat
 #' @export
 InapplicableFitch <- function (tree, dataset, ...) {

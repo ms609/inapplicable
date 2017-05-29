@@ -5,6 +5,7 @@
 #' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
 #'
 #' @author Martin R. Smith
+#' @s3method
 #' @export
 summary.morphyPtr <- function (morphyObj, ...) {
   ans <- list()
@@ -61,7 +62,7 @@ SetMorphyWeights <- function (weight, morphyObj, checkInput = TRUE) {
 #' @param phy an object of class \code{\link{phyDat}}
 #' @return a pointer to a Morphy object, with the attribute "weight" corres
 #' 
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @importFrom phangorn phyDat
 #' @export
 LoadMorphy <- function (phy) {

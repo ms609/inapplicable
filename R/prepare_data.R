@@ -27,7 +27,7 @@
 #' 
 #' @seealso \code{\link{phyDat}}
 #' 
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 MorphyDat <- function (phydat) {
   # Written with reference to phangorn:::prepareDataFitch
@@ -83,10 +83,10 @@ MorphyDat <- function (phydat) {
 #' # Lion     -?0123
 #' # Gazelle  1230?-
 #' 
-#' @return This function returns a matrix of class \code{morphyDat}; see \code{\link{MorphyData}}
+#' @template returnPhydat
 #' @seealso \code{\link{phyDat}}
 #' 
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 StringToMorphy <- function (x, tips, byTaxon = TRUE) {
   x <- strsplit(x, '')[[1]]
@@ -110,10 +110,10 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
 #' # Lion     -?0123
 #' # Gazelle  1230?-
 #' 
-#' @return This function returns a matrix of class \code{morphyDat}; see \code{\link{MorphyData}}
+#' @template returnPhydat
 #' @seealso \code{\link{phyDat}}
 #' 
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @importFrom phangorn phyDat
 #' @export
 StringToPhyDat <- function (x, tips, byTaxon = TRUE) {
@@ -134,7 +134,7 @@ StringToPhyDat <- function (x, tips, byTaxon = TRUE) {
 #' @param byTaxon If TRUE, write one taxon followed by the next.
         #'If FALSE, write one character followed by the next
 #' 
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @importFrom phangorn phyDat
 #' @export
 PhyToString <- function (phy, ps='', useIndex=TRUE, byTaxon=TRUE) {

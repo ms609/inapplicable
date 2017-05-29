@@ -11,7 +11,7 @@
 #' 
 #' @return This function returns a tree of class \code{phylo}
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 Renumber <- function (tree) {
   tree   <- Postorder(tree)
@@ -323,7 +323,7 @@ SetOutgroup <- Root <- function (tree, outgroup) {
 #' Get Ancestors
 #'
 #' \code{GetAncestors} gets the ancestors of each node in a tree
-#' It's a more efficient version of \code{\link{phangorn:::Ancestors}}
+#' It's a more efficient version of \code{\link[phangorn]{Ancestors}}
 #'
 #' @param PARAM is a parameter you should send to it
 #' 
@@ -332,7 +332,7 @@ SetOutgroup <- Root <- function (tree, outgroup) {
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 GetAncestors <- function (parent, child, node) {
   if (length(node) == 1) {
@@ -364,7 +364,7 @@ GetAncestors <- function (parent, child, node) {
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 AllAncestors <- function (parent, child) {
   res <- vector("list", max(parent))
@@ -386,7 +386,7 @@ AllAncestors <- function (parent, child) {
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 GetDescendants <- function (tree, node, ...) {
 # ARGUMENTS:
@@ -413,7 +413,7 @@ GetDescendants <- function (tree, node, ...) {
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.internal=FALSE, include.ancestor = FALSE) {
   # ARGUMENTS:
@@ -456,8 +456,9 @@ DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.int
 #' @examples TwoTipTree('Homo', 'Pan')
 #' @keywords  tree 
 #' 
+#' @importFrom ape read.tree
 #' @export
-TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');'))
+TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');')) #TODO make this more efficient?
 
 #' TITLE GOES HERE
 #'
@@ -470,7 +471,7 @@ TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, 
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @importFrom graphics locator
 #' @export
 BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
@@ -690,7 +691,7 @@ BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
 # Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.
@@ -898,7 +899,7 @@ DropTipNoSubtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), i
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 CollapseSingles <- function (tree) {
 # Copied from ape:::collapse.singles.
@@ -934,7 +935,7 @@ CollapseSingles <- function (tree) {
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 KeepEdges <- function (edge, tip.label, nTips, kept.edges) {
   kept <- list()

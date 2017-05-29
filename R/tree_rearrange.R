@@ -27,7 +27,7 @@ ReorderPruning <- function (x) {
 #' @param edge (optional) the value of tree$edge
 #'
 #' @return A tree with nodes numbered in postorder
-#' @author Modified by Martin R. Smith from \code{\link{ape:::.reorder_ape}} (Emmanuel Paradis)
+#' @author Modified by Martin R. Smith from \code{\link[ape]{.reorder_ape}} (Emmanuel Paradis)
 #'
 #' @keywords internal
 #' @export
@@ -124,14 +124,12 @@ ReorderTips <- function (tree, tipOrder) {
 #' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, and the attributes
 #'     \code{pscore}, the tree's parsimony score, and 
 #'     \code{hits}, the number of times the best score has been hit in the calling function;
-#'   
-#' @param dataset a data matrix in \code{morphyDat} format, perhaps created with \code{\link{MorphyData}};
+#' @template morphyObjParam
 #' @param Rearrange a rearrangement function: probably one of 
 #'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};
 #' @param  min.score trees longer than \code{min.score}, probably the score of the starting tree,
 #'     will be discarded;
-#' @param concavity concavity constant for implied weighting (not currently implemented!); 
-#'     see \code{\link{InapplicableParsimony}};
+#' @template concavityParam 
 #' @param  return.single returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
 #'   \item{iter}{iteration number of calling function, for reporting to user only;
 #' @param  cluster a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
@@ -225,9 +223,6 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity
 #' }
 #' 
 #'
-#' @aliases RootedNNI
-#' @aliases RootedSPR
-#' @aliases RootedTBR
 #' @export
 RootedNNI <- function (tree) {
   edge <- matrix(tree$edge, ncol = 2)
@@ -256,8 +251,10 @@ RootedNNI <- function (tree) {
   tree <- Renumber(ReorderPruning(tree))  
 }
 
+#' Perform SPR operation, retaining position of root
 #' @importFrom ape is.rooted 
 #' @importFrom stats runif 
+#' @describeIn SPR
 #' @export
 RootedSPR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
@@ -303,8 +300,10 @@ RootedSPR <- function(tree) {
   tree
 }
 
+#' Perform TBR rearrangement, retaining position of root
+#' @describeIn TBR
 #' @importFrom ape is.rooted
-#' @importFrom stats runif 
+#' @importFrom stats runif
 #' @export
 RootedTBR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
@@ -363,9 +362,9 @@ NNI <- function (tree) {
     child_swap <- child[new_ind]
     edge [old_ind, 2L] <- child_swap
     child[old_ind] <- child_swap
-    neworder <- .C(neworder_phylo, as.integer(nb.tip), as.integer(parent), 
+    neworder <- .C('neworder_phylo', as.integer(nb.tip), as.integer(parent), 
                    as.integer(child), as.integer(nb.edge), integer(nb.edge), 
-                   as.integer(2), NAOK = TRUE)[[5]] # from .reorder_ape
+                   as.integer(2), NAOK = TRUE, package='inapplicable')[[5]] # from .reorder_ape
     tree$edge <- edge[neworder, ]
     if (!is.null(tree$edge.length)) {
         lengths[old_ind] <- lengths[new_ind]
@@ -503,7 +502,7 @@ TBR <- function(tree, edge.to.break=NULL) {
 
 #' Generate random tree topology from dataset
 #' 
-#' @param dataset A dataset in \code{phyDat} format
+#' @param dataset A dataset in \code{\link[phangorn]{phyDat}} format
 #' 
 #' @author Martin R. Smith 
 #' @importFrom ape rtree

@@ -106,7 +106,7 @@ Pruningwise <- function (tree, nTaxa = length(tree$tip.label), edge = tree$edge)
 #' @export
 ReorderTips <- function (tree, tipOrder) {
   startOrder <- tree$tip.label
-  if (identical(startOrder, tipOrder)) return (tree)
+  if (startOrder == tipOrder) return (tree)
   
   nTip <- length(startOrder)
   child <- tree$edge[, 2]
@@ -364,7 +364,7 @@ NNI <- function (tree) {
     child_swap <- child[new_ind]
     edge [old_ind, 2L] <- child_swap
     child[old_ind] <- child_swap
-    neworder <- .C('ape_neworder_phylo', as.integer(nb.tip), as.integer(parent), 
+    neworder <- .C('neworder_phylo', as.integer(nb.tip), as.integer(parent), 
                    as.integer(child), as.integer(nb.edge), integer(nb.edge), 
                    as.integer(2), NAOK = TRUE, PACKAGE='inapplicable')[[5]] # from .reorder_ape
     tree$edge <- edge[neworder, ]

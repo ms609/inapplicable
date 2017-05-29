@@ -255,7 +255,7 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
 #' End-users are expected to access this function through its wrapper, TreeSearch
 #' It is also called directly by Ratchet and Sectorial functions
 #'
-#' @param labelledTreeParam
+#' @template labelledTreeParam
 #' @template morphyObjParam
 #'
 #' @author Martin R. Smith
@@ -270,9 +270,10 @@ DoTreeSearch <- function
   attr(tree, 'hits') <- 1
   if (!is.null(forest.size) && length(forest.size)) {
     if (forest.size > 1) {
-      forest <- empty.forest <- vector('list', forest.size); forest[[1]] <- tree
+      forest <- empty.forest <- vector('list', forest.size)
+      forest[[1]] <- tree
     } else {
-      forest.size <-1 
+      forest.size <- 1 
     }
   }
   if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- MorphyLength(tree, morphyObj)

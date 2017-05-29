@@ -123,3 +123,114 @@ void phangorn_reorder
     }                
     root[0]=Nnode;     
 }
+
+
+/* reorder_phylo.c       2012-09-03 */
+/* Copyright 2008-2012 Emmanuel Paradis */
+
+/* This file is part of the R-package `ape'. */
+/* See the file ../COPYING for licensing issues. */
+
+static int iii;
+
+{
+
+/* 'i' is the C index corresponding to 'node' */
+
+	for (j = 0; j < pos[i]; j++) {
+		neworder[iii++] = k + 1;
+	}
+}
+
+{
+
+	for (j = pos[i] - 1; j >= 0; j--)
+
+	for (j = 0; j < pos[i]; j++) {
+	}
+}
+
+{
+
+
+   the edge matrix where the node is ancestor (i.e., present in the 1st
+   a vector) is used in R as a 2-d structure. */
+
+
+/* pos gives the position for each 'row' of L, that is the number of elements
+   which have already been stored for that 'row'. */
+
+
+/* we now go down along the edge matrix */
+
+		j = pos[k]; /* the current 'column' position corresponding to k */
+		pos[k]++; /* increment in case the same node is found in another row of the edge matrix */
+	}
+
+/* L is now ready: we can start the recursive calls. */
+   the corresponding C index inside the recursive function. */
+
+	switch(*order) {
+	case 1 : iii = 0;
+		break;
+		break;
+	}
+}
+
+#define DO_NODE_PRUNING\
+    /* go back down in `edge' to set `neworder' */\
+    for (j = 0; j <= i; j++) {\
+        /* if find the edge where `node' is */\
+        /* the descendant, make as ready */\
+        if (edge2[j] == node) ready[j] = 1;\
+	if (edge1[j] != node) continue;\
+	neworder[nextI] = j + 1;\
+	ready[j] = 0; /* mark the edge as done */\
+	nextI++;\
+    }
+
+void ape_neworder_pruningwise(int *ntip, int *nnode, int *edge1,
+			  int *edge2, int *nedge, int *neworder)
+{
+
+    nextI = *ntip +  *nnode;
+    Ndegr = (int*)R_alloc(nextI, sizeof(int));
+    memset(Ndegr, 0, nextI*sizeof(int));
+    for (i = 0; i < *nedge; i++) (Ndegr[edge1[i] - 1])++;
+
+    ready = (int*)R_alloc(*nedge, sizeof(int));
+
+    /* `ready' indicates whether an edge is ready to be */
+    /* collected; only the terminal edges are initially ready */
+    for (i = 0; i < *nedge; i++)
+	    ready[i] = (edge2[i] <= *ntip) ? 1 : 0;
+
+    /* This algo will work if the tree is in cladewise order, */
+    /* so that the nodes of "cherries" will be contiguous in `edge'. */
+    nextI = 0;
+    while (nextI < *nedge - Ndegr[*ntip]) {
+        for (i = 0; i < *nedge; i++) {
+            if (!ready[i]) continue;
+	        /* if found an edge ready, initialize `node' and start counting */
+	        node = edge1[i];
+	    } else { /* else counting has already started */
+		else {
+		    /* if the node has changed we checked that all edges */
+		    /* from `node' have been found */
+		        DO_NODE_PRUNING
+		    }
+		    node = edge1[i];
+		}
+	    } /* go to the next edge */
+	    /* if at the end of `edge', check that we can't do a node */
+	        DO_NODE_PRUNING
+	    }
+        }
+    }
+    for (i = 0; i < *nedge; i++) {
+        if (!ready[i]) continue;
+        neworder[nextI] = i + 1;
+        nextI++;
+    }
+}
+

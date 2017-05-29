@@ -104,9 +104,10 @@ Pruningwise <- function (tree, nTaxa = length(tree$tip.label), edge = tree$edge)
 #'
 #' @author Martin R. Smith
 #' @export
-
 ReorderTips <- function (tree, tipOrder) {
   startOrder <- tree$tip.label
+  if (startOrder == tipOrder) return (tree)
+  
   nTip <- length(startOrder)
   child <- tree$edge[, 2]
   tips <- child <= nTip

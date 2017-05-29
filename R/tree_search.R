@@ -12,11 +12,11 @@
 #' @author Martin R. Smith
 #' @importFrom ape root
 #' @export
-InapplicableSectorial <- function (tree, data, maxit=100, 
+InapplicableSectorial <- function (tree, dataset, maxit=100, 
     maxiter=500, k=5, verbosity=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", criterion=NULL, ...) {
-  if (class(data) != 'phyDat') stop("data must be a phyDat object.")
+  if (class(dataset) != 'phyDat') stop("dataset must be a phyDat object.")
   if (is.null(tree)) stop("a starting tree must be provided")
-  tree <- ReorderTips(tree, data)
+  tree <- ReorderTips(tree, names(dataset))
   if (verbosity >= 0) cat('InapplicableSectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
   SectorData <- function (X, tips) {
@@ -60,8 +60,8 @@ InapplicableSectorial <- function (tree, data, maxit=100,
       crown.tips <- crown$tip.label
       sector.size <- length(crown.tips)
       cat(sector, 'size', sector.size, '...')
-      crown.data <- SectorData(data, crown.tips)
-      if (!is.null(crown.data)) break else cat('unsuitable (no data); trying')
+      crown.data <- SectorData(dataset, crown.tips)
+      if (!is.null(crown.data)) break else cat('unsuitable (no dataset); trying')
       candidate.nodes <- candidate.nodes[-which(candidate.nodes==sector)]
       if (length(candidate.nodes == 0)) stop('No selectable sectors contain parsimony information! Either "largest.sector" is close to "smallest.sector" or your dataset is short of parsimony information.')
     } 
@@ -126,6 +126,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
+#' library('ape')
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 #' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup)
@@ -140,7 +141,7 @@ Ratchet <- function
 maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
-  tree <- ReorderTips(tree, dataset)
+  tree <- ReorderTips(tree, names(dataset))
   eps <- 1e-0
   if (is.null(attr(tree, "pscore"))) {
     attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
@@ -391,13 +392,13 @@ TreeSearch <- function
 #' of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
 #' 
 #' @usage
-#' SectorialSearch(tree, data, outgroup, concavity = NULL, rearrangements = "NNI",
+#' SectorialSearch(tree, dataset, outgroup, concavity = NULL, rearrangements = "NNI",
 #'   maxiter = 2000, cluster = NULL, verbosity = 3)
-#' InapplicableSectorial(tree, data, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
+#' InapplicableSectorial(tree, dataset, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
 #'   verbosity = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
 #' 
 #' @param tree a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;
-#' @param data a data matrix \code{phyDat} format;
+#' @template datasetParam
 #' @param outgroup a vector listing the taxa that form the outgroup;
 #' @template concavityParam
 #' @param maxit maximum number of sectorial iterations to perform;
@@ -428,14 +429,14 @@ TreeSearch <- function
 #' \dontrun{SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming}
 #' 
 #' ## SectorialSearch is currently defined as
-#' function (start.tree, data, outgroup, rearrangements='NNI') {
+#' function (start.tree, dataset, outgroup, rearrangements='NNI') {
 #'   best.score <- attr(start.tree, 'pscore')
-#'   if (length(best.score) == 0) best.score <- InapplicableParsimony(start.tree, data)
-#'   sect <- InapplicableSectorial(start.tree, data, outgroup=outgroup, verbosity=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
-#'   sect <- TreeSearch(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=20, verbosity=3)
-#'   sect <- TreeSearch(sect, data, outgroup, method='TBR', maxiter=2000, maxhits=25, verbosity=3)
-#'   sect <- TreeSearch(sect, data, outgroup, method='SPR', maxiter=2000, maxhits=50, verbosity=3)
-#'   sect <- TreeSearch(sect, data, outgroup, method='NNI', maxiter=2000, maxhits=50, verbosity=3)
+#'   if (length(best.score) == 0) best.score <- InapplicableParsimony(start.tree, dataset)
+#'   sect <- InapplicableSectorial(start.tree, dataset, outgroup=outgroup, verbosity=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
+#'   sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxiter=2000, maxhits=20, verbosity=3)
+#'   sect <- TreeSearch(sect, dataset, outgroup, method='TBR', maxiter=2000, maxhits=25, verbosity=3)
+#'   sect <- TreeSearch(sect, dataset, outgroup, method='SPR', maxiter=2000, maxhits=50, verbosity=3)
+#'   sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxiter=2000, maxhits=50, verbosity=3)
 #'   if (attr(sect, 'pscore') <= best.score) {
 #'     return (sect)
 #'   } else return (SetOutgroup(start.tree, outgroup))
@@ -444,17 +445,17 @@ TreeSearch <- function
 #' 
 #' @keywords  tree 
 #' @export
-SectorialSearch <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, verbosity=3, ...) {
+SectorialSearch <- function (tree, dataset, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, verbosity=3, ...) {
   best.score <- attr(tree, 'pscore')
-  tree <- ReorderTips(tree, data)
-  if (length(best.score) == 0) best.score <- InapplicableFitch(tree, data, ...)[[1]]
-  sect <- InapplicableSectorial(tree, data, cluster=cluster,
+  tree <- ReorderTips(tree, names(dataset))
+  if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
+  sect <- InapplicableSectorial(tree, dataset, cluster=cluster,
     verbosity=verbosity-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 
     largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)
-  sect <- TreeSearch(sect, data, method='NNI', maxiter=maxiter, maxhits=30, cluster=cluster, verbosity=verbosity)
-  sect <- TreeSearch(sect, data, method='TBR', maxiter=maxiter, maxhits=20, cluster=cluster, verbosity=verbosity)
-  sect <- TreeSearch(sect, data, method='SPR', maxiter=maxiter, maxhits=50, cluster=cluster, verbosity=verbosity)
-  sect <- TreeSearch(sect, data, method='NNI', maxiter=maxiter, maxhits=60, cluster=cluster, verbosity=verbosity)
+  sect <- TreeSearch(sect, dataset, method='NNI', maxiter=maxiter, maxhits=30, cluster=cluster, verbosity=verbosity)
+  sect <- TreeSearch(sect, dataset, method='TBR', maxiter=maxiter, maxhits=20, cluster=cluster, verbosity=verbosity)
+  sect <- TreeSearch(sect, dataset, method='SPR', maxiter=maxiter, maxhits=50, cluster=cluster, verbosity=verbosity)
+  sect <- TreeSearch(sect, dataset, method='NNI', maxiter=maxiter, maxhits=60, cluster=cluster, verbosity=verbosity)
   if (attr(sect, 'pscore') <= best.score) {
     return (sect)
   } else return (tree)

@@ -262,7 +262,9 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
 #' @keywords internal
 #' @export
 
-DoTreeSearch <- function (tree, morphyObj, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, verbosity=1, criterion=NULL, ...) {
+DoTreeSearch <- function 
+(tree, morphyObj, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, 
+ verbosity=1, criterion=NULL, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1
   if (!is.null(forest.size) && length(forest.size)) {
@@ -279,7 +281,9 @@ DoTreeSearch <- function (tree, morphyObj, method='NNI', maxiter=100, maxhits=20
   return.single <- !(forest.size > 1)
   
   for (iter in 1:maxiter) {
-    trees <- RearrangeTree(tree, morphyObj, RearrangeFunc, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, criterion=criterion, verbosity=verbosity)
+    trees <- RearrangeTree(tree, morphyObj, RearrangeFunc, min.score=best.pscore, 
+                           return.single=return.single, iter=iter, cluster=cluster,
+                           criterion=criterion, verbosity=verbosity, ...)
     iter.pscore <- attr(trees, 'pscore')
     if (length(forest.size) && forest.size > 1) {
       hits <- attr(trees, 'hits')
@@ -368,11 +372,11 @@ TreeSearch <- function
  cluster=NULL, verbosity=1, criterion=NULL, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
+  tree <- ReorderTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
   ret <- DoTreeSearch(tree, morphyObj, method, maxiter, maxhits, forest.size, cluster, 
                       verbosity, criterion, ...)
   morphyObj <- UnloadMorphy(morphyObj)
-  ret$tip.label <- names(dataset)
   return (ret)
 }
 

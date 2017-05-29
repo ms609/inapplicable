@@ -2,9 +2,10 @@
 #'
 #' \code{Renumber} numbers the nodes and tips in a tree to conform with the phylo standards.
 #'
-#' @param tree An object of class \code{phylo}
+#' <%= treeParam %>
 #' 
 #' @examples
+#' library('ape')
 #' tree <- rtree(10)
 #' Renumber (tree)
 #' 
@@ -13,7 +14,7 @@
 #' @author Martin Smith
 #' @export
 Renumber <- function (tree) {
-  tree   <- reorder(tree, 'postorder')
+  tree   <- Postorder(tree)
   edge   <- tree$edge
   nTip   <- length(tree$tip.label)
   parent <- edge[, 1L]
@@ -38,7 +39,7 @@ Renumber <- function (tree) {
   
   tree$edge[,1] <- parent
   tree$edge[,2] <- child
-  reorder(tree)
+  Cladewise(tree)
 }
 
 #' SingleTaxonTree
@@ -83,6 +84,7 @@ SingleTaxonTree <- function (label) {
 #' @seealso extract.clade
 #'
 #' @examples{
+#' library('phangorn')
 #' tree <- rtree(20, br=NULL)
 #' plot(tree); nodelabels(); nodelabels(33, 33, bg='yellow'); dev.new()
 #' plot(ExtractClade(tree, 33))
@@ -129,7 +131,7 @@ ecr <- ExtractClade
 #'
 #' @usage AddTip(tree, where, label)
 #' 
-#' @param tree A phylogenetic tree of class \code{\link{phylo}};
+#' <%= treeParam %>
 #' @param where The node or tip that should form the sister taxon to the new node.  To add a new tip at the root, use "where = 0";
 #' @param label A character string providing the label the new tip.
 #' 
@@ -140,11 +142,12 @@ ecr <- ExtractClade
 #' @seealso \code{\link{bind.tree}}
 #' @seealso \code{\link{nodelabels}}
 #' 
-#' @examples{
+#' @examples {
+#'   library('ape')
 #'   plot(tree <- rtree(10, br=NULL)); nodelabels(); nodelabels(15, 15, bg='green'); dev.new()
 #'   plot(AddTip(tree, 15, 'NEW_TIP'))
 #' }
-#' @keywords  tree 
+#' @keywords tree 
 #' 
 #' @export
 AddTip <- function (tree, where, label) {
@@ -209,7 +212,7 @@ AddTip <- function (tree, where, label) {
 #'
 #' @usage SetOutgroup(tree, outgroup)
 #' 
-#' @param tree  a tree, in \code{\link{phylo}} format, with all nodes resolved;
+#' <%= treeParam %>, with all nodes resolved;
 #' @param outgroup a vector of mode numeric or character specifying the new outgroup.
 #' 
 #' @return This function returns a rooted tree with the new outgroup.
@@ -221,6 +224,7 @@ AddTip <- function (tree, where, label) {
 #'  but does not always do so in practice.
 #' 
 #' @examples{
+#'   require('ape')
 #'   tree <- read.tree(text='(((a,b),c),(d,e));')
 #'   plot(tree)
 #'   plot(Root(tree, c('a', 'b')))
@@ -467,6 +471,7 @@ TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, 
 #' @return This function returns :
 #'   
 #' @author Martin Smith
+#' importFrom graphics locator
 #' @export
 BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
 ## Copied from ape:::bind.tree; the only change is that I use (x|y).edge in place of (x|y)$edge.
@@ -545,8 +550,8 @@ BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
         return(x)
     }
 
-    x <- reorder(x)
-    y <- reorder(y)
+    x <- Cladewise(x)
+    y <- Cladewise(y)
 
 ### because in all situations internal nodes need to be
 ### renumbered, they are changed to negatives first, and
@@ -708,13 +713,13 @@ DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge =
     root.edge <- 0
   }
 
-  phy <- reorder(phy)
+  phy <- Cladewise(phy)
   NEWROOT <- ROOT <- Ntip + 1
   Nnode <- phy$Nnode
   Nedge <- dim(phy.edge)[1]
   if (subtree) {
     trim.internal <- TRUE
-    tr <- reorder(phy, "pruningwise")
+    tr <- Pruningwise(phy)
     tr.edge <- tr$edge
     N <- .C("node_depth", as.integer(Ntip), as.integer(Nnode),
             as.integer(tr.edge[, 1]), as.integer(tr.edge[, 2]),
@@ -813,7 +818,8 @@ DropTip <- function(phy, tip, trim.internal = TRUE, subtree = FALSE, root.edge =
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
+#' importFrom ape is.rooted 
 #' @export
 DropTipNoSubtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), interactive = FALSE) {
 # Copied from ape:::drop.tip; edited to avoid excessive calls to $, and to support single-taxon trees.
@@ -833,7 +839,7 @@ DropTipNoSubtree <- function(phy, tip, root.edge = 0, rooted = is.rooted(phy), i
   if (ntip.to.drop + 1 == Ntip) 
     return(SingleTaxonTree(phy.tip[setdiff(1:Ntip, tip)]))
 
-  phy <- reorder(phy)
+  phy <- Cladewise(phy)
   NEWROOT <- ROOT <- Ntip + 1
   Nnode <- phy$Nnode
   edge1 <- phy.edge[, 1] # local copies

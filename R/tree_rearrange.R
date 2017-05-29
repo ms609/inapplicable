@@ -1,5 +1,8 @@
 #' Reorder pruning
-#' Modified from phangorn:::reorderPruning
+#' 
+#' @author Modified from phangorn:::reorderPruning
+#' @keywords internal
+#' @export
 ReorderPruning <- function (x) {
   edge <- x$edge
   parents <- as.integer(edge[, 1])
@@ -15,17 +18,49 @@ ReorderPruning <- function (x) {
   x
 }
 
+#' Reorder tree Cladewise
+#' 
+#' A wrapper for \code{\link{.reorder_ape}}
+#'
+#' <%= treeParam %>
+#' @param nTaxa (optional) number of tips in the tree
+#'
+#' @return A tree with nodes numbered in postorder
+#' @keywords internal
+#' @importFrom ape .reorder_ape
+#' @export
+Cladewise <- function (tree, nTaxa = NULL) {
+  if (is.null(nTaxa)) nTaxa <- length(tree$tip.label)
+  .reorder_ape(tree, "cladewise", FALSE, nTaxa, 1)
+}
+
+#' @describeIn Cladewise Reorder tree in Postorder
+#' @export
+Postorder <- function (tree, nTaxa = NULL) {
+  if (is.null(nTaxa)) nTaxa <- length(tree$tip.label)
+  .reorder_ape(tree, "postorder", FALSE, nTaxa, 2)
+}
+
+
+#' @describeIn Cladewise Reorder tree Pruningwise
+#' @export
+Pruningwise <- function (tree, nTaxa = NULL) {
+  if (is.null(nTaxa)) nTaxa <- length(tree$tip.label)
+  .reorder_ape(tree, "pruningwise", FALSE, nTaxa, 3)
+}
+
+
 #' Reorder tips
 #'
 #' \code{ReorderTips(tree, tipOrder)} sorts the tips of a phylogenetic tree 
 #' such that the indices in \code{tree$edge[, 2]} correspond to the order of
 #' tips given in \code{tipOrder}
 #'
-#' @param tree An object of class \code{phylo}
+#' <%= treeParam %>
 #' @param tipOrder A character vector containing the values of 
 #'        \code{tree$tip.label} in the desired sort order
 #' 
-#' @example 
+#' @examples
 #' Data(SigSut) # Loads the phyDat object SigSut.phy
 #' tree <- RandomTree(SigSut.phy) # 
 #' tree <- ReorderTips(tree, names(SigSut.phy))
@@ -78,8 +113,8 @@ ReorderTips <- function (tree, tipOrder) {
 #' 
 #' @examples
 #' data('SigSut')
-#' random.tree <- rtree(34, tip.label=names(SigSut.data), br=NULL)
-#' RearrangeTree(random.tree, SigSut.preparedata, RootedNNI)
+#' random.tree <- RandomTree(SigSut.phy)
+#' RearrangeTree(random.tree, SigSut.phy, RootedNNI)
 #' 
 #' @importFrom parallel clusterCall
 #' @export
@@ -127,7 +162,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity
 #' RootedSPR(tree)
 #' RootedTBR(tree)
 #'
-#' @param tree An object of class \code{\link{phylo}}, with all nodes resolved (bifurcating).
+#' <%= treeParam %>, with all nodes resolved (bifurcating).
 #' 
 #' @return This function returns a tree, in \code{phylo} format.
 #'
@@ -142,6 +177,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity
 #' }
 #' 
 #' @examples{
+#'   require('ape')
 #'   tree <- read.tree(text='(((a,b),c),(d,(e,f)));')
 #'   tree <- SetOutgroup(tree, c('e', 'f'))
 #'   plot(tree)
@@ -163,6 +199,7 @@ RootedNNI <- function (tree) {
   safe.child <- child
   safe.child[which(parent == as.integer(parent[!match(parent, child, 0)][1]))] <- -1 # Don't want to switch across the root
   k <- min(parent) - 1
+  ## TODO FIX THIS NOW
   sampleable <- length(na.omit(match(safe.child, parent)))
   n <- sample(sampleable, 1)
   ind <- which(safe.child > k)[n] # Internal nodes
@@ -182,6 +219,8 @@ RootedNNI <- function (tree) {
   tree <- Renumber(ReorderPruning(tree))  
 }
 
+#' importFrom ape is.rooted 
+#' importFrom stats runif 
 #' @export
 RootedSPR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
@@ -227,6 +266,8 @@ RootedSPR <- function(tree) {
   tree
 }
 
+#' importFrom ape is.rooted
+#' importFrom stats runif 
 #' @export
 RootedTBR <- function(tree) {
   if (!is.rooted(tree)) warning("Tree root is not resolved.  Try:  tree <- SetOutgroup(tree, outgroup).")
@@ -259,7 +300,7 @@ RootedTBR <- function(tree) {
 
 #' Perform one NNI rearrangement at a given branch
 #'
-#' @param tree A tree of class \code{phylo}
+#' <%= treeParam %>
 #'
 #' @return One of the two trees resulting when a NNI rearrangement is 
 #'         performed at a random internal edge
@@ -353,7 +394,7 @@ SPR <- function(tree) {
 #' @usage
 #' TBR(tree, edge.to.break = NULL)
 #' 
-#' @param tree a fully resolved tree in \code{\link{phyDat}} format;
+#' <%= treeParam %>, with all nodes resolved
 #' @param edge.to.break the index of an edge to bisect, generated randomly if not specified.
 #' 
 #' @details Branch lengths are not (yet) supported.
@@ -368,6 +409,7 @@ SPR <- function(tree) {
 #' @seealso RootedTBR useful when the position of the root node should be retained.
 #' 
 #' @examples{
+#' library('ape')
 #' tree <- rtree(20, br=NULL)
 #' TBR(tree)
 #' }

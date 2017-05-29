@@ -15,6 +15,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
     maxiter=500, k=5, verbosity=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", criterion=NULL, ...) {
   if (class(data) != 'phyDat') stop("data must be a phyDat object.")
   if (is.null(tree)) stop("a starting tree must be provided")
+  tree <- RearrangeTips(tree, data)
   if (verbosity >= 0) cat('InapplicableSectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
   
   SectorData <- function (X, tips) {
@@ -98,7 +99,7 @@ InapplicableSectorial <- function (tree, data, maxit=100,
 #'   maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, rearrangements = "NNI", ...)
 #' 
 #'
-#' @param tree An object of class \code{phyDat} denoting the topology to begin the search from;
+#' <%= treeParam %>
 #' @param data A matrix of class \code{\link{phyDat}},
 #'             
 #' @param concavity concavity constant for implied weighting (not currently implemented!); 
@@ -141,6 +142,7 @@ Ratchet <- function
 maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
+  tree <- RearrangeTips(tree, dataset)
   eps <- 1e-0
   if (is.null(attr(tree, "pscore"))) {
     attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
@@ -214,7 +216,7 @@ maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
 #' @author Martin Smith
 #' @export
 RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) InapplicablePratchet(tree, dataset, maxit, maxiter, maxhits, k=1, verbosity, rearrangements, criterion=criterion, ...))
+  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxit, maxiter, maxhits, k=1, verbosity, rearrangements, criterion=criterion, ...))
   scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
   trees <- unique(trees[scores == min(scores)])
   cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')
@@ -223,6 +225,11 @@ RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20
 
 #' Bootstrap tree search with inapplicable data
 #' 
+#' <%= treeParam %>, whose \code{$tip.labels} are 
+#'             sorted (perhaps with function \code{\link{ReorderTip}} to
+#'             correspond to the character order in \code{morphyObj}
+#' <%= morphyParam %>
+#'
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @export
 BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterion, verbosity=1, ...) {
@@ -444,6 +451,7 @@ TreeSearch <- function
 #' @export
 SectorialSearch <- function (tree, data, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, verbosity=3) {
   best.score <- attr(tree, 'pscore')
+  tree <- RearrangeTips(tree, data)
   if (length(best.score) == 0) best.score <- InapplicableFitch(tree, data, ...)[[1]]
   sect <- InapplicableSectorial(tree, data, cluster=cluster,
     verbosity=verbosity-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 

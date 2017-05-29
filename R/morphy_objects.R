@@ -1,6 +1,6 @@
 #' Details the attributes of a morphy object
 #'
-#' @param morphyObj A morphy object created with \code{\link{LoadMorphy}}
+#' <%= morphyParam %>
 #' 
 #' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
 #'
@@ -23,7 +23,7 @@ summary.morphyPtr <- function (morphyObj, ...) {
 
 #' Report the character weightings associated with a Morphy object
 #'
-#' @param morphyObj A morphy object created with \code{\link{LoadMorphy}}
+#' <%= morphyParam %>
 #' @return a matrix of dimensions (2, number of characters); row 1 lists the
 #'         exact rates specified by the user; row 2 the approximate (integral)
 #'         weights used by MorphyLib

@@ -9,7 +9,9 @@
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
+#'
+#' importFrom par
 #' @export
 VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, char.no, plot.fun=plot) {
   par(mfrow=c(1,2), mar=rep(0.5,4))
@@ -29,10 +31,9 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' @param char.no number of the character to be displayed;
 #' @param plot.fun a function that plots a tree, \code{\link{plot}} by default.
 #' 
-#' @return{
-#' The function plots a cladogram, annotating each node with the values that could occur there at the lowest parsimony score.
+#' @return The function plots a cladogram, annotating each node with the values that could occur there at the lowest parsimony score.
 #'   Nodes highlighed in red potentially (but do not necessarily) contribute to tree length.
-#' }
+#' 
 #' @author Martin R. Smith
 #' 
 #' @examples{
@@ -48,6 +49,8 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' @aliases VisualizeCharacter
 #' @aliases VisualizeChar
 #' 
+#' @importFrom ape .PlotPhyloEnv tiplabels nodelabels 
+#' importFrom graphics text
 #' @export
 VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 
 function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
@@ -58,7 +61,7 @@ function (tree, data, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
   if (char.no > at$nr || char.no < 1) stop(paste0("char.no must be between 1 and ", at$nr, ' (', sum(at$weight), 'TS, ', at$nr, ' unique)'))
   char.dat <- data[char.no,]
   char.index <- at$index[char.no]
-  if (is.null(at$order) || at$order == "cladewise") tree <- reorder(tree, "postorder")
+  if (is.null(at$order) || at$order != "postorder") tree <- Postorder(tree)
   tree.edge <- tree$edge
   parent <- tree.edge[,1]
   child <- tree.edge[,2]

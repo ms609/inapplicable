@@ -156,11 +156,12 @@ RenumberTips <- function (tree, tipOrder) {
 #' @importFrom parallel clusterCall
 #' @export
 RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='?', cluster=NULL, criterion=NULL, verbosity=0) {
-  if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
+  best.score <- if (is.null(attr(tree, 'pscore'))) 1e+07 else attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label
   if (is.null(cluster)) {
-    trees <- list(rearrangedTree<-RenumberTips(Rearrange(tree), tipOrder))
+    rearrangedTree <- RenumberTips(Rearrange(tree), tipOrder)
+    trees <- list(rearrangedTree)
     min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)
   } else {

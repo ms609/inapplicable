@@ -142,7 +142,7 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   tree <- RenumberTips(tree, names(dataset))
-  eps <- 1e-0
+  eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) {
     attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
   }
@@ -240,7 +240,8 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
   BS <- tabulate(sample(v, replace=TRUE), length(startWeights))
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
-  mpl_apply_tipdata(morphyObj)
+  mpl_apply_tipdata(morphyObj)#
+  attr(tree, 'pscore') <- NULL
   res <- DoTreeSearch(tree, morphyObj, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, verbosity=verbosity-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL

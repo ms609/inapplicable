@@ -5,18 +5,19 @@
 #' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
 #'
 #' @author Martin R. Smith
-#' @method summary morphyPtr
 #' @export
-summary.morphyPtr <- function (object, ...) {
+MorphyDetails <- function (object, ...) {
   ans <- list()
   class(ans) <- "summary.morphyPtr"
   nTax <- mpl_get_numtaxa(object)
   nChar <- mpl_get_num_charac(object)
+  nInternal <- mpl_get_num_internal_nodes(object)
   charWeights <- MorphyWeights(object)
 
   ans$nTax <- nTax 
   ans$nChar <- nChar 
-  ans$nInternal <- mpl_get_num_internal_nodes(object)
+  ans$nInternal <- nInternal
+  ans$dummyRootNode <- nTax + nInternal -1L
   ans$charWeights <- charWeights
   ans$allStates <- mpl_get_symbols(object)
   return(ans)
@@ -90,7 +91,6 @@ LoadMorphy <- function (phy) {
   if(mpl_apply_tipdata(morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), "in mpl_apply_tipdata")
   }
-  class(morphyObj) <- 'morphyPtr'
   return(morphyObj)
 }
 
@@ -105,7 +105,7 @@ LoadMorphy <- function (phy) {
 #' @author Martin R. Smith
 #' @export
 UnloadMorphy <- function (morphyObj) {
-  if (class(morphyObj) != 'morphyPtr') stop ("Object is not a valid pointer; cannot destroy.")
+  if (class(morphyObj) != 'externalptr') stop ("Object is not a valid pointer; cannot destroy.")
   if (mpl_delete_Morphy(morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), "in mpl_delete_Morphy")
   }

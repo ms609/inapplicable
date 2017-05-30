@@ -76,7 +76,7 @@ LoadMorphy <- function (phy) {
   if(mpl_attach_rawdata(PhyToString(phy, ';', useIndex=FALSE), morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), " in mpl_attach_rawdata")
   }
-  if(mpl_set_num_internal_nodes(nTax - 1L, morphyObj) -> error) { # One is the 'dummy root'
+  if(mpl_set_num_internal_nodes(nTax - 1L + 1L, morphyObj) -> error) { # +1L for the 'dummy root'
     stop("Error ", mpl_translate_error(error), " in mpl_set_num_internal_nodes")
   }
   if (any(vapply(seq_len(nChar), function (i) mpl_set_parsim_t(i, 'FITCH', morphyObj), integer(1)) 

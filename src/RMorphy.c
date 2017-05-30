@@ -17,6 +17,7 @@ SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl)
   const int n_internal = mpl_get_num_internal_nodes(handl);
   const int root_node = n_taxa;
   const int max_node = n_taxa + n_internal;
+  const int dummy_root_node = max_node;
   
   // R_descendants and R_ancestors have already had one subtracted to convert them to an index 
   const int *ancestor=INTEGER(R_ancestors), *left=INTEGER(R_left), 
@@ -36,8 +37,8 @@ SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl)
     //Rprintf("Downpass on node %i -< %i,%i ... pscore is %i\n", i, left[i-n_taxa], right[i-n_taxa], *pscore_temp);
     
   }
-  mpl_update_lower_root(root_node, root_node, handl); // We could use a spare internal node with index = max_node as a dummy root node.
-                                                      // Or we can just pass the root node as its own ancestor.
+  mpl_update_lower_root(dummy_root_node, root_node, handl); // We could use a spare internal node with index = max_node as a dummy root node.
+                                                      // Or we can just pass the root node as its own ancestor [not yet supported]
  
   for (i = root_node; i < max_node; i++) { // First uppass: internal nodes
     *pscore_temp += mpl_first_up_recon(i, left[i - n_taxa], right[i - n_taxa], ancestor[i], handl);

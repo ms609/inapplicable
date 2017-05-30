@@ -142,6 +142,7 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   tree <- RenumberTips(tree, names(dataset))
+  eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) {
     attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
   }

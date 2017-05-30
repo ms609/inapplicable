@@ -1,370 +1,392 @@
-#define USE_RINTERNALS
-#include <Rmath.h>
-#include <math.h>
-#include <R.h> 
-#include <Rinternals.h>
+//
+//  fitch.c
+//  MorPhy2
+//
+//  Created by mbrazeau on 02/05/2017.
+//  Copyright © 2017 brazeaulab. All rights reserved.
+//
+#include "morphydefs.h"
+#include "mplerror.h"
+#include "morphy.h"
+#include "fitch.h"
+#include "statedata.h"
 
-// Note: Where possible pass pointers rather than their values to conserve stack space.
-
-void app_fitch_downnode
-(int *this, int *left, int *right, const int start_char, const int end_char, 
- int *pars) {
-  int i;
-  for (i = start_char; i < (end_char); i++) {
-    if (left[i] & right[i]) {
-      this[i] = left[i] & right[i];
-    }
-    else {
-      this[i] = left[i] | right[i];
-      //#debug#//Rprintf(" +++ Increment length in standard Fitch downpass %i\n", 1);
-      (pars[i])++; // Add one to tree length
-    }
-  }
-}
-
-void app_fitch_downpass
-(int *dat, const int *parent, const int *child, const int start_char, const int n_char, const int n_edge, 
- const int inapp, int *pars) {
-  int parent_i = 0;
-  for (int i = 0; i < n_edge; i+=2) {
-    parent_i = parent[i];
-    app_fitch_downnode(&dat[(parent_i  -1) * n_char],
-                       &dat[(child[i+1]-1) * n_char], 
-                       &dat[(child[i]  -1) * n_char],
-                       start_char, n_char, pars);
-  }
-}
-
-void inapp_update_tip
-(int *this, int *active_tracker, int *ancestor, const int n_char, const int inapp) {
-  int i;
-  for (i=0; i<n_char; i++) {
-    if ((this[i] & ~inapp) && (this[i] & inapp)) { // 2.8
-      if (ancestor[i] == inapp) { //2.9a
-        this[i] = inapp;
-      } else { //2.9b
-        this[i] &= ~inapp;
-      }
-    }
-    if (this[i] == inapp) { // 3.2.  - Less elegant than in MorphyLib perhaps, but 
-      active_tracker[i] = 0; //         easier to match with algorithm.
-    } else if (this[i] & ~inapp) { // 3.3
-      active_tracker[i] = 1;
-    } else if (ancestor[i] & inapp) { // 3.4
-      active_tracker[i] = 0;
-    } else {
-      active_tracker[i] = 1; //3.4b
-    }
-  }   
-}
-
-void inapp_update_tips
-(int *dat, int *upp1, int *act, const int *parent_of, const int *n_tip, const int n_char, const int inapp) {
-  int i;
-  for (i=0; i<*n_tip; i++) {
-  //#debug#//Rprintf(" - [TIP %i] state=%i, [parent %i] state=%i: ", i, dat[i], parent_of[i] - 1, dat[(parent_of[i] -1)]);
-    inapp_update_tip(
-      &dat[i * n_char], // this
-      &act[i * n_char], // this_active
-      &upp1[(parent_of[i] -1) * n_char], // ancestor
-      n_char,
-      inapp
-    );
-    //#debug#//Rprintf("-> [%i]\n", dat[i]);
-  }   
-}
-
-void inapp_first_upnode
-(int *this, int *upp1, int *ancestor, int *left, int *right,
- const int inapp, const int end_char) {
-  int i;
-  for (i=0; i<end_char; i++) {
-    //#debug#//Rprintf("   ... this=%i, anc=%i, left=%i, right=%i:", this[i], ancestor[i], left[i], right[i]);
-    if (this[i] & inapp) {
-      if (this[i] & ~inapp) {
-        if (ancestor[i] == inapp) {
-          upp1[i] = inapp;
+/**/
+int mpl_fitch_downpass
+(MPLndsets* lset, MPLndsets* rset, MPLndsets* nset, MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int steps = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    MPLstate* left  = lset->downpass1;
+    MPLstate* right = rset->downpass1;
+    MPLstate* n     = nset->downpass1;
+    
+    unsigned long* weights = part->intwts;
+    
+    for (i = 0; i < nchars; ++i) {
+        j = indices[i];
+        if (left[j] & right[j]) {
+            n[j] = left[j] & right[j];
         }
         else {
-          upp1[i] = this[i] & ~inapp; // TODO posit: just ~inapp will do
+            n[j] = left[j] | right[j];
+            steps += weights[i];
         }
-      }
-      else {
-        if (ancestor[i] == inapp) {
-          upp1[i] = inapp;
-        }
-        else {
-          if ((left[i] | right[i]) & ~inapp) {
-            upp1[i] = ((left[i] | right[i]) & ~inapp); // TODO posit: just ~inapp will do
-          }
-          else {
-            upp1[i] = inapp;
-          }
-        }
-      }
     }
-    else {
-      upp1[i] = this[i];
-    }
-    //#debug#//Rprintf("-> %i\n", upp1[i]);
-  }
-}
-
-void inapp_first_root(int *this, int *upp1, const int inapp, const int end_char) {
-  for (int i=0; i<end_char; i++) {
-    if (this[i] != inapp) {
-      upp1[i] = this[i] & ~inapp; // TODO posit: ~inapp will do?
-    } else {
-      upp1[i] = inapp;
-    }
-    //#debug#//Rprintf("   ... this=%i --> %i\n", this[i], upp1[i]);
-  }
-}
-
-void inapp_first_uppass
-(int *dat, int *upp1, const int *parent_of, const int *children_of, 
- const int end_char, const int n_char, const int n_internal, const int inapp) {
-  const int root_node = n_internal + 1L;  // which is the index of the root node
-  //#debug#//Rprintf(" - Calling first upnode at ROOT node %i:\n", root_node);
-  inapp_first_root(&dat [(root_node) * n_char], 
-                   &upp1[(root_node) * n_char], inapp, end_char);
-  for (int i = 1; i < (n_internal); i++) {
-    //#debug#//Rprintf(" - Calling first upnode at %i with anc: %i < %i,%i\n", root_node + i, parent_of[root_node + i] - 1, children_of[i + n_internal] - 1, children_of[i] - 1);
-    // parent_of is stored as [tip]1L, 1R, 2L, 2R, 3L, 3R, 4L, 4R, ... nL, nR.  (The root node is listed as being its own parent.)
-    // children_of is stored as 0L, 1L, 2L, ... nL, 0R, 1R, 2R, 3R, ..., nR
-    inapp_first_upnode(
-      &dat [(root_node + i) * n_char], // this_start
-      &upp1[(root_node + i) * n_char], // store applicability for future ref
-      &upp1[(parent_of[root_node + i] -1) * n_char], // ancestor (after uppass)
-      &dat [(children_of[i + n_internal] -1) * n_char], // left child
-      &dat [(children_of[i] -1) * n_char], // right child
-      inapp, end_char
-    );
-  }
-}
-
-void inapp_first_downnode
-(int *this, int *left, int *right, 
- int *this_acts, int *l_acts, int *r_acts,
- const int inapp, const int end_char) {
-  int i, temp;
-  for (i=0; i<end_char; i++) {
-    if ((temp = (left[i] & right[i]))) {
-      this[i] = temp;
-      if (temp == inapp) {
-        if ((left[i] & ~inapp) && (right[i] & ~inapp)) {
-          this[i] = (left[i] | right[i]);
-        }
-      }
-    }
-    else {
-      this[i] = (left[i] | right[i]);
-      if ((left[i] & ~inapp) && (right[i] & ~inapp)) {
-        this[i] = this[i] & ~inapp;
-      }
-    }
-    this_acts[i] = (l_acts[i] | r_acts[i]) & ~inapp;
-//    //#debug#//Rprintf("   - Setting actives (%i+%i) to %i\n", l_acts[i], r_acts[i], this_acts[i]);
-  }
+    
+    return steps;
 }
 
 
-void inapp_first_downpass
-(int *dat, int *act, const int *parent, const int *child, 
- const int end_char, const int n_char, const int inapp, const int n_edge) {
-  int i;  
-  for (i = 0; i < n_edge; i+=2) {
-    //#debug#//Rprintf(" - First downpass at node %i\n", parent[i] - 1);
-    inapp_first_downnode(&dat[(parent[i]  - 1) * n_char],
-                         &dat[( child[i+1]- 1) * n_char],
-                         &dat[( child[i]  - 1) * n_char],
-                         &act[(parent[i]  - 1) * n_char],
-                         &act[( child[i+1]- 1) * n_char], 
-                         &act[( child[i]  - 1) * n_char], inapp, end_char);
-  }
-}
-
-void inapp_second_downnode
-(int *this, int *this_upp1, int *left, int *right,
- int *this_acts, int *l_acts, int *r_acts,
- const int end_char, const int inapp, int *pars) {
-  int i, temp;
-  for (i=0; i<end_char; i++) {
-    //#debug#//Rprintf("up=%i, l=%i, r=%i, l_act=%i, r_act=%i:\n", this_upp1[i], left[i], right[i], l_acts[i], r_acts[i]);
-    this_acts[i] = (l_acts[i] | r_acts[i]) & ~inapp; // 4.1
-    if (this_upp1[i] != inapp) { // 4.2
-      if ((temp = (left[i] & right[i]))) { // 4.3
-        if (temp & ~inapp) { // 4.4
-          this[i] = temp & ~inapp; //4.4a
-        } else {
-          this[i] = temp; //4.4b; temp == inapp by 4.4
-        }
-      } else { //4.5
-        this[i] = (left[i] | right[i]) & ~inapp;
+int mpl_fitch_uppass
+(MPLndsets* lset, MPLndsets* rset, MPLndsets* nset, MPLndsets* ancset,
+ MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    MPLstate* left  = lset->downpass1;
+    MPLstate* right = rset->downpass1;
+    MPLstate* npre  = nset->downpass1;
+    MPLstate* nfin  = nset->uppass1;
+    MPLstate* anc   = ancset->uppass1;
+    
+    for (i = 0; i < nchars; ++i) {
         
-        if ((left[i] & ~inapp && right[i] & ~inapp) //4.6
-        ||  (l_acts[i] && r_acts[i])) { // 4.7
-          (pars[i])++; // Add one to tree length
-          //#debug#//Rprintf(" +++ Increment length to %i\n", pars[i]);
+        j = indices[i];
+        
+        if ((anc[j] & npre[j]) == anc[j]) {
+            nfin[j] = anc[j] & npre[j];
         }
-      }
-    } else { //4.2b
-      this[i] = this_upp1[i]; // "leave it unchanged" = inherit from up1.
-    }
-    //#debug#//Rprintf("   -> %i [act %i]\n", this[i], this_acts[i]);
-  }
-}
-
-void inapp_second_root
-(int *dat, int *upp1, const int inapp, const int end_char) {
-  int i;
-  for (i=0; i<end_char; i++) {
-    if (upp1[i] != inapp) { // Assume applicable if ambiguous.
-      dat[i] = dat[i] & ~inapp; 
-      upp1[i] = dat[i]; 
-    }
-  }
-}
-
-void inapp_second_downpass
-(int *dat, int *upp1, int *act, const int *parent, const int *child,
- const int n_edge, const int n_char, const int end_char, const int inapp, int *pars) {
-  int i, parent_i = 0;
-  for (i=0; i<n_edge; i+=2) {
-    parent_i = parent[i];
-    //#debug#//Rprintf("[NODE %i] 2nd down:", parent_i - 1);
-    inapp_second_downnode(
-      &dat[(parent_i  -1) * n_char],
-      &upp1[(parent_i  -1) * n_char],
-      &dat[(child[i+1]-1) * n_char], 
-      &dat[(child[i]  -1) * n_char],
-      
-      &act[(parent_i  -1) * n_char],
-      &act[(child[i+1]-1) * n_char], 
-      &act[(child[i]  -1) * n_char], 
-      end_char, inapp, pars
-    );
-  }
-  inapp_second_root(
-    &dat[(parent_i -1) * n_char], 
-    &upp1[(parent_i -1) * n_char], inapp, end_char);
-}
-
-void inapp_second_upnode
-(int *this, int *ancestor, int *left, int *right, 
- int *this_acts, int *l_acts, int *r_acts,
- const int end_char, const int inapp, int *pars) {
-  int i;
-  for (i = 0; i < end_char; ++i) {    
-    //#debug#//Rprintf("   - this=%i, anc=%i, left=%i, right=%i, l_act=%i, r_act=%i\n\n", this[i], ancestor[i], left[i], right[i], l_acts[i], r_acts[i]);
-    if (this[i] & ~inapp) {
-      if (ancestor[i] & ~inapp) {
-        if ((ancestor[i] & this[i]) == ancestor[i]) {
-          this[i] = ancestor[i] & this[i];
-        } else {
-          if (left[i] & right[i]) {
-            this[i] = (this[i] | (ancestor[i] & left[i] & right[i]));
-          }
-          else {
-            if ((left[i] | right[i]) & inapp) {
-              if ((left[i] | right[i]) & ancestor[i]) {
-                this[i] = ancestor[i];
-              } else {
-                this[i] = (left[i] | right[i] | ancestor[i]) & inapp;
-              }
-            } else {
-              this[i] = this[i] | ancestor[i];
-              if ((ancestor[i] & this[i]) == ancestor[i]) {
-                this[i] = ancestor[i] & this[i];
-              }
+        else {
+            if (left[j] & right[j]) {
+                nfin[j] = (npre[j] | (anc[j] & (left[j] | right[j])));
             }
-          }
+            else {
+                nfin[j] = npre[j] | anc[j];
+            }
         }
-      }
+       
+        assert(nfin[j]);
     }
-    else {
-      if (l_acts[i] && r_acts[i]) {
-        //#debug#//Rprintf(" +++ Increment length in INAPP Fitch uppass %i\n", 2);
-        (pars[i])++; // Add one to tree length
-      }
-    }
-  }
+    
+    return 0;
 }
 
-void inapp_second_uppass
-(int *dat, int *act, const int *parent_of, const int *child_of, 
- const int end_char, const int n_char, const int n_node, const int inapp, int *pars) {
-  int i, root_node = n_node + 1L; // already in index notation, so no -1 needed.
-  for (i=0; i<(n_node); i++) {
-    //#debug#//Rprintf(" - Calling second upnode at %i, anc=%i\n", root_node + i, parent_of[root_node + i] - 1);
-    inapp_second_upnode(
-      &dat[(root_node + i) * n_char], // this_start, will become this_finish
-      &dat[(parent_of[root_node + i] -1) * n_char], // ancestor
-      &dat[(child_of[i + n_node] -1) * n_char], // left child
-      &dat[(child_of[i] -1) * n_char], // right child
-      
-      &act[(root_node + i) * n_char], // this-actives
-      &act[(child_of[i + n_node] -1) * n_char], // left child-actives
-      &act[(child_of[i] -1) * n_char], // right child-actives
-      
-      end_char, inapp, pars
-    );
-  }
+
+/**/
+int mpl_NA_fitch_first_downpass
+(MPLndsets* lset, MPLndsets* rset, MPLndsets* nset, MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    MPLstate* left  = lset->downpass1;
+    MPLstate* right = rset->downpass1;
+    MPLstate* n     = nset->downpass1;
+    MPLstate* stacts  = nset->subtree_actives;
+    MPLstate* lacts   = lset->subtree_actives;
+    MPLstate* racts   = rset->subtree_actives;
+    MPLstate temp = 0;
+    
+    for (i = 0; i < nchars; ++i) {
+        j = indices[i];
+        
+        if ((temp = (left[j] & right[j]))) {
+            n[j] = temp;
+            
+            if (temp == NA) {
+                if ((left[j] & ISAPPLIC) && (right[j] & ISAPPLIC)) {
+                    n[j] = (left[j] | right[j]);
+                }
+            }
+        }
+        else {
+            n[j] = (left[j] | right[j]);
+            
+            if ((left[j] & ISAPPLIC) && (right[j] & ISAPPLIC)) {
+                n[j] = n[j] & ISAPPLIC;
+            }
+        }
+        
+        stacts[j] = (lacts[j] | racts[j]) & ISAPPLIC;
+        
+        assert(n[j]);
+    }
+    
+    return 0;
 }
 
-SEXP MORPHYFITCH
-(SEXP dat, SEXP nchar, SEXP ntip, 
- SEXP parents, SEXP children, SEXP parent_list, SEXP children_list,
- SEXP weight, SEXP inapp, SEXP inapp_chars) { 
- // Memo: the first 'inapp_chars' characters require the Morphy Treatment.
- // Memo: R plots the first-mentioned child ["left"] below the second-mentioned ["right"]
-  int *data, *upp1, *active_tracker, i;
-  const int inappl=INTEGER(inapp)[0], n_char=INTEGER(nchar)[0],
-            n_tips=INTEGER(ntip)[0], first_applicable=INTEGER(inapp_chars)[0],
-            *parent_of=INTEGER(parent_list), *children_of=INTEGER(children_list),
-            *parent=INTEGER(parents), *child=INTEGER(children);
-  const int n_internal = n_tips - 1L, n_edge = (n_tips * 2) - 2L, 
-            max_node = n_edge + 1L;
-  SEXP RESULT, pars, pscore, DAT, APPL, ACTIVE;
-  PROTECT(RESULT = allocVector(VECSXP, 3));
-  PROTECT(pars = allocVector(INTSXP, n_char));
-  PROTECT(pscore = allocVector(REALSXP, 1));
-  PROTECT(DAT = allocMatrix(INTSXP, n_char, max_node));
-  PROTECT(APPL = allocMatrix(INTSXP, n_char, max_node));
-  PROTECT(ACTIVE = allocMatrix(INTSXP, n_char, max_node)); // #TODO One day we should use first_applicable instead
-  for(i=0; i<n_char; i++) INTEGER(pars)[i] = 0;
-  REAL(pscore)[0] = 0.0;
-  data = INTEGER(DAT);
-  upp1  = INTEGER(APPL);
-  active_tracker = INTEGER(ACTIVE);
-  for(i=0; i<(n_char * max_node); i++) active_tracker[i] = 0;
-  for(i=0; i<(n_char * n_tips); i++) {
-    data[i] = INTEGER(dat)[i];
-    // TODO for upp1, make i < (first_applicable * n_tips)
-    // The current code is inefficient - we don't need to copy upp1 for 
-    // taxa that are applicable - but then we can copy data more easily. 
-    upp1[i] = INTEGER(dat)[i];
-    active_tracker[i] = INTEGER(dat)[i] & ~inappl; // 0 if only inapplicable, 1 otherwise
-  }
 
-  inapp_first_downpass(data, active_tracker, parent, child, 
-                       first_applicable, n_char, inappl, n_edge);
-  inapp_first_uppass(data, upp1, parent_of, children_of,
-                     first_applicable, n_char, n_internal, inappl);
-  inapp_update_tips(data, upp1, active_tracker, parent_of, &n_tips, n_char, inappl);
-  
-  inapp_second_downpass(data, upp1, active_tracker, parent, child, 
-                        n_edge, n_char, first_applicable, inappl, INTEGER(pars));
-  inapp_second_uppass  (data, active_tracker, parent_of, children_of, 
-                        first_applicable, n_char, n_internal, inappl, INTEGER(pars));
+int mpl_NA_fitch_first_uppass
+(MPLndsets* lset, MPLndsets* rset, MPLndsets* nset, MPLndsets* ancset,
+ MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    MPLstate* left  = lset->downpass1;
+    MPLstate* right = rset->downpass1;
+    MPLstate* npre  = nset->downpass1;
+    MPLstate* nifin = nset->uppass1;
+    MPLstate* anc   = ancset->uppass1;
+    
+    for (i = 0; i < nchars; ++i) {
+        
+        j = indices[i];
+        
+        if (npre[j] & NA) {
+            if (npre[j] & ISAPPLIC) {
+                if (anc[j] == NA) {
+                    nifin[j] = NA;
+                }
+                else {
+                    nifin[j] = npre[j] & ISAPPLIC;
+                }
+            }
+            else {
+                if (anc[j] == NA) {
+                    nifin[j] = NA;
+                }
+                else {
+                    if ((left[j] | right[j]) & ISAPPLIC) {
+                        nifin[j] = ((left[j] | right[j]) & ISAPPLIC);
+                    }
+                    else {
+                        nifin[j] = NA;
+                    }
+                }
+            }
+        }
+        else {
+            nifin[j] = npre[j];
+        }
+        
+        assert(nifin[j]);
+    }
+    
+    
+    return 0;
+}
 
-  app_fitch_downpass(data, parent, child,
-                     first_applicable, n_char, n_edge, inappl, INTEGER(pars)); // No need for an up-pass: all scoring on way down.
-  
-  for (i=0; i<n_char; i++) *(REAL(pscore)) += (REAL(weight)[i] * INTEGER(pars)[i]);
-  SET_VECTOR_ELT(RESULT, 0, pscore);
-  SET_VECTOR_ELT(RESULT, 1, pars);
-  SET_VECTOR_ELT(RESULT, 2, DAT);
-  UNPROTECT(6);
-  return(RESULT);
+
+int mpl_NA_fitch_second_downpass
+(MPLndsets* lset, MPLndsets* rset, MPLndsets* nset, MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int steps = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    MPLstate* left  = lset->downpass2;
+    MPLstate* right = rset->downpass2;
+    MPLstate* nifin = nset->uppass1;
+    MPLstate* npre    = nset->downpass2;
+    MPLstate* stacts  = nset->subtree_actives;
+    MPLstate* lacts   = lset->subtree_actives;
+    MPLstate* racts   = rset->subtree_actives;
+    MPLstate temp = 0;
+    
+    unsigned long* weights = part->intwts;
+    
+    for (i = 0; i < nchars; ++i) {
+        
+//        temp = 0;
+        
+        j = indices[i];
+        
+        if (nifin[j] & ISAPPLIC) {
+            if ((temp = (left[j] & right[j]))) {
+                if (temp & ISAPPLIC) {
+                    npre[j] = temp & ISAPPLIC;
+                } else {
+                    npre[j] = temp;
+                }
+            }
+            else {
+                npre[j] = (left[j] | right[j]) & ISAPPLIC;
+                
+                if (left[j] & ISAPPLIC && right[j] & ISAPPLIC) {
+                    steps += weights[i];
+                } else if (lacts[j] && racts[j]) {
+                    steps += weights[i];
+                }
+            }
+        }
+        else {
+            npre[j] = nifin[j];
+        }
+        
+        stacts[j] = (lacts[j] | racts[j]) & ISAPPLIC;
+    
+        assert(npre[j]);
+    }
+    
+    return steps;
+}
+
+
+int mpl_NA_fitch_second_uppass
+(MPLndsets* lset, MPLndsets* rset, MPLndsets* nset, MPLndsets* ancset,
+ MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int steps = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    MPLstate* left  = lset->downpass2;
+    MPLstate* right = rset->downpass2;
+    MPLstate* npre  = nset->downpass2;
+    MPLstate* nfin  = nset->uppass2;
+    MPLstate* anc   = ancset->uppass2;
+    MPLstate* lacts = lset->subtree_actives;
+    MPLstate* racts = rset->subtree_actives;
+    unsigned long* weights = part->intwts;
+    
+    for (i = 0; i < nchars; ++i) {
+        
+        j = indices[i];
+        
+        if (npre[j] & ISAPPLIC) {
+            if (anc[j] & ISAPPLIC) {
+                if ((anc[j] & npre[j]) == anc[j]) {
+                    nfin[j] = anc[j] & npre[j];
+                } else {
+                    if (left[j] & right[j]) {
+                        nfin[j] = (npre[j] | (anc[j] & left[j] & right[j]));
+                    }
+                    else {
+                        if ((left[j] | right[j]) & NA) {
+                            if ((left[j] | right[j]) & anc[j]) {
+                                nfin[j] = anc[j];
+                            } else {
+                                nfin[j] = (left[j] | right[j] | anc[j]) & NA;
+                            }
+                        } else {
+                            nfin[j] = npre[j] | anc[j];
+                            if ((anc[j] & nfin[j]) == anc[j]) {
+                                nfin[j] = anc[j] & nfin[j];
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                nfin[j] = npre[j];
+            }
+        }
+        else {
+            nfin[j] = npre[j];
+            
+            if (lacts[j] && racts[j]) {
+                steps += weights[i];
+            }
+        }
+        assert(nfin[j]);
+    }
+    
+    return steps;
+}
+
+int mpl_fitch_tip_update(MPLndsets* tset, MPLndsets* ancset, MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    // TODO: Check these!!!!!!!
+    MPLstate* tprelim = tset->downpass1;
+    MPLstate* tfinal  = tset->uppass1;
+    MPLstate* astates = ancset->uppass1;
+    
+    for (i = 0; i < nchars; ++i) {
+        j = indices[i];
+        if (tprelim[j] & astates[j]) {
+            tfinal[j] = tprelim[j] & astates[j];
+        }
+        else {
+            tfinal[j] = tprelim[j];
+        }
+        assert(tfinal[j]);
+    }
+    return 0;
+}
+
+int mpl_fitch_NA_tip_update
+(MPLndsets* tset, MPLndsets* ancset, MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    MPLstate* tpass1    = tset->downpass1;
+    MPLstate* tpass2   = tset->uppass1;
+    MPLstate* tpass3   = tset->downpass2;
+//    MPLstate* tifinal   = tset->uppass2;
+    MPLstate* astates   = ancset->uppass1;
+    MPLstate* stacts    = tset->subtree_actives;
+    
+    for (i = 0; i < nchars; ++i) {
+        
+        j = indices[i];
+        
+        if (tpass1[j] & astates[j]) {
+            stacts[j] = (tpass1[j] & astates[j] & ISAPPLIC);
+        }
+        else {
+            stacts[j] |= tpass1[j] & ISAPPLIC;
+        }
+
+        tpass2[j] = tpass1[j];
+        
+        if (tpass2[j] & astates[j]) {
+            if (astates[j] & ISAPPLIC) {
+                tpass2[j] &= ISAPPLIC;
+            }
+        }
+        
+        tpass3[j] = tpass2[j];
+        
+        assert(tpass3[j]);
+        assert(tpass2[j]);
+    }
+    
+    return 0;
+}
+
+int mpl_fitch_NA_tip_finalize
+(MPLndsets* tset, MPLndsets* ancset, MPLpartition* part)
+{
+    int i     = 0;
+    int j     = 0;
+    int* indices    = part->charindices;
+    int nchars      = part->ncharsinpart;
+    MPLstate* tpass1    = tset->downpass1;
+    MPLstate* tfinal    = tset->uppass2;
+    MPLstate* astates   = ancset->uppass2;
+    MPLstate* stacts    = tset->subtree_actives;
+    
+    for (i = 0; i < nchars; ++i) {
+        
+        j = indices[i];
+        
+        if (tpass1[j] & astates[j]) {
+            tfinal[j] = tpass1[j] & astates[j];
+        }
+        else {
+            tfinal[j] = tpass1[j];
+        }
+        
+        stacts[j] = tfinal[j] & ISAPPLIC;
+        assert(tfinal[j]);
+    }
+    
+    return 0;
 }

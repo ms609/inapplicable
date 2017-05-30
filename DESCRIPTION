@@ -13,4 +13,5 @@ Description: Correctly calculates tree parsimony scores when datasets contain in
 Imports: ape, phangorn, parallel
 Suggests: testthat
 License: Unlimited
+LazyData: true
 RoxygenNote: 6.0.1

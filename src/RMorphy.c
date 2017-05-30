@@ -10,13 +10,14 @@
 #include "RMorphyUtils.h"
 
 
+
 SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl) {
   Morphy handl = R_ExternalPtrAddr(MorphyHandl);
   const int n_taxa = mpl_get_numtaxa(handl); 
   const int n_internal = mpl_get_num_internal_nodes(handl);
   const int root_node = n_taxa;
-  const int dummy_root_node = n_taxa + n_internal - 1;
-  const int max_real_node = dummy_root_node - 1;
+  const int max_node = n_taxa + n_internal;
+  const int dummy_root_node = max_node;
   
   // R_descendants and R_ancestors have already had one subtracted to convert them to an index 
   const int *ancestor=INTEGER(R_ancestors), *left=INTEGER(R_left), 
@@ -31,14 +32,15 @@ SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl)
   pscore_temp = INTEGER(Rres);
   *pscore_temp = 0;
    
-  for (i = max_real_node; i >= root_node; i--) { // First Downpass.
+  for (i = max_node - 1; i >= n_taxa; i--) { // First Downpass 
     *pscore_temp += mpl_first_down_recon(i,  left[i - n_taxa], right[i - n_taxa], handl);
     //Rprintf("Downpass on node %i -< %i,%i ... pscore is %i\n", i, left[i-n_taxa], right[i-n_taxa], *pscore_temp);
+    
   }
   mpl_update_lower_root(dummy_root_node, root_node, handl); // We could use a spare internal node with index = max_node as a dummy root node.
                                                       // Or we can just pass the root node as its own ancestor [not yet supported]
  
-  for (i = root_node; i <= max_real_node; i++) { // First uppass: internal nodes
+  for (i = root_node; i < max_node; i++) { // First uppass: internal nodes
     *pscore_temp += mpl_first_up_recon(i, left[i - n_taxa], right[i - n_taxa], ancestor[i], handl);
     //Rprintf("Uppass on node %i -< %i,%i ... pscore is %i\n", i, left[i-n_taxa], right[i-n_taxa], *pscore_temp);
   }
@@ -46,11 +48,11 @@ SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl)
     mpl_update_tip(i, ancestor[i], handl);
   }
   
-  for (i = max_real_node; i >= root_node; i--) { // Second Downpass 
+  for (i = max_node - 1; i >= n_taxa; i--) { // Second Downpass 
     *pscore_temp += mpl_second_down_recon(i, left[i - n_taxa], right[i - n_taxa], handl);
   }
  
-  for (i = root_node; i <= max_real_node; i++) { // Second uppass: internal nodes
+  for (i = n_taxa; i < max_node; i++) { // Second uppass: internal nodes
     *pscore_temp += mpl_second_up_recon(i, left[i - n_taxa], right[i - n_taxa], ancestor[i], handl);
   }
   for (i = 0; i < n_taxa; i++) { // Second uppass: finalize tips (fwiw)

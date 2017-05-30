@@ -32,7 +32,7 @@ summary.morphyPtr <- function (object, ...) {
 #' @author Martin R. Smith
 #' @export
 MorphyWeights <- function(morphyObj) {
- charWeights <- vapply(seq_len(mpl_get_num_charac(morphyObj)), mpl_get_charac_weight, list(0, 0), morphyobj=morphyObj)
+ charWeights <- vapply(seq_len(mpl_get_num_charac(morphyObj)), mpl_get_charac_weight, list(0, 0), morphyObj=morphyObj)
  dimnames(charWeights) <- list(c("exact", "approx"), NULL)
  charWeights
 }
@@ -90,7 +90,6 @@ LoadMorphy <- function (phy) {
   if(mpl_apply_tipdata(morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), "in mpl_apply_tipdata")
   }
-  class(morphyObj) <- 'morphyPtr'
   return(morphyObj)
 }
 
@@ -105,7 +104,7 @@ LoadMorphy <- function (phy) {
 #' @author Martin R. Smith
 #' @export
 UnloadMorphy <- function (morphyObj) {
-  if (class(morphyObj) != 'morphyPtr') stop ("Object is not a valid pointer; cannot destroy.")
+  if (class(morphyObj) != 'externalptr') stop ("Object is not a valid pointer; cannot destroy.")
   if (mpl_delete_Morphy(morphyObj) -> error) {
     stop("Error ", mpl_translate_error(error), "in mpl_delete_Morphy")
   }

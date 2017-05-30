@@ -28,6 +28,7 @@
 #' @export
 
 mpl_translate_error <- function (errorCode) {
+  if (errorCode == -999) return ("ERR_EMPTY_POINTER    ")
   mplErrorCodes <- rev(c(
       "ERR_EX_DATA_CONF     ",
       "ERR_OUT_OF_BOUNDS    ",

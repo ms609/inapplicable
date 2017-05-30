@@ -3,23 +3,37 @@
 #include "mpl.h"
 #include "RMorphyUtils.h"
 
-SEXP _R_wrap_mpl_new_Morphy(void)
-{
-    Morphy new = mpl_new_Morphy();
-    SEXP result = R_MakeExternalPtr(new, R_NilValue, R_NilValue);
-    
-    return result;
-}
-
 SEXP _R_wrap_mpl_delete_Morphy(SEXP MorphyHandl)
 {
     int ret = 0;
     SEXP Rret = PROTECT(allocVector(INTSXP, 1));
     Morphy handl = R_ExternalPtrAddr(MorphyHandl);
-    ret = mpl_delete_Morphy(handl);
+    if (handl) {
+      ret = mpl_delete_Morphy(handl);
+      R_ClearExternalPtr(handl); // Unprotects "result" called when new Morphy created
+    } else {
+      ret = -999;
+    }
     INTEGER(Rret)[0] = ret;
-    UNPROTECT(1);
+    UNPROTECT(1); 
     return Rret;
+}
+
+static void finalize_Morphy(SEXP ptr) {
+  if (!R_ExternalPtrAddr(ptr)) return;
+  _R_wrap_mpl_delete_Morphy(ptr);
+}
+
+SEXP _R_wrap_mpl_new_Morphy(void)
+{
+    Morphy new = mpl_new_Morphy();
+    // Pointer handling protocol follows https://github.com/cran/RODBC/blob/master/src/RODBC.c
+    SEXP result;
+    result = R_MakeExternalPtr(new, R_NilValue, R_NilValue);
+    PROTECT(result);
+    R_RegisterCFinalizerEx(result, finalize_Morphy, TRUE);
+    UNPROTECT(1);
+    return result;
 }
 
 SEXP _R_wrap_mpl_init_Morphy(SEXP Rntax, SEXP Rnchar, SEXP MorphHandl)

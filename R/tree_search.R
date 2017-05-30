@@ -13,7 +13,7 @@
 #' @importFrom ape root
 #' @export
 InapplicableSectorial <- function (tree, dataset, maxit=100, 
-    maxiter=500, k=5, verbosity=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", criterion=NULL, ...) {
+    maxiter=500, k=5, verbosity=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be a phyDat object.")
   if (is.null(tree)) stop("a starting tree must be provided")
   tree <- RenumberTips(tree, names(dataset))
@@ -70,7 +70,7 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
     initial.p <- InapplicableFitch(crown, crown.data, ...)
     attr(crown, 'pscore') <- initial.p
     if (verbosity >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
-    candidate <- TreeSearch(crown, crown.data, 'SECTOR_ROOT', method=rearrangements, criterion=criterion, verbosity=verbosity-1, maxiter=maxiter, ...)
+    candidate <- TreeSearch(crown, crown.data, 'SECTOR_ROOT', method=rearrangements, verbosity=verbosity-1, maxiter=maxiter, ...)
     candidate.p <- attr(candidate, 'pscore')
     
     if((candidate.p + eps) < initial.p) {
@@ -97,7 +97,7 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #'
 #' @usage Ratchet(tree, dataset, concavity = NULL, keepAll = FALSE, outgroup = NULL, maxit = 100, 
 #'                maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, 
-#'                rearrangements = c('TBR', 'SPR', 'NNI'), concavity = NULL, ...)
+#'                rearrangements = c('TBR', 'SPR', 'NNI'), ...)
 #'
 #' @template treeParam 
 #' @template datasetParam
@@ -138,7 +138,7 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' @export
 Ratchet <- function 
 (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, 
-maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
+maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   tree <- RenumberTips(tree, names(dataset))
@@ -154,12 +154,12 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
   for (i in 1:maxit) {
     if (verbosity > 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
     candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxiter=maxiter, maxhits=maxhits,
-                               criterion=criterion, verbosity=verbosity-1, ...)
+                               verbosity=verbosity-1, ...)
     
     for (method in rearrangements) {
       if (method %in% c('TBR', 'SPR', 'NNI')) {
         if (verbosity > 0) cat ("\n - Running", method, "rearrangements from new candidate tree...")
-        candidate <- DoTreeSearch(candidate, morphyObj, criterion=criterion, method=method, 
+        candidate <- DoTreeSearch(candidate, morphyObj, method=method, 
                                   verbosity=verbosity-1, maxiter=maxiter, maxhits=maxhits, ...)
       } else {
         warning("Method", method, "unknown; try SPR, TBR or NNI")
@@ -218,7 +218,7 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
 #' @author Martin R. Smith
 #' @export
 RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxit, maxiter, maxhits, k=1, verbosity, rearrangements, criterion=criterion, ...))
+  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxit, maxiter, maxhits, k=1, verbosity, rearrangements, ...))
   scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
   trees <- unique(trees[scores == min(scores)])
   cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')
@@ -232,7 +232,7 @@ RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20
 #'
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @export
-BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterion, verbosity=1, ...) {
+BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, verbosity=1, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   startWeights <- MorphyWeights(morphyObj)[1, ]
   eachChar <- seq_along(startWeights)
@@ -242,7 +242,7 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)#
   attr(tree, 'pscore') <- NULL
-  res <- DoTreeSearch(tree, morphyObj, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, verbosity=verbosity-1, ...)
+  res <- DoTreeSearch(tree, morphyObj, method='NNI', maxiter=maxiter, maxhits=maxhits, verbosity=verbosity-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   vapply(eachChar, function (i) 
@@ -269,7 +269,7 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
 
 DoTreeSearch <- function 
 (tree, morphyObj, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, 
- verbosity=1, criterion=NULL, ...) {
+ verbosity=1, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1
   if (!is.null(forest.size) && length(forest.size)) {
@@ -289,7 +289,7 @@ DoTreeSearch <- function
   for (iter in 1:maxiter) {
     trees <- RearrangeTree(tree, morphyObj, RearrangeFunc, min.score=best.pscore, 
                            return.single=return.single, iter=iter, cluster=cluster,
-                           criterion=criterion, verbosity=verbosity, ...)
+                           verbosity=verbosity, ...)
     iter.pscore <- attr(trees, 'pscore')
     if (length(forest.size) && forest.size > 1) {
       hits <- attr(trees, 'hits')
@@ -374,14 +374,14 @@ DoTreeSearch <- function
 #' 
 #' @export
 TreeSearch <- function 
-(tree, dataset, method='NNI', maxiter=100, maxhits=20, forest.size=1, 
- cluster=NULL, verbosity=1, criterion=NULL, ...) {
+(tree, dataset, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, 
+ verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   tree <- RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
   ret <- DoTreeSearch(tree, morphyObj, method, maxiter, maxhits, forest.size, cluster, 
-                      verbosity, criterion, ...)
+                      verbosity, ...)
   morphyObj <- UnloadMorphy(morphyObj)
   return (ret)
 }

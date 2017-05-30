@@ -126,12 +126,8 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
-#' library('ape')
-#' data('SigSut')
-#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup)
-#' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
-#' Ratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
+#' data('Lobo')
+#' Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxit=1, maxiter=50)
 #' }
 #' @keywords  tree 
 

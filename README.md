@@ -6,8 +6,8 @@ It incorporates modifications to phangorn that increase the rate of phylogenetic
 You can install inapplicable into R thus:
 
 ```r
-# Install the devtools package from CRAN
-install.packages('devtools')
+# Install the devtools package from CRAN, if necessary
+if(!require(devtools)) install.packages("devtools")
 
 # Install the inapplicable package from github
 devtools::install_github('ms609/inapplicable')

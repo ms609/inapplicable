@@ -138,7 +138,7 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' @export
 Ratchet <- function 
 (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, 
-maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
+maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   tree <- RenumberTips(tree, names(dataset))
@@ -147,20 +147,18 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
     attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
   }
   best.pars <- attr(tree, "pscore")
-  if (verbosity > 0) cat("* Initial pscore:", best.pars)
+  if (verbosity >= 0) cat("* Initial pscore:", best.pars)
   if (keepAll) forest <- vector('list', maxiter)
 
   kmax <- 0 
   for (i in 1:maxit) {
-    if (verbosity > 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
-    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxiter=maxiter, maxhits=maxhits,
-                               criterion=criterion, verbosity=verbosity-1, ...)
+    if (verbosity >= 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
+    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxiter=maxiter, maxhits=maxhits, criterion=criterion, verbosity=verbosity-1, ...)
     
     for (method in rearrangements) {
       if (method %in% c('TBR', 'SPR', 'NNI')) {
-        if (verbosity > 0) cat ("\n - Running", method, "rearrangements from new candidate tree...")
-        candidate <- DoTreeSearch(candidate, morphyObj, criterion=criterion, method=method, 
-                                  verbosity=verbosity-1, maxiter=maxiter, maxhits=maxhits, ...)
+        if (verbosity >= 0) cat ("\n - Running", method, "rearrangements from new candidate tree...")
+        candidate <- DoTreeSearch(candidate, morphyObj, criterion=criterion, method=method, verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
       } else {
         warning("Method", method, "unknown; try SPR, TBR or NNI")
       }
@@ -182,11 +180,10 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
         if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
       }
     }
-    if (verbosity > 0) cat("\n* Best pscore after", i, "/", maxit, "Ratchet iterations:", 
-                           best.pars, "( hit", kmax, "/", k, ")")
+    if (verbosity >= 0) cat("\n* Best pscore after", i, "/", maxit, "Ratchet iterations:", best.pars, "( hit", kmax, "/", k, ")")
     if (kmax >= k) break()
   } # for
-  if (verbosity > 0)
+  if (verbosity >= 0)
     cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
     
   if (keepAll) {

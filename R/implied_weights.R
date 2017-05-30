@@ -9,7 +9,7 @@
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 MinSteps <- function (x, inapp.power2) {
   if (is.null(x)) return (NULL)
@@ -46,7 +46,7 @@ MinSteps <- function (x, inapp.power2) {
 #' 
 #' @return This function returns :
 #'   
-#' @author Martin Smith
+#' @author Martin R. Smith
 #' @export
 MinStepsInapp <- function (dat, inapp.level) {
   # This function gives unconventional results; see text.

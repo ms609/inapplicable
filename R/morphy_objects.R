@@ -1,7 +1,8 @@
 #' Details the attributes of a morphy object
 #'
 #' @param object A Morphy object
-#' 
+#' @param \dots any other parameters... 
+#'
 #' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
 #'
 #' @author Martin R. Smith

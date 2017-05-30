@@ -4,9 +4,9 @@
 \alias{Ratchet}
 \title{Parsimony Ratchet}
 \usage{
-Ratchet(tree, dataset, concavity = NULL, keepAll = FALSE, outgroup = NULL, maxit = 100, 
-               maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, 
-               rearrangements = c('TBR', 'SPR', 'NNI'), concavity = NULL, ...)
+Ratchet(tree, dataset, keepAll = FALSE, outgroup = NULL, maxit = 100,
+  maxiter = 5000, maxhits = 40, k = 10, verbosity = 1,
+  rearrangements = c("TBR", "SPR", "NNI"), ...)
 }
 \arguments{
 \item{tree}{A tree of class \code{\link{phylo}}}
@@ -42,14 +42,8 @@ This function returns a tree modified by parsimony ratchet iteration, retaining 
 \code{Ratchet} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
 }
 \examples{
-{
-library('ape')
-data('SigSut')
-outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup)
-njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
-Ratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
-}
+Ratchet(RandomTree(Lobo.phy), SigSut.phy, outgroup='Cricocosmia')
+
 }
 \references{
 Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}

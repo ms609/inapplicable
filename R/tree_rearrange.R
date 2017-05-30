@@ -119,8 +119,6 @@ RenumberTips <- function (tree, tipOrder) {
 
 #' Rearrange phylogenetic tree
 #' @details \code{RearrangeTree} performs one tree rearrangement of a specified type
-#' @usage #' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
-#'  iter = '?', cluster = NULL, verbosity = 0)
 #' 
 #' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, with its labels
 #'             in an order that matches the Morphy object, and the attributes
@@ -203,7 +201,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity
 #' RootedSPR(tree)
 #' RootedTBR(tree)
 #'
-#' <%= treeParam =>, with all nodes resolved (bifurcating).
+#' @param tree A bifurcating tree of class \code{\link{phylo}}, with all nodes resolved;
 #' 
 #' @return This function returns a tree, in \code{phylo} format.
 #'
@@ -443,9 +441,7 @@ SPR <- function(tree) {
 #'
 #' \code{TBR} performs a single random \acronym{TBR} iteration.
 #'
-#' @usage TBR(tree, edge.to.break = NULL)
-#' 
-#' <%= treeParam =>, with all nodes resolved
+#' @param tree A bifurcating tree of class \code{\link{phylo}}, with all nodes resolved;
 #' @param edge.to.break the index of an edge to bisect, generated randomly if not specified.
 #' 
 #' @details Branch lengths are not (yet) supported.

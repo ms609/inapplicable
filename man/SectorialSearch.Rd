@@ -4,10 +4,8 @@
 \alias{SectorialSearch}
 \title{Sectorial Search}
 \usage{
-SectorialSearch(tree, dataset, outgroup, concavity = NULL, rearrangements = "NNI",
-  maxiter = 2000, cluster = NULL, verbosity = 3)
-InapplicableSectorial(tree, dataset, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
-  verbosity = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
+SectorialSearch(tree, dataset, concavity = NULL, rearrangements = "NNI",
+  maxiter = 2000, cluster = NULL, verbosity = 3, ...)
 }
 \arguments{
 \item{tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}

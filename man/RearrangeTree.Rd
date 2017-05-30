@@ -4,8 +4,9 @@
 \alias{RearrangeTree}
 \title{Rearrange phylogenetic tree}
 \usage{
-#' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
- iter = '?', cluster = NULL, verbosity = 0)
+RearrangeTree(tree, morphyObj, Rearrange, min.score = NULL,
+  concavity = NULL, return.single = TRUE, iter = "?", cluster = NULL,
+  criterion = NULL, verbosity = 0)
 }
 \arguments{
 \item{tree}{a rooted bifurcating phylogenetic tree with the desired outgroup, with its labels

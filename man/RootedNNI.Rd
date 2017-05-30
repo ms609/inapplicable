@@ -7,8 +7,9 @@
 RootedNNI(tree)
 RootedSPR(tree)
 RootedTBR(tree)
-
-<%= treeParam =>, with all nodes resolved (bifurcating).
+}
+\arguments{
+\item{tree}{A bifurcating tree of class \code{\link{phylo}}, with all nodes resolved;}
 }
 \value{
 This function returns a tree, in \code{phylo} format.

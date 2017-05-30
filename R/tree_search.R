@@ -95,10 +95,6 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #'
 #' \code{Ratchet} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
 #'
-#' @usage Ratchet(tree, dataset, concavity = NULL, keepAll = FALSE, outgroup = NULL, maxit = 100, 
-#'                maxiter = 5000, maxhits = 40, k = 10, verbosity = 0, 
-#'                rearrangements = c('TBR', 'SPR', 'NNI'), ...)
-#'
 #' @template treeParam 
 #' @template datasetParam
 #' @template concavityParam
@@ -125,16 +121,9 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' @seealso \code{\link{TreeSearch}}
 #' @seealso \code{\link{SectorialSearch}}
 #' 
-#' @examples{
-#' library('ape')
-#' data('SigSut')
-#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup)
-#' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
-#' Ratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
-#' }
+#' @examples Ratchet(RandomTree(Lobo.phy), SigSut.phy, outgroup='Cricocosmia')
+#' 
 #' @keywords  tree 
-
 #' @export
 Ratchet <- function 
 (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, 
@@ -327,11 +316,7 @@ DoTreeSearch <- function
 #'
 #' Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR}) 
 #' to search for a more parsimonious tree.
-#' 
-#' @usage TreeSearch(tree, dataset, method = "NNI", maxiter = 100, 
-#'   maxhits = 20, forest.size = 1, cluster = NULL, verbosity = 1, ...)
-#' 
-#' 
+#'  
 #' @param tree a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;
 #' @template datasetParam
 #' @param outgroup a vector listing the taxa in the outgroup;
@@ -400,12 +385,6 @@ TreeSearch <- function
 #' 
 #' \code{SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial} followed by a few rounds
 #' of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
-#' 
-#' @usage
-#' SectorialSearch(tree, dataset, outgroup, concavity = NULL, rearrangements = "NNI",
-#'   maxiter = 2000, cluster = NULL, verbosity = 3)
-#' InapplicableSectorial(tree, dataset, outgroup = NULL, concavity = NULL, maxit = 100, maxiter = 500, k = 5,
-#'   verbosity = 0, smallest.sector = 4, largest.sector = 1e+06, rearrangements = "NNI", ...)
 #' 
 #' @param tree a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;
 #' @template datasetParam

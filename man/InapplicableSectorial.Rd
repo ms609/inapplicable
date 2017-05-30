@@ -6,7 +6,7 @@
 \usage{
 InapplicableSectorial(tree, dataset, maxit = 100, maxiter = 500, k = 5,
   verbosity = 0, smallest.sector = 4, largest.sector = 1e+06,
-  rearrangements = "NNI", criterion = NULL, ...)
+  rearrangements = "NNI", ...)
 }
 \arguments{
 \item{PARAM}{is a parameter you should send to it}

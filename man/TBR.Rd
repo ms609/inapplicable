@@ -8,10 +8,10 @@
 RootedTBR(tree)
 
 TBR(tree, edge.to.break = NULL)
-
-<%= treeParam =>, with all nodes resolved
 }
 \arguments{
+\item{tree}{A bifurcating tree of class \code{\link{phylo}}, with all nodes resolved;}
+
 \item{edge.to.break}{the index of an edge to bisect, generated randomly if not specified.}
 }
 \value{

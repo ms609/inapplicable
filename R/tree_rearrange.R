@@ -385,17 +385,21 @@ NNI <- function (tree) {
 #' Subtree Pruning and Rearrangement 
 #'
 #' Perform one \acronym{SPR} rearrangement on a tree
+#' Equivalent to phangorn's kSPR, but 10x faster
 #'
 #' @template treeParam
+#' @author Martin R. Smith
 #' @export
 SPR <- function(tree) {
-  tip.label <- tree$tip.label
-  nTips <- length(tip.label)
-  edge  <- tree$edge; parent <- edge[,1L]; child <- edge[,2L]
-  nEdge <- length(child)
-  root  <- nTips + 1L
-  if (nTips < 4L) stop ('must be >3 tips for SPR rearrangement!')
-  pruning.candidates <- seq(nEdge + 1L)[-root]
+  labels <- tree$tip.label
+  nTips  <- length(labels)
+  edge   <- tree$edge
+  parent <- edge[, 1]
+  child  <- edge[, 2]
+  nEdge  <- length(child)
+  root   <- nTips + 1
+  if (nTips < 4) stop ('must be >3 tips for SPR rearrangement!')
+  pruning.candidates <- seq(nEdge + 1)[-root]
   repeat {
     prune.node <- sample(pruning.candidates, 1)
     moving.subnodes <- c(prune.node, which(DoDescendants(parent, child, nTips, prune.node)))
@@ -418,8 +422,8 @@ SPR <- function(tree) {
   if (prune.parent == root) {
     new.root <- child[parent==root]
     new.root <- new.root[new.root != prune.node]
-    edge[sister.edge, 2L] <- edge[graft.edge, 2L]
-    edge[graft.edge, 2L] <- root
+    edge[sister.edge, 2] <- edge[graft.edge, 2]
+    edge[graft.edge,  2] <- root
     new.root.spots <- edge==new.root
     edge[edge == root] <- new.root
     edge[new.root.spots] <- root
@@ -428,7 +432,7 @@ SPR <- function(tree) {
     edge[c(leading.edge, sister.edge, graft.edge), 2] <- edge[c(sister.edge, graft.edge, leading.edge), 2]
   }
   
-  reordered.edge <- .C('order_edges', as.integer(edge[,1]), as.integer(edge[,2]), as.integer(nTips-1L), as.integer(nEdge), PACKAGE='inapplicable')
+  reordered.edge <- .C('order_edges', as.integer(edge[,1]), as.integer(edge[,2]), as.integer(nTips-1), as.integer(nEdge), PACKAGE='inapplicable')
   numbered.edge <- .C('number_nodes', as.integer(reordered.edge[[1]]), as.integer(reordered.edge[[2]]), as.integer(root), as.integer(nEdge), PACKAGE='inapplicable')
   tree$edge <- matrix(c(numbered.edge[[1]], numbered.edge[[2]]), ncol=2)
   tree
@@ -465,19 +469,19 @@ TBR <- function(tree, edge.to.break=NULL) {
   nTips <- tree$Nnode + 1
   if (nTips < 3) return (tree)
   tree.edge <- tree$edge
-  tree.parent <- tree.edge[,1]
-  tree.child <- tree.edge[,2]
+  tree.parent <- tree.edge[, 1]
+  tree.child  <- tree.edge[, 2]
   if (nTips == 3) return (Root(tree, sample(tree.child[tree.parent==max(tree.parent)], 1L)))
-  all.nodes <- 1:(2*(nTips-1))
+  all.nodes <- seq_len(2 * (nTips - 1))
   root <- nTips + 1
-  if (is.null(edge.to.break)) edge.to.break <- sample(2L:nrow(tree.edge), 1L) # Only include one root edge
+  if (is.null(edge.to.break)) edge.to.break <- sample(2:nrow(tree.edge), 1) # Only include one root edge
   subtree.root <- tree.child[edge.to.break]
   #cat("\n - ", edge.to.break, subtree.root)
   stump <- if (subtree.root <= nTips) {
     DropTipNoSubtree(tree, subtree.root, root.edge=1)
   } else {
     in.crown <- DoDescendants(tree.parent, tree.child, nTips, subtree.root, just.tips=TRUE)
-    DropTipNoSubtree (tree, which(in.crown), root.edge=1)
+    DropTipNoSubtree(tree, which(in.crown), root.edge=1)
   }
   stump.len <- dim(stump$edge)[1]
   crown <- ExtractClade(tree, subtree.root) # ~ 2x faster than DropTip
@@ -487,8 +491,8 @@ TBR <- function(tree, edge.to.break=NULL) {
     if (crown.len == 2) {
       rerooted.crown <- crown
     } else {
-      crown.parent <- crown.edge[,1]
-      crown.child <- crown.edge[,2]
+      crown.parent <- crown.edge[, 1]
+      crown.child <- crown.edge[, 2]
       crown.nNode <- crown$Nnode
       crown.tips <- crown.nNode + 1L
       crown.root <- min(crown.parent)

@@ -460,48 +460,37 @@ DoDescendants <- function (edge1, edge2, nTip, node, just.tips = FALSE, just.int
 #' @export
 TwoTipTree <- function (tip1, tip2) read.tree(text=paste0('(', tip1, ',', tip2, ');')) #TODO make this more efficient?
 
-#' TITLE GOES HERE
+#' Bind trees
 #'
-#' \code{FUNCTIONNAME} does something useful
+#' Copied from \code{ape:::bind.tree}.
+#' Changes: \itemise{
+#'   \item{use (x|y).edge in place of (x|y)$edge for efficiency}
+#'   \item{Delete interactive option}
+#'   \item{Use Cladewise instead of reorder (..., 'cladewise')}
+#' }
 #'
-#' @param PARAM is a parameter you should send to it
+#' @param x First tree fragment
+#' @param y Second tree fragment 
+#' @param where which edge to use to bind fragments [?]
+#' @param position Where on second tree to bind [?]
 #' 
-#' @examples
-#' to_do <- TRUE
-#' 
-#' @return This function returns :
+#' @return A single tree comprising the two fragments
 #'   
-#' @author Martin R. Smith
-#' @importFrom graphics locator
+#' @author Martin R. Smith, based on APE (Emmanuel Paradis)
 #' @export
-BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
-## Copied from ape:::bind.tree; the only change is that I use (x|y).edge in place of (x|y)$edge.
-
+BindTree <- function(x, y, where = "root", position = 0) {
     nx <- length(x$tip.label)
     mx <- x$Nnode
     ROOTx <- nx + 1L
     ny <- length(y$tip.label)
     my <- y$Nnode
 
-    if (interactive) {
-        lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
-        if (lastPP$type != "phylogram" || lastPP$direction != "rightwards")
-            stop("you must plot tree 'x' as a 'rightward phylogram'")
-        cat("Click where you want to graft tree 'y'...\n")
-        xy <- locator(1)
-        d <- abs(xy$y - lastPP$yy)
-        d[lastPP$xx - xy$x < 0] <- Inf
-        where <- which.min(d)
-        position <- lastPP$xx[where] - xy$x
-        if (position < 0) position <- 0
-        cat("The following parameters are used:\n")
-        cat("  where =", where, " position =", position, "\n")
-    } else {
-        if (where == 0 || where == "root") where <- ROOTx
-        if (position < 0) position <- 0
-        if (where > nx + mx)
-            stop("argument 'where' out of range for tree 'x'")
-    }
+    
+    if (where == 0 || where == "root") where <- ROOTx
+    if (position < 0) position <- 0
+    if (where > nx + mx)
+        stop("argument 'where' out of range for tree 'x'")
+    
 
     ## check whether both trees have branch lengths:
     switch(is.null(x$edge.length) + is.null(y$edge.length) + 1L,
@@ -671,7 +660,7 @@ BindTree <- function(x, y, where = "root", position = 0, interactive = FALSE) {
     newNb[-ROOT] <- n + 1L
     sndcol <- x.edge[, 2] < 0
     ## executed from right to left, so newNb is modified before x.edge:
-    x.edge[sndcol, 2] <- newNb[-x.edge[sndcol, 2]] <- n + 2:x$Nnode
+    x.edge[sndcol, 2] <- newNb[-x.edge[sndcol, 2]] <- n + (2:x$Nnode)
     x.edge[, 1] <- newNb[-x.edge[, 1]]
     x$edge <- x.edge
     if (!is.null(x$node.label))

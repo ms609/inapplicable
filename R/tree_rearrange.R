@@ -160,7 +160,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label
   if (is.null(cluster)) {
-    rearrangedTree <- RenumberTips(Rearrange(tree), tipOrder)
+    rearrangedTree<-RenumberTips(Rearrange(tree), tipOrder)
     trees <- list(rearrangedTree)
     min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)
@@ -349,36 +349,40 @@ RootedTBR <- function(tree) {
 #'         performed at a random internal edge
 #' @export
 NNI <- function (tree) {
-    edge    <- tree$edge
-    parent  <- edge[, 1]
-    child   <- edge[, 2]
-    lengths <- tree$edge.length
-    nb.tip  <- length(tree$tip.label)
-    ind     <- sample(which(child > nb.tip), 1)
-    if(is.na(ind)) return(NULL)
-    nb.edge <- length(parent)
-    nb.node <- tree$Nnode
-    if (nb.node == 1) return(tree)
-    p1      <- parent[ind]
-    p2      <- child[ind]
-    ind1    <- which(parent == p1)
-    ind1    <- ind1[ind1 != ind][1]
-    ind2    <- which(parent == p2)[sample(2, 1)]
-    new_ind <- c(ind2, ind1)
-    old_ind <- c(ind1, ind2)
-    child_swap <- child[new_ind]
-    edge [old_ind, 2L] <- child_swap
-    child[old_ind] <- child_swap
-    neworder <- .C('ape_neworder_phylo', as.integer(nb.tip), as.integer(parent), 
-                   as.integer(child), as.integer(nb.edge), integer(nb.edge), 
-                   as.integer(2), NAOK = TRUE, PACKAGE='inapplicable')[[5]] # from .reorder_ape
-    tree$edge <- edge[neworder, ]
-    if (!is.null(tree$edge.length)) {
-        lengths[old_ind] <- lengths[new_ind]
-        tree$edge.length <- lengths[neworder]
-    }
-    attr(tree, "order") <- "postorder"
-    tree
+  edge    <- tree$edge
+  parent  <- edge[, 1]
+  child   <- edge[, 2]
+  lengths <- tree$edge.length
+  nTips  <- length(tree$tip.label)
+  rootNode <- nTips + 1L
+  ind     <- sample(which(child > nTips), 1)
+  if(is.na(ind)) return(NULL)
+  nEdge <- length(parent)
+  nNode <- tree$Nnode
+  if (nNode == 1) return(tree)
+  p1      <- parent[ind]
+  p2      <- child[ind]
+  ind1    <- which(parent == p1)
+  ind1    <- ind1[ind1 != ind][1]
+  ind2    <- which(parent == p2)[sample(2, 1)]
+  new_ind <- c(ind2, ind1)
+  old_ind <- c(ind1, ind2)
+  child_swap <- child[new_ind]
+  edge [old_ind, 2L] <- child_swap
+  child[old_ind] <- child_swap
+  neworder <- .C('ape_neworder_phylo', as.integer(nTips), as.integer(parent), 
+                 as.integer(child), as.integer(nEdge), integer(nEdge), 
+                 as.integer(2), NAOK = TRUE, PACKAGE='inapplicable')[[5]] # from .reorder_ape
+  if (!is.null(tree$edge.length)) {
+      lengths[old_ind] <- lengths[new_ind]
+      tree$edge.length <- lengths[neworder]
+  }
+  reorderedEdge <- .C('order_edges', as.integer(edge[neworder, 1]), as.integer(edge[neworder, 2]),
+                       as.integer(nTips-1L), as.integer(nEdge), PACKAGE='inapplicable')
+  numberedEdge  <- .C('number_nodes', as.integer(reorderedEdge[[1]]), as.integer(reorderedEdge[[2]]),
+                       as.integer(rootNode), as.integer(nEdge), PACKAGE='inapplicable')
+  tree$edge <- matrix(c(numberedEdge[[1]], numberedEdge[[2]]), ncol=2)
+  tree
 }
 
 #' Subtree Pruning and Rearrangement 

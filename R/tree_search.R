@@ -126,39 +126,37 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
-#' library('ape')
-#' data('SigSut')
-#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup)
-#' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
-#' Ratchet(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50)
+#' data('Lobo')
+#' Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxit=1, maxiter=50)
 #' }
 #' @keywords  tree 
 
 #' @export
 Ratchet <- function 
 (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, 
-maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
+maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=NULL, ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   tree <- RenumberTips(tree, names(dataset))
-  eps <- 1e-0
+  eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) {
     attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
   }
   best.pars <- attr(tree, "pscore")
-  if (verbosity >= 0) cat("* Initial pscore:", best.pars)
+  if (verbosity > 0) cat("* Initial pscore:", best.pars)
   if (keepAll) forest <- vector('list', maxiter)
 
   kmax <- 0 
   for (i in 1:maxit) {
-    if (verbosity >= 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
-    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxiter=maxiter, maxhits=maxhits, criterion=criterion, verbosity=verbosity-1, ...)
+    if (verbosity > 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
+    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxiter=maxiter, maxhits=maxhits,
+                               criterion=criterion, verbosity=verbosity-1, ...)
     
     for (method in rearrangements) {
       if (method %in% c('TBR', 'SPR', 'NNI')) {
-        if (verbosity >= 0) cat ("\n - Running", method, "rearrangements from new candidate tree...")
-        candidate <- DoTreeSearch(candidate, morphyObj, criterion=criterion, method=method, verbosity=verbosity, maxiter=maxiter, maxhits=maxhits, ...)
+        if (verbosity > 0) cat ("\n - Running", method, "rearrangements from new candidate tree...")
+        candidate <- DoTreeSearch(candidate, morphyObj, criterion=criterion, method=method, 
+                                  verbosity=verbosity-1, maxiter=maxiter, maxhits=maxhits, ...)
       } else {
         warning("Method", method, "unknown; try SPR, TBR or NNI")
       }
@@ -180,10 +178,11 @@ maxhits=40, k=10, verbosity=0, rearrangements=c('TBR', 'SPR', 'NNI'), criterion=
         if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
       }
     }
-    if (verbosity >= 0) cat("\n* Best pscore after", i, "/", maxit, "Ratchet iterations:", best.pars, "( hit", kmax, "/", k, ")")
+    if (verbosity > 0) cat("\n* Best pscore after", i, "/", maxit, "Ratchet iterations:", 
+                           best.pars, "( hit", kmax, "/", k, ")")
     if (kmax >= k) break()
   } # for
-  if (verbosity >= 0)
+  if (verbosity > 0)
     cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
     
   if (keepAll) {
@@ -237,7 +236,8 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, criterion=criterio
   BS <- tabulate(sample(v, replace=TRUE), length(startWeights))
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
-  mpl_apply_tipdata(morphyObj)
+  mpl_apply_tipdata(morphyObj)#
+  attr(tree, 'pscore') <- NULL
   res <- DoTreeSearch(tree, morphyObj, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, verbosity=verbosity-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL

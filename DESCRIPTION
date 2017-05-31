@@ -1,8 +1,8 @@
 Package: inapplicable
 Type: Package
 Title: Inapplicable data in parsimony analysis
-Version: 0.2.0
-Date: 2017-05-24
+Version: 0.2.1
+Date: 2017-05-31
 Author: Martin R. Smith
 Maintainer: Martin R. Smith <martins@gmail.com>
 Description: Correctly calculates tree parsimony scores when datasets contain inapplicable data.
@@ -13,5 +13,7 @@ Description: Correctly calculates tree parsimony scores when datasets contain in
 Imports: ape, phangorn, parallel
 Suggests: testthat
 License: Unlimited
+URL: https://github.com/ms609/inapplicable
+BugReports: https://github.com/ms609/inapplicable/issues
 LazyData: true
 RoxygenNote: 6.0.1

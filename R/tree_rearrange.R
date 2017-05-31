@@ -235,8 +235,7 @@ RootedNNI <- function (tree) {
   safe.child <- child
   safe.child[which(parent == as.integer(parent[!match(parent, child, 0)][1]))] <- -1 # Don't want to switch across the root
   k <- min(parent) - 1
-  ## TODO FIX THIS NOW
-  sampleable <- length(na.omit(match(safe.child, parent)))
+  sampleable <- sum(safe.child %in% parent)
   n <- sample(sampleable, 1)
   ind <- which(safe.child > k)[n] # Internal nodes
   p1 <- parent[ind]

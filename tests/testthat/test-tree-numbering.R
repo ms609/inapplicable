@@ -1,6 +1,6 @@
 library(ape)
-library(testthat)
 
+#' @ author Martin R. Smith <martins@gmail.com>
 CheckTreeSanity <- function (tree) {
   nTip <- length(tree$tip.label)
   nNode <- tree$Nnode

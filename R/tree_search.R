@@ -121,8 +121,10 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' @seealso \code{\link{TreeSearch}}
 #' @seealso \code{\link{SectorialSearch}}
 #' 
-#' @examples Ratchet(RandomTree(Lobo.phy), SigSut.phy, outgroup='Cricocosmia')
-#' 
+#' @examples{
+#' data('Lobo')
+#' Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxit=1, maxiter=50)
+#' }
 #' @keywords  tree 
 #' @export
 Ratchet <- function 

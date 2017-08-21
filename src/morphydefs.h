@@ -15,6 +15,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+    
 //#ifdef MPLDBL
 typedef double Mflt;
 #define MPL_EPSILON DBL_EPSILON
@@ -63,31 +64,16 @@ typedef int (*MPLtipfxn)
             (MPLndsets*     tset,
              MPLndsets*     ancset,
              MPLpartition*  part);
+    
+typedef int (*MPLloclfxn)
+            (MPLndsets* srcset,
+             MPLndsets* topnod,
+             MPLndsets* botnod,
+             MPLpartition* part,
+             int cutoff,
+             bool usemax);
 
 // Key data types
-typedef enum {
-    
-    NONE_T          = 0,
-    FITCH_T         = 1,
-    WAGNER_T        = 2,
-    DOLLO_T         = 3,
-    IRREVERSIBLE_T  = 4,
-    USERTYPE_T      = 5,
-    
-    MAX_CTYPE,
-    
-} MPLchtype;
-
-typedef enum {
-    
-    GAP_INAPPLIC,
-    GAP_MISSING,
-    GAP_NEWSTATE,
-    
-    GAP_MAX,
-    
-} MPLgap_t;
-
 typedef struct {
     MPLstate    asint;
     char*       asstr;
@@ -117,23 +103,37 @@ typedef struct charinfo_s {
 } MPLcharinfo;
     
     
+typedef struct {
+    int     maxchars;
+    int     nupdate;
+    int*    indices;
+} MPLcupdate;
+    
+    
 typedef struct partition_s MPLpartition;
 typedef struct partition_s {
     
-    MPLchtype       chtype;
-    bool            isNAtype;
+    MPLchtype       chtype;         /*!< The optimality type used for this partition. */
+    bool            isNAtype;       /*!< This character should be treated as having inapplicable data. */ 
     int             maxnchars;
     int             ncharsinpart;
     int*            charindices;
+    unsigned long   nchanges;       /*!< Number of state changes in this partition. */
+    int             ntoupdate;
+    int*            update_indices;
+    int             nNAtoupdate;
+    int*            update_NA_indices;
     bool            usingfltwt;
     unsigned long*  intwts;
     Mflt*           fltwts;
     MPLtipfxn       tipupdate;
     MPLtipfxn       tipfinalize;
+    MPLtipfxn       tiproot;        /*!< For the function that adds length at the base of an unrooted tree. */
     MPLdownfxn      inappdownfxn;
     MPLupfxn        inappupfxn;
     MPLdownfxn      prelimfxn;
     MPLupfxn        finalfxn;
+    MPLloclfxn      loclfxn;
     MPLpartition*   next;
     
 } MPLpartition;
@@ -142,15 +142,18 @@ typedef struct partition_s {
 
 typedef struct MPLndsets {
     
+    bool        needsupdate;
+    int         steps_to_recall;
     MPLstate*   downpass1;
     MPLstate*   uppass1;
     MPLstate*   downpass2;
     MPLstate*   uppass2;
     MPLstate*   subtree_actives;
-    MPLstate*   subtree_downpass1;
-    MPLstate*   subtree_uppass1;
-    MPLstate*   subtree_downpass2;
-    MPLstate*   subtree_uppass2;
+    MPLstate*   temp_subtr_actives;
+    MPLstate*   temp_downpass1;
+    MPLstate*   temp_uppass1;
+    MPLstate*   temp_downpass2;
+    MPLstate*   temp_uppass2;
     char**      downp1str;
     char**      downp2str;
     char**      upp1str;
@@ -158,17 +161,13 @@ typedef struct MPLndsets {
     
 } MPLndsets;
     
+    
 typedef struct mpl_matrix_s {
     int             ncells;
     MPLcell*        cells;
 } MPLmatrix;
 
-//typedef struct {
-//    int*            tips;
-//    int*            internals;
-//    MPLndsets**  ancstates;
-//} MPLnodesets;
-
+    
 typedef struct symbols_s {
     int         numstates;
     char*       statesymbols;
@@ -206,7 +205,6 @@ typedef struct Morphy_t {
     
 } Morphy_t, *Morphyp;
 
-typedef void* Morphy;
 
 #ifdef __cplusplus
 }

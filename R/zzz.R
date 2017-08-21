@@ -1,7 +1,7 @@
 .onLoad <- function(libname, pkgname) {
-    library.dynam("inapplicable", pkgname, libname)
+#    library.dynam("inapplicable", pkgname, libname)
 }
 
 .onUnload <- function (libpath) {
-  library.dynam.unload("inapplicable", libpath)
+#  library.dynam.unload("inapplicable", libpath)
 }

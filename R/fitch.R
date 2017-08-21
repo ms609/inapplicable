@@ -55,7 +55,7 @@ MorphyLength <- function (tree, morphyObj) {
   treeOrder <- attr(tree, 'order')
   if (is.null(treeOrder) || treeOrder != "postorder") tree <- Postorder(tree)
   tree.edge <- tree$edge
-  parent <- tree.edge[ ,1]
+  parent <- tree.edge[, 1]
   child <- tree.edge[, 2]
   maxNode <- nTaxa + mpl_get_num_internal_nodes(morphyObj)
   rootNode <- nTaxa + 1

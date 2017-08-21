@@ -8,7 +8,8 @@ TreeSearch(tree, dataset, method = "NNI", maxiter = 100, maxhits = 20,
   forest.size = 1, cluster = NULL, verbosity = 1, ...)
 }
 \arguments{
-\item{tree}{a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
+\item{tree}{a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; 
+edge lengths are not supported and will be deleted;}
 
 \item{dataset}{A phylogenetic data matrix of class \code{\link[phangorn]{phyDat}}, whose names 
 correspond to the labels of any accompanying tree}

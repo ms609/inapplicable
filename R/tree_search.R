@@ -1,96 +1,3 @@
-#' Sectorial Search with inapplicable data
-#'
-#' \code{InapplicableSectorial} does something useful
-#'
-#' @param PARAM is a parameter you should send to it
-#' 
-#' @examples
-#' to_do <- TRUE
-#' 
-#' @return This function returns :
-#'   
-#' @author Martin R. Smith
-#' @importFrom ape root
-#' @export
-InapplicableSectorial <- function (tree, dataset, maxit=100, 
-    maxiter=500, k=5, verbosity=0, smallest.sector=4, largest.sector=1e+06, rearrangements="NNI", ...) {
-  if (class(dataset) != 'phyDat') stop("dataset must be a phyDat object.")
-  if (is.null(tree)) stop("a starting tree must be provided")
-  tree <- RenumberTips(tree, names(dataset))
-  if (verbosity >= 0) cat('InapplicableSectorial search: optimizing sectors of', smallest.sector, 'to', floor(largest.sector), 'tips')
-  
-  SectorData <- function (X, tips) {
-    at <- attributes(X)
-    dec <- X[tips, ]
-    nBits <- floor(log2(max(X))) + 1L
-    bin <- array(FALSE, dim=c(nrow(dec), ncol(dec), nBits))
-    for (i in 0:(nBits-1)) {
-      bin[, , nBits-i] <- as.logical(dec %% 2)
-      dec <- (dec %/% 2)
-    }
-    state.union <- apply(bin, c(1,3), all)
-    parsimony.informative <- !as.logical(rowSums(state.union))
-    if (!any(parsimony.informative)) return (NULL)
-    X <- X[tips, parsimony.informative]
-    informative.chars <- sum(parsimony.informative)
-    SECTOR_ROOT <- rep(2^nBits-1, informative.chars)
-    X <- cbind(X, SECTOR_ROOT)
-    attr(X, 'nr') <- informative.chars
-    attr(X, 'inapp.level') <- at$inapp.level
-    inapp.power2 <- log2(at$inapp.level) + 1
-    #attr(X, 'min.steps') <- apply(X, 1, function(x) min.steps(x, inapp.power2))
-    attr(X, 'levels') <- at$levels
-    attr(X, 'weight') <- at$weight[parsimony.informative]
-    class(X) <- 'morphyDat'
-    warning("#TODO this is not yet tested")
-    X
-  }
-  
-  eps <- 1e-08
-  kmax <- 1
-  for (i in 1:maxit) {
-    edge1 <- tree$edge[,1]
-    nodes <- unique(edge1)[-1]
-    node.lengths <- sapply(GetDescendants(tree, nodes), length) # (10x quicker than DoDescendants)
-    candidate.nodes <- nodes[node.lengths >= smallest.sector & node.lengths <= largest.sector]
-    if (verbosity >= 0) cat ("\n - Iteration", i, "- attempting sectorial search on node ")
-    repeat {
-      sector <- sample(candidate.nodes, 1)
-      crown <- ExtractClade(tree, sector)
-      crown.tips <- crown$tip.label
-      sector.size <- length(crown.tips)
-      cat(sector, 'size', sector.size, '...')
-      crown.data <- SectorData(dataset, crown.tips)
-      if (!is.null(crown.data)) break else cat('unsuitable (no dataset); trying')
-      candidate.nodes <- candidate.nodes[-which(candidate.nodes==sector)]
-      if (length(candidate.nodes == 0)) stop('No selectable sectors contain parsimony information! Either "largest.sector" is close to "smallest.sector" or your dataset is short of parsimony information.')
-    } 
-    if (verbosity >= 0) cat(' Sector OK.')
-    crown <- root(AddTip(crown, 0, 'SECTOR_ROOT'), length(crown$tip.label) + 1, resolve.root=TRUE) ## TODO use Root or add ape::root to includeFrom in NAMESPACE
-    initial.p <- InapplicableFitch(crown, crown.data, ...)
-    attr(crown, 'pscore') <- initial.p
-    if (verbosity >= 0) cat("\n - Running", rearrangements, "search on sector", sector)
-    candidate <- TreeSearch(crown, crown.data, 'SECTOR_ROOT', method=rearrangements, verbosity=verbosity-1, maxiter=maxiter, ...)
-    candidate.p <- attr(candidate, 'pscore')
-    
-    if((candidate.p + eps) < initial.p) {
-      kmax <- kmax + 1
-      stump <- DropTip(tree, GetDescendants(tree, sector)[[1]], subtree=TRUE)
-      stump.edge <- 1:nrow(stump$edge)
-      stump$root.edge <- 1
-      crown <- DropTip(candidate, 'SECTOR_ROOT')
-      tree <- CollapseSingles((BindTree(stump, crown, where=which(stump$tip.label==paste('[', sector.size, '_tips]', sep="")), position=0)))
-      if (verbosity > 0) cat(' : improved local pscore, updated tree')
-    } else if (verbosity > 0) cat (' : no improvement to local pscore')
-    if (kmax == k) break()
-  } # for
-  if (verbosity >= 0)
-    cat ("\nCompleted sectorial rearrangements.\n")
-  attr(tree, 'pscore') <- NULL
-  attr(tree, 'hits') <- NULL
-  tree
-}  # InapplicableSectorial
-
 #' Parsimony Ratchet
 #'
 #' \code{Ratchet} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
@@ -99,7 +6,8 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' @template datasetParam
 #' @template concavityParam
 #' @param all Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus
-#' @param outgroup a vector specifying all tips in the outgroup; if unspecified then identical trees with different roots will be considered unique;
+#' @param outgroup a vector specifying all tips in the outgroup; if unspecified then identical
+#'  trees with different roots will be considered unique;
 #' @param maxit   maximum ratchet iterations to perform;
 #' @param maxiter maximum rearrangements to perform on each bootstrap or ratchet iteration;
 #' @param maxhits maximum times to hit best score before terminating a tree search within a pratchet iteration;
@@ -111,7 +19,8 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' 
 #' @return This function returns a tree modified by parsimony ratchet iteration, retaining the position of the root.
 #'
-#' @references Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}
+#' @references Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.}
+#'  Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}
 #'
 #' @author Martin R. Smith
 #' 
@@ -126,6 +35,7 @@ InapplicableSectorial <- function (tree, dataset, maxit=100,
 #' Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxit=1, maxiter=50)
 #' }
 #' @keywords  tree 
+#' @importFrom TreeSearch Root
 #' @export
 Ratchet <- function 
 (tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, 
@@ -160,7 +70,7 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
     if((cand.pars+eps) < best.pars) {
       if (keepAll) {
         forest <- vector('list', maxiter)
-        forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
+        forest[[i]] <- if (is.null(outgroup)) candidate else TreeSearch::Root(candidate, outgroup)
       }
       tree <- candidate
       best.pars <- cand.pars
@@ -170,7 +80,7 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
         kmax <- kmax + 1
         candidate$tip.label <- names(dataset)
         tree <- candidate
-        if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else Root(candidate, outgroup)
+        if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else TreeSearch::Root(candidate, outgroup)
       }
     }
     if (verbosity > 0) cat("\n* Best pscore after", i, "/", maxit, "Ratchet iterations:", 
@@ -256,6 +166,7 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, verbosity=1, ...) 
 #' @author Martin R. Smith
 #' 
 #' @keywords internal
+#' @importFrom TreeSearch TBR SPR NNI
 #' @export
 
 DoTreeSearch <- function 
@@ -274,7 +185,7 @@ DoTreeSearch <- function
   if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- MorphyLength(tree, morphyObj)
   best.pscore <- attr(tree, 'pscore')
   if (verbosity > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
-  RearrangeFunc <- switch(method, 'TBR' = TBR, 'SPR' = SPR, 'NNI' = NNI)
+  RearrangeFunc <- switch(method, 'TBR' = TreeSearch::TBR, 'SPR' = TreeSearch::SPR, 'NNI' = TreeSearch::NNI)
   return.single <- !(forest.size > 1)
   
   for (iter in 1:maxiter) {
@@ -319,7 +230,8 @@ DoTreeSearch <- function
 #' Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR}) 
 #' to search for a more parsimonious tree.
 #'  
-#' @param tree a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;
+#' @param tree a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; 
+#'        edge lengths are not supported and will be deleted;
 #' @template datasetParam
 #' @param outgroup a vector listing the taxa in the outgroup;
 #' @param concavity concavity constant for implied weighting (not currently implemented!); 
@@ -423,7 +335,9 @@ TreeSearch <- function
 #' function (start.tree, dataset, outgroup, rearrangements='NNI') {
 #'   best.score <- attr(start.tree, 'pscore')
 #'   if (length(best.score) == 0) best.score <- InapplicableParsimony(start.tree, dataset)
-#'   sect <- InapplicableSectorial(start.tree, dataset, outgroup=outgroup, verbosity=0, maxit=30, maxiter=200, maxhits=15, smallest.sector=6, largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
+#'   sect <- InapplicableSectorial(start.tree, dataset, outgroup=outgroup, verbosity=0, maxit=30,
+#'             maxiter=200, maxhits=15, smallest.sector=6,
+#'             largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
 #'   sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxiter=2000, maxhits=20, verbosity=3)
 #'   sect <- TreeSearch(sect, dataset, outgroup, method='TBR', maxiter=2000, maxhits=25, verbosity=3)
 #'   sect <- TreeSearch(sect, dataset, outgroup, method='SPR', maxiter=2000, maxhits=50, verbosity=3)

@@ -47,13 +47,14 @@ InapplicableFitch <- function (tree, dataset, ...) {
 #'
 #' @author Martin R. Smith
 #' @keywords internal
+#' @importFrom TreeSearch Postorder
 #' @export
 MorphyLength <- function (tree, morphyObj) {
   nTaxa <- mpl_get_numtaxa(morphyObj)
   if (nTaxa < 1) stop("Error: ", mpl_translate_error(nTaxa))
   if (nTaxa != length(tree$tip.label)) stop ("Number of taxa in morphy object (", nTaxa, ") not equal to number of tips in tree")
   treeOrder <- attr(tree, 'order')
-  if (is.null(treeOrder) || treeOrder != "postorder") tree <- Postorder(tree)
+  if (is.null(treeOrder) || treeOrder != "postorder") tree <- TreeSearch::Postorder(tree)
   tree.edge <- tree$edge
   parent <- tree.edge[, 1]
   child <- tree.edge[, 2]

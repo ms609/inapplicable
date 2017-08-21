@@ -14,7 +14,8 @@ Ratchet(tree, dataset, keepAll = FALSE, outgroup = NULL, maxit = 100,
 \item{dataset}{A phylogenetic data matrix of class \code{\link[phangorn]{phyDat}}, whose names 
 correspond to the labels of any accompanying tree}
 
-\item{outgroup}{a vector specifying all tips in the outgroup; if unspecified then identical trees with different roots will be considered unique;}
+\item{outgroup}{a vector specifying all tips in the outgroup; if unspecified then identical
+trees with different roots will be considered unique;}
 
 \item{maxit}{maximum ratchet iterations to perform;}
 
@@ -48,7 +49,8 @@ Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxit=
 }
 }
 \references{
-Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.} Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}
+Nixon, K. C. (1999). \cite{The Parsimony Ratchet, a new method for rapid parsimony analysis.}
+ Cladistics, 15(4), 407-414. doi:\href{http://dx.doi.org/10.1111/j.1096-0031.1999.tb00277.x}{10.1111/j.1096-0031.1999.tb00277.x}
 }
 \seealso{
 \code{\link{pratchet}}

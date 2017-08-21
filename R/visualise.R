@@ -50,6 +50,7 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' 
 #' @importFrom ape .PlotPhyloEnv tiplabels nodelabels 
 #' @importFrom graphics text
+#' @importFrom TreeSearch Postorder
 #' @export
 VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 
 function (tree, dataset, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
@@ -60,7 +61,7 @@ function (tree, dataset, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
   if (char.no > at$nr || char.no < 1) stop(paste0("char.no must be between 1 and ", at$nr, ' (', sum(at$weight), 'TS, ', at$nr, ' unique)'))
   char.dat <- dataset[char.no,]
   char.index <- at$index[char.no]
-  if (is.null(at$order) || at$order != "postorder") tree <- Postorder(tree)
+  if (is.null(at$order) || at$order != "postorder") tree <- TreeSearch::Postorder(tree)
   tree.edge <- tree$edge
   parent <- tree.edge[,1]
   child <- tree.edge[,2]

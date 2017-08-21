@@ -25,6 +25,7 @@
 #' @examples mpl_translate_error(-1) # "ERR_INVALID_SYMBOL"
 #'
 #' @author Martin R. Smith
+#' @keywords internal
 #' @export
 
 mpl_translate_error <- function (errorCode) {
@@ -61,10 +62,12 @@ mpl_translate_error <- function (errorCode) {
 #' mpl_delete_Morphy(morphyObj) # Delete when done
 #' 
 #' @author Martin Brazeau
+#' @useDynLib(inapplicable)
+#' @keywords internal
 #' @export
 mpl_new_Morphy <- function() 
 {
-    return(.Call("_R_wrap_mpl_new_Morphy", PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_new_Morphy"))
 }
 
 
@@ -78,10 +81,11 @@ mpl_new_Morphy <- function()
 #' @return A Morphy error code.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_delete_Morphy <- function(morphyobj)
 {
-    return(.Call("_R_wrap_mpl_delete_Morphy", morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_delete_Morphy", morphyobj))
 }
 
 #' Sets up the dimensions of the dataset.
@@ -97,10 +101,11 @@ mpl_delete_Morphy <- function(morphyobj)
 #' @return Morphy error code.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_init_Morphy <- function(numtaxa, numchars, morphyobj)
 {
-    return(.Call("_R_wrap_mpl_init_Morphy", as.integer(numtaxa), as.integer(numchars), morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_init_Morphy", as.integer(numtaxa), as.integer(numchars), morphyobj))
 }
 
 
@@ -113,10 +118,11 @@ mpl_init_Morphy <- function(numtaxa, numchars, morphyobj)
 #' @return The number of taxa if success, otherwise an error code.
 #'
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_get_numtaxa <- function(morphyobj)
 {
-    return(.Call("_R_wrap_mpl_get_numtaxa", morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_get_numtaxa", morphyobj))
 }
 
 
@@ -131,11 +137,12 @@ mpl_get_numtaxa <- function(morphyobj)
 #' @return An error code.
 #' 
 #' @author Martin R. Smith
+#' @keywords internal
 #' @export
 mpl_set_charac_weight <- function (charID, weight, morphyobj)
 {
   return (.Call('_R_wrap_mpl_set_charac_weight', as.integer(charID - 1L), as.numeric(weight),
-                morphyobj, PACKAGE='inapplicable'))
+                morphyobj))
 }
 
 #' Retrieve the weight of a character in the dataset
@@ -149,11 +156,12 @@ mpl_set_charac_weight <- function (charID, weight, morphyobj)
 #'         approximation used by Morphy.
 #' 
 #' @author Martin R. Smith
+#' @keywords internal
 #' @export
 mpl_get_charac_weight <- function (charID, morphyobj)
 {
   return (.Call('_R_wrap_mpl_get_charac_weight', as.integer(charID - 1L), 
-                morphyobj, PACKAGE='inapplicable'))
+                morphyobj))
 }
 
 
@@ -166,10 +174,11 @@ mpl_get_charac_weight <- function (charID, morphyobj)
 #' @return The number of internal nodes.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_get_num_charac <- function(morphyobj)
 {
-    return(.Call("_R_wrap_mpl_get_num_charac", morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_get_num_charac", morphyobj))
 }
 
 
@@ -190,10 +199,11 @@ mpl_get_num_charac <- function(morphyobj)
 #' @return Morphy error code.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_attach_symbols <- function(symbols, morphyobj)
 {
-    return(.Call("_R_wrap_mpl_attach_symbols", symbols, morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_attach_symbols", symbols, morphyobj))
 }
 
 
@@ -210,10 +220,11 @@ mpl_attach_symbols <- function(symbols, morphyobj)
 #' @return Morphy error code.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_attach_rawdata <- function(rawdata, morphyobj)
 {
-    return(.Call("_R_wrap_mpl_attach_rawdata", rawdata, morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_attach_rawdata", rawdata, morphyobj))
 }
 
 #' Retrieves the current list of symbols.
@@ -228,11 +239,12 @@ mpl_attach_rawdata <- function(rawdata, morphyobj)
 #' being used. NULL if failure.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 
 mpl_get_symbols <- function(morphyobj)
 {
-    str = .Call("_R_wrap_mpl_get_symbols", morphyobj, PACKAGE='inapplicable')
+    str = .Call("_R_wrap_mpl_get_symbols", morphyobj)
     return(str)
 }
 
@@ -251,11 +263,11 @@ mpl_get_symbols <- function(morphyobj)
 #' @return A Morphy error code.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_set_parsim_t <- function(char_id, tname = "typename", morphyobj)
 {
-    return(.Call("_R_wrap_mpl_set_parsim_t", as.integer(char_id - 1L), tname, morphyobj,
-                 PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_set_parsim_t", as.integer(char_id - 1L), tname, morphyobj))
 }
 
 
@@ -271,10 +283,11 @@ mpl_set_parsim_t <- function(char_id, tname = "typename", morphyobj)
 #' @return A Morphy error code.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_set_num_internal_nodes <- function(numnodes, morphyobj)
 {
-    return(.Call("_R_wrap_mpl_set_num_internal_nodes", as.integer(numnodes), morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_set_num_internal_nodes", as.integer(numnodes), morphyobj))
 }
 
 
@@ -290,11 +303,12 @@ mpl_set_num_internal_nodes <- function(numnodes, morphyobj)
 #' @return The number of internal nodes.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 
 mpl_get_num_internal_nodes <- function(morphyobj)
 {
-    return(.Call("_R_wrap_mpl_get_num_internal_nodes", morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_get_num_internal_nodes", morphyobj))
 }
 
 
@@ -310,10 +324,11 @@ mpl_get_num_internal_nodes <- function(morphyobj)
 #' @return A Morphy error code.
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_apply_tipdata <- function(morphyobj)
 {
-    return(.Call("_R_wrap_mpl_apply_tipdata", morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_apply_tipdata", morphyobj))
 }
 
 #' Reconstructs the first (downpass) nodal reconstructions
@@ -334,10 +349,11 @@ mpl_apply_tipdata <- function(morphyobj)
 #' @return The integral parsimony length (right now)
 #' 
 #' @author Martin Brazeau
+#' @keywords internal
 #' @export
 mpl_first_down_recon <- function(node_id, left_id, right_id, morphyobj)
 {
-    return(.Call("_R_wrap_mpl_first_down_recon", as.integer(node_id), as.integer(left_id), as.integer(right_id), morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_first_down_recon", as.integer(node_id), as.integer(left_id), as.integer(right_id), morphyobj))
 }
 
 
@@ -351,10 +367,11 @@ mpl_first_down_recon <- function(node_id, left_id, right_id, morphyobj)
 #' @return Morphy error code.
 #' 
 #' @author Thomas Guillerme
+#' @keywords internal
 #' @export
 mpl_delete_rawdata <- function(morphyobj)
 {
-    return(.Call("_R_wrap_mpl_delete_rawdata", morphyobj, PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_delete_rawdata", morphyobj))
 }
 
 
@@ -377,11 +394,12 @@ mpl_delete_rawdata <- function(morphyobj)
 #' @return A null value (for now).
 #' 
 #' @author Thomas Guillerme
+#' @keywords internal
 #' @export
 mpl_first_up_recon <- function(node_id, left_id, right_id, anc_id, morphyobj)
 {
     return(.Call("_R_wrap_mpl_first_up_recon", as.integer(node_id), as.integer(left_id), 
-                 as.integer(right_id), as.integer(anc_id), morphyobj, PACKAGE='inapplicable'))
+                 as.integer(right_id), as.integer(anc_id), morphyobj))
 }
 
 
@@ -405,11 +423,12 @@ mpl_first_up_recon <- function(node_id, left_id, right_id, anc_id, morphyobj)
 #' @return The integral parsimony length (right now)
 #' 
 #' @author Thomas Guillerme
+#' @keywords internal
 #' @export
 mpl_second_down_recon <- function(node_id, left_id, right_id, morphyobj)
 {
     return(.Call("_R_wrap_mpl_second_down_recon", as.integer(node_id), as.integer(left_id),
-                 as.integer(right_id), morphyobj, PACKAGE='inapplicable'))
+                 as.integer(right_id), morphyobj))
 }
 
 
@@ -433,11 +452,12 @@ mpl_second_down_recon <- function(node_id, left_id, right_id, morphyobj)
 #' @return The integral parsimony length (right now)
 #'  
 #' @author Thomas Guillerme
+#' @keywords internal
 #' @export
 mpl_second_up_recon <- function(node_id, left_id, right_id, anc_id, morphyobj)
 {
     return(.Call("_R_wrap_mpl_second_up_recon", as.integer(node_id), as.integer(left_id), 
-                 as.integer(right_id), as.integer(anc_id), morphyobj, PACKAGE='inapplicable'))
+                 as.integer(right_id), as.integer(anc_id), morphyobj))
 }
 
 #' Initial update of tip values following uppass reconstruction.
@@ -462,6 +482,7 @@ mpl_second_up_recon <- function(node_id, left_id, right_id, anc_id, morphyobj)
 #' @seealso A null value (for now).
 #' 
 #' @author Thomas Guillerme
+#' @keywords internal
 #' @export
 mpl_update_tip <- function(tip_id, anc_id, morphyobj)
 {
@@ -486,9 +507,10 @@ mpl_update_tip <- function(tip_id, anc_id, morphyobj)
 #' @return A Morphy error code.
 #' 
 #' @author Thomas Guillerme
+#' @keywords internal
 #' @export
 mpl_update_lower_root <- function(l_root_id, root_id, morphyobj)
 {
     return(.Call("_R_wrap_mpl_update_lower_root", as.integer(l_root_id), as.integer(root_id),
-                  morphyobj, PACKAGE='inapplicable'))
+                  morphyobj))
 }

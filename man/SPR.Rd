@@ -16,9 +16,13 @@ SPR(tree)
 Rooted SPR rearrangement
 
 Perform one \acronym{SPR} rearrangement on a tree
+Equivalent to phangorn's kSPR, but 10x faster
 }
 \section{Functions}{
 \itemize{
 \item \code{RootedSPR}: Perform \acronym{SPR} operation, retaining position of root
 }}
 
+\author{
+Martin R. Smith
+}

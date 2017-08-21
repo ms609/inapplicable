@@ -2,23 +2,30 @@
 % Please edit documentation in R/phylo.R
 \name{BindTree}
 \alias{BindTree}
-\title{TITLE GOES HERE}
+\title{Bind trees}
 \usage{
-BindTree(x, y, where = "root", position = 0, interactive = FALSE)
+BindTree(x, y, where = "root", position = 0)
 }
 \arguments{
-\item{PARAM}{is a parameter you should send to it}
+\item{x}{First tree fragment}
+
+\item{y}{Second tree fragment}
+
+\item{where}{which edge to use to bind fragments [?]}
+
+\item{position}{Where on second tree to bind [?]}
 }
 \value{
-This function returns :
+A single tree comprising the two fragments
 }
 \description{
-\code{FUNCTIONNAME} does something useful
+Copied from \code{ape:::bind.tree}.
+Changes: \itemise{
+  \item{use (x|y).edge in place of (x|y)$edge for efficiency}
+  \item{Delete interactive option}
+  \item{Use Cladewise instead of reorder (..., 'cladewise')}
 }
-\examples{
-to_do <- TRUE
-
 }
 \author{
-Martin R. Smith
+Martin R. Smith, based on APE (Emmanuel Paradis)
 }

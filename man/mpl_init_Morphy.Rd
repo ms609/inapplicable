@@ -24,3 +24,4 @@ constrain any input matrix supplied to Morphy.
 \author{
 Martin Brazeau
 }
+\keyword{internal}

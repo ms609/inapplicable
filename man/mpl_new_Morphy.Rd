@@ -22,3 +22,4 @@ mpl_delete_Morphy(morphyObj) # Delete when done
 \author{
 Martin Brazeau
 }
+\keyword{internal}

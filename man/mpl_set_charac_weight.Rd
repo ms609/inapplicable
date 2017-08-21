@@ -22,3 +22,4 @@ Sets the weight of a character in the dataset.
 \author{
 Martin R. Smith
 }
+\keyword{internal}

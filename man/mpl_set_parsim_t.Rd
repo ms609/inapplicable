@@ -25,3 +25,4 @@ cause it to be excluded from any further calculations.
 \author{
 Martin Brazeau
 }
+\keyword{internal}

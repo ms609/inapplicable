@@ -21,3 +21,4 @@ from the matrix, or the caller-specified values).
 \author{
 Martin Brazeau
 }
+\keyword{internal}

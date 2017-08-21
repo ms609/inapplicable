@@ -6,9 +6,10 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <Rmath.h>
+#include <R_ext/Rdynload.h>
+#include <stdlib.h> // for NULL
 #include "mpl.h"
 #include "RMorphyUtils.h"
-#include <R_ext/Rdynload.h>
 
 SEXP _R_wrap_mpl_new_Morphy(void)
 {

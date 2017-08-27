@@ -4,15 +4,14 @@
 #'
 #' @template treeParam 
 #' @template datasetParam
-#' @template concavityParam
-#' @param all Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus
+#' @param keepAll Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus
 #' @param outgroup a vector specifying all tips in the outgroup; if unspecified then identical
 #'  trees with different roots will be considered unique;
-#' @param maxit   maximum ratchet iterations to perform;
-#' @param maxiter maximum rearrangements to perform on each bootstrap or ratchet iteration;
-#' @param maxhits maximum times to hit best score before terminating a tree search within a pratchet iteration;
+#' @param maxIt   maximum ratchet iterations to perform;
+#' @param maxIter maximum rearrangements to perform on each bootstrap or ratchet iteration;
+#' @param maxHits maximum times to hit best score before terminating a tree search within a pratchet iteration;
 #' @param k stop when k ratchet iterations have found the same best score;
-#' @param verbosity larger numbers provides more verbose feedback to the user;
+#' @template verbosityParam
 #' @param rearrangements method(s) to use when rearranging trees: 
 #'        a vector containing any combination of the strings "NNI", "SPR" or "TBR";
 #' @param \dots other arguments to pass to subsequent functions.
@@ -32,14 +31,14 @@
 #' 
 #' @examples{
 #' data('Lobo')
-#' Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxit=1, maxiter=50)
+#' Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
 #' @importFrom TreeSearch Root
 #' @export
 Ratchet <- function 
-(tree, dataset, keepAll=FALSE, outgroup=NULL, maxit=100, maxiter=5000, 
-maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
+(tree, dataset, keepAll=FALSE, outgroup=NULL, maxIt=100, maxIter=5000, 
+maxHits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
@@ -50,19 +49,19 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
   }
   best.pars <- attr(tree, "pscore")
   if (verbosity > 0) cat("* Initial pscore:", best.pars)
-  if (keepAll) forest <- vector('list', maxiter)
+  if (keepAll) forest <- vector('list', maxIter)
 
   kmax <- 0 
-  for (i in 1:maxit) {
+  for (i in 1:maxIt) {
     if (verbosity > 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
-    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxiter=maxiter, maxhits=maxhits,
+    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
                                verbosity=verbosity-1, ...)
     
     for (method in rearrangements) {
       if (method %in% c('TBR', 'SPR', 'NNI')) {
         if (verbosity > 0) cat ("\n - Running", method, "rearrangements from new candidate tree...")
         candidate <- DoTreeSearch(candidate, morphyObj, method=method, 
-                                  verbosity=verbosity-1, maxiter=maxiter, maxhits=maxhits, ...)
+                                  verbosity=verbosity-1, maxIter=maxIter, maxHits=maxHits, ...)
       } else {
         warning("Method", method, "unknown; try SPR, TBR or NNI")
       }
@@ -70,7 +69,7 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
     cand.pars <- attr(candidate, 'pscore')
     if((cand.pars+eps) < best.pars) {
       if (keepAll) {
-        forest <- vector('list', maxiter)
+        forest <- vector('list', maxIter)
         forest[[i]] <- if (is.null(outgroup)) candidate else TreeSearch::Root(candidate, outgroup)
       }
       tree <- candidate
@@ -84,7 +83,7 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
         if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else TreeSearch::Root(candidate, outgroup)
       }
     }
-    if (verbosity > 0) cat("\n* Best pscore after", i, "/", maxit, "Ratchet iterations:", 
+    if (verbosity > 0) cat("\n* Best pscore after", i, "/", maxIt, "Ratchet iterations:", 
                            best.pars, "( hit", kmax, "/", k, ")")
     if (kmax >= k) break()
   } # for
@@ -105,21 +104,10 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
   return (ret)
 }
 
-#' Consensus of Ratchet iterations
-#'
-#' \code{FUNCTIONNAME} does something useful but undocumented
-#'
-#' @param PARAM is a parameter you should send to it
-#' 
-#' @examples
-#' to_do <- TRUE
-#' 
-#' @return This function returns :
-#'   
-#' @author Martin R. Smith
+#' @describeIn Ratchet returns a list of optimal trees produced by a Ratchet search
 #' @export
-RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxit, maxiter, maxhits, k=1, verbosity, rearrangements, ...))
+RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0, rearrangements="NNI", criterion=NULL, nSearch=10, ...) {
+  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxIt, maxIter, maxHits, k=1, verbosity, rearrangements, ...))
   scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
   trees <- unique(trees[scores == min(scores)])
   cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')
@@ -130,10 +118,14 @@ RatchetConsensus <- function (tree, dataset, maxit=5000, maxiter=500, maxhits=20
 #' 
 #' @template labelledTreeParam
 #' @template morphyObjParam
+#' @param maxIter maximum number of iterations to perform in tree search
+#' @param maxHits maximum number of hits to accomplish in tree search
+#' @template verbosityParam
+#' @param \dots further parameters to send to DoTreeSearch
 #'
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @export
-BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, verbosity=1, ...) {
+BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   startWeights <- MorphyWeights(morphyObj)[1, ]
   eachChar <- seq_along(startWeights)
@@ -143,7 +135,7 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, verbosity=1, ...) 
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)#
   attr(tree, 'pscore') <- NULL
-  res <- DoTreeSearch(tree, morphyObj, method='NNI', maxiter=maxiter, maxhits=maxhits, verbosity=verbosity-1, ...)
+  res <- DoTreeSearch(tree, morphyObj, method='NNI', maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   vapply(eachChar, function (i) 
@@ -170,30 +162,30 @@ BootstrapTree <- function (tree, morphyObj, maxiter, maxhits, verbosity=1, ...) 
 #' @export
 
 DoTreeSearch <- function 
-(tree, morphyObj, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, 
+(tree, morphyObj, method='NNI', maxIter=100, maxHits=20, forestSize=1, cluster=NULL, 
  verbosity=1, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1
-  if (!is.null(forest.size) && length(forest.size)) {
-    if (forest.size > 1) {
-      forest <- empty.forest <- vector('list', forest.size)
+  if (!is.null(forestSize) && length(forestSize)) {
+    if (forestSize > 1) {
+      forest <- empty.forest <- vector('list', forestSize)
       forest[[1]] <- tree
     } else {
-      forest.size <- 1 
+      forestSize <- 1 
     }
   }
   if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- MorphyLength(tree, morphyObj)
   best.pscore <- attr(tree, 'pscore')
   if (verbosity > 0) cat("\n  - Performing", method, "search.  Initial pscore:", best.pscore)
   RearrangeFunc <- switch(method, 'TBR' = TreeSearch::TBR, 'SPR' = TreeSearch::SPR, 'NNI' = TreeSearch::NNI)
-  return.single <- !(forest.size > 1)
+  return.single <- !(forestSize > 1)
   
-  for (iter in 1:maxiter) {
+  for (iter in 1:maxIter) {
     trees <- RearrangeTree(tree, morphyObj, RearrangeFunc, min.score=best.pscore, 
                            return.single=return.single, iter=iter, cluster=cluster,
                            verbosity=verbosity, ...)
     iter.pscore <- attr(trees, 'pscore')
-    if (length(forest.size) && forest.size > 1) {
+    if (length(forestSize) && forestSize > 1) {
       hits <- attr(trees, 'hits')
       if (iter.pscore == best.pscore) {
         forest[(hits-length(trees)+1L):hits] <- trees
@@ -214,11 +206,11 @@ DoTreeSearch <- function
         tree <- trees
       }
     }
-    if (attr(trees, 'hits') >= maxhits) break
+    if (attr(trees, 'hits') >= maxHits) break
   }
   if (verbosity > 0) cat("\n  - Final score", attr(tree, 'pscore'), "found", attr(tree, 'hits'), "times after", iter, method, "iterations\n")  
-  if (forest.size > 1) {
-    if (hits < forest.size) forest <- forest[-((hits+1):forest.size)]
+  if (forestSize > 1) {
+    if (hits < forestSize) forest <- forest[-((hits+1):forestSize)]
     attr(forest, 'hits') <- hits
     attr(forest, 'pscore') <- best.pscore
     return (unique(forest))
@@ -233,14 +225,12 @@ DoTreeSearch <- function
 #' @param tree a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; 
 #'        edge lengths are not supported and will be deleted;
 #' @template datasetParam
-#' @param outgroup a vector listing the taxa in the outgroup;
-#' @param concavity concavity constant for implied weighting (not currently implemented!); 
 #' @param method rearrangements to perform; one of \kbd{NNI}, \kbd{SPR}, or \kbd{TBR};
-#' @param maxiter the maximum number of iterations to perform before abandoning the search;
-#' @param maxhits the maximum times to hit the best pscore before abandoning the search;
-#' @param forest.size the maximum number of trees to return - useful in concert with \code{\link{consensus}};
+#' @param maxIter the maximum number of iterations to perform before abandoning the search;
+#' @param maxHits the maximum times to hit the best pscore before abandoning the search;
+#' @param forestSize the maximum number of trees to return - useful in concert with \code{\link{consensus}};
 #' @param cluster a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;
-#' @param verbosity higher values provide more verbose user feedback in stdout;
+#' @template verbosityParam
 #' @param \dots other arguments to pass to subsequent functions.
 #' 
 #' @return{
@@ -265,22 +255,21 @@ DoTreeSearch <- function
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #'
 #' \dontrun{
-#' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='NNI')
-#' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='SPR')
-#' TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='TBR')}
+#' TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, method='NNI')
+#' TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, method='SPR')
+#' TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, method='TBR')}
 #' 
 #' @keywords  tree 
 #' 
 #' @export
 TreeSearch <- function 
-(tree, dataset, method='NNI', maxiter=100, maxhits=20, forest.size=1, cluster=NULL, 
- verbosity=1, ...) {
+(tree, dataset, method='NNI', maxIter=100, maxHits=20, forestSize=1, cluster=NULL, verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   tree <- RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  ret <- DoTreeSearch(tree, morphyObj, method, maxiter, maxhits, forest.size, cluster, 
+  ret <- DoTreeSearch(tree, morphyObj, method, maxIter, maxHits, forestSize, cluster, 
                       verbosity, ...)
   return (ret)
 }
@@ -304,11 +293,11 @@ TreeSearch <- function
 #' @template datasetParam
 #' @param outgroup a vector listing the taxa that form the outgroup;
 #' @template concavityParam
-#' @param maxit maximum number of sectorial iterations to perform;
-#' @param maxiter maximum number of rearrangements to perform on each sectorial iteration;
+#' @param maxIt maximum number of sectorial iterations to perform;
+#' @param maxIter maximum number of rearrangements to perform on each sectorial iteration;
 #' @param cluster a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;
 #' @param k stop when \code{k} searches have improved their sectorial score;
-#' @param verbosity integer determining how verbose the reporting to stdout will be;
+#' @template verbosityParam
 #' @param smallest.sector sectors with fewer than \code{smallest.sector} taxa will not be selected; \kbd{4} is the smallest sensible value;
 #' @param largest.sector sectors with more than \code{largest.sector} taxa will not be selected;
 #' @param rearrangements method to use when rearranging subtrees: NNI, SPR or TBR;
@@ -328,20 +317,20 @@ TreeSearch <- function
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 #' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
-#' InapplicableSectorial(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50, largest.sector=7)
+#' InapplicableSectorial(njtree, SigSut.phy, outgroup, maxIt=1, maxIter=50, largest.sector=7)
 #' \dontrun{SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming}
 #' 
 #' ## SectorialSearch is currently defined as
 #' function (start.tree, dataset, outgroup, rearrangements='NNI') {
 #'   best.score <- attr(start.tree, 'pscore')
 #'   if (length(best.score) == 0) best.score <- InapplicableParsimony(start.tree, dataset)
-#'   sect <- InapplicableSectorial(start.tree, dataset, outgroup=outgroup, verbosity=0, maxit=30,
-#'             maxiter=200, maxhits=15, smallest.sector=6,
+#'   sect <- InapplicableSectorial(start.tree, dataset, outgroup=outgroup, verbosity=0, maxIt=30,
+#'             maxIter=200, maxHits=15, smallest.sector=6,
 #'             largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
-#'   sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxiter=2000, maxhits=20, verbosity=3)
-#'   sect <- TreeSearch(sect, dataset, outgroup, method='TBR', maxiter=2000, maxhits=25, verbosity=3)
-#'   sect <- TreeSearch(sect, dataset, outgroup, method='SPR', maxiter=2000, maxhits=50, verbosity=3)
-#'   sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxiter=2000, maxhits=50, verbosity=3)
+#'   sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxIter=2000, maxHits=20, verbosity=3)
+#'   sect <- TreeSearch(sect, dataset, outgroup, method='TBR', maxIter=2000, maxHits=25, verbosity=3)
+#'   sect <- TreeSearch(sect, dataset, outgroup, method='SPR', maxIter=2000, maxHits=50, verbosity=3)
+#'   sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxIter=2000, maxHits=50, verbosity=3)
 #'   if (attr(sect, 'pscore') <= best.score) {
 #'     return (sect)
 #'   } else return (SetOutgroup(start.tree, outgroup))
@@ -350,17 +339,17 @@ TreeSearch <- function
 #' 
 #' @keywords  tree 
 #' @export
-SectorialSearch <- function (tree, dataset, concavity = NULL, rearrangements='NNI', maxiter=2000, cluster=NULL, verbosity=3, ...) {
+SectorialSearch <- function (tree, dataset, concavity = NULL, rearrangements='NNI', maxIter=2000, cluster=NULL, verbosity=3, ...) {
   best.score <- attr(tree, 'pscore')
   tree <- RenumberTips(tree, names(dataset))
   if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
   sect <- InapplicableSectorial(tree, dataset, cluster=cluster,
-    verbosity=verbosity-1, maxit=30, maxiter=maxiter, maxhits=15, smallest.sector=6, 
+    verbosity=verbosity-1, maxIt=30, maxIter=maxIter, maxHits=15, smallest.sector=6, 
     largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)
-  sect <- TreeSearch(sect, dataset, method='NNI', maxiter=maxiter, maxhits=30, cluster=cluster, verbosity=verbosity)
-  sect <- TreeSearch(sect, dataset, method='TBR', maxiter=maxiter, maxhits=20, cluster=cluster, verbosity=verbosity)
-  sect <- TreeSearch(sect, dataset, method='SPR', maxiter=maxiter, maxhits=50, cluster=cluster, verbosity=verbosity)
-  sect <- TreeSearch(sect, dataset, method='NNI', maxiter=maxiter, maxhits=60, cluster=cluster, verbosity=verbosity)
+  sect <- TreeSearch(sect, dataset, method='NNI', maxIter=maxIter, maxHits=30, cluster=cluster, verbosity=verbosity)
+  sect <- TreeSearch(sect, dataset, method='TBR', maxIter=maxIter, maxHits=20, cluster=cluster, verbosity=verbosity)
+  sect <- TreeSearch(sect, dataset, method='SPR', maxIter=maxIter, maxHits=50, cluster=cluster, verbosity=verbosity)
+  sect <- TreeSearch(sect, dataset, method='NNI', maxIter=maxIter, maxHits=60, cluster=cluster, verbosity=verbosity)
   if (attr(sect, 'pscore') <= best.score) {
     return (sect)
   } else return (tree)

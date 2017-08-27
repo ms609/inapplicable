@@ -15,21 +15,20 @@
 #' @export
 VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, char.no, plot.fun=plot) {
   par(mfrow=c(1,2), mar=rep(0.5,4))
-  VisualizeCharacter(tree, data, char.no, plot.fun, inherit.ancestral=FALSE)
-  VisualizeCharacter(tree, data, char.no, plot.fun, inherit.ancestral=TRUE)
+  VisualizeCharacter(tree, data, char.no, plot.fun)
 }
 #' VisualiseCharacter
 #' 
 #' Visualize optimization for a character
 #' 
 #' @description Determine and depict the possible states for a character on a tree under the most parsimonious conditions
-#' @usage VisualiseCharacter(tree, dataset, char.no, plot.fun = plot, inherit.ancestral = FALSE)
+#' @usage VisualiseCharacter(tree, dataset, char.no, plot.fun = plot)
 #' 
 #' @param tree a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;
 #' @template datasetParam
 #' @param char.no number of the character to be displayed;
 #' @param plot.fun a function that plots a tree, \code{\link{plot}} by default.
-#' 
+#'
 #' @return The function plots a cladogram, annotating each node with the values that could occur there at the lowest parsimony score.
 #'   Nodes highlighed in red potentially (but do not necessarily) contribute to tree length.
 #' 
@@ -53,7 +52,7 @@ VisualiseInheritance <- VisualizeInheritance <- VisIn <- function (tree, data, c
 #' @importFrom TreeSearch Postorder
 #' @export
 VisualizeCharacter <- VisualiseCharacter <- VisualiseChar <- VisualizeChar <- 
-function (tree, dataset, char.no, plot.fun = plot, inherit.ancestral = FALSE) {
+function (tree, dataset, char.no, plot.fun = plot) {
   if (class(dataset) == 'phyDat') dataset <- MorphyDat(dataset)
   if (class(dataset) != 'morphyDat') stop('Invalid dataset type in VizualizeCharacter.')
   warning("#TODO: Update to use new morphyDat dataset objects")

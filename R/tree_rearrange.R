@@ -11,12 +11,11 @@
 #'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};
 #' @param  min.score trees longer than \code{min.score}, probably the score of the starting tree,
 #'     will be discarded;
-#' @template concavityParam 
 #' @param  return.single returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
 #'   \item{iter}{iteration number of calling function, for reporting to user only;
 #' @param  cluster a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
 #'     searches on multicore machines;
-#' @param verbosity determines how much information to output to screen.
+#' @template verbosityParam
 #' 
 #' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}
 #'  as described for argument \code{tree}, and with tip labels ordered to match morphyObj.}
@@ -31,12 +30,14 @@
 #' @examples
 #' data('SigSut')
 #' random.tree <- RandomTree(SigSut.phy)
-#' RearrangeTree(random.tree, SigSut.phy, RootedNNI)
+#' require('TreeSearch')
+#' RearrangeTree(random.tree, SigSut.phy, TreeSearch::RootedNNI)
 #' 
 #' @importFrom parallel clusterCall
 #' @importFrom TreeSearch RenumberTips
 #' @export
-RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, concavity=NULL, return.single=TRUE, iter='?', cluster=NULL, criterion=NULL, verbosity=0) {
+RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.single=TRUE,
+                           iter='?', cluster=NULL, verbosity=0) {
   if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label

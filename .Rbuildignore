@@ -1,5 +1,5 @@
 /^src\-/
-/^man-roxygen/
+/^man\-roxygen/
 /^\.git/
 ^.*\.o$
 ^.*\.dll$

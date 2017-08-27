@@ -23,7 +23,8 @@ in the corresponding Morphy object.}
 
 \item{forestSize}{how many trees to hold}
 
-\item{cluster}{Not really implemented; #TODO}
+\item{cluster}{a cluster, prepared with code{link{PrepareCluster}}, to accelerate 
+searches on multicore machines. #TODO not tested. #TODO restore code link}
 
 \item{verbosity}{Level of detail to display in console: larger numbers provides more verbose feedback to the user;}
 

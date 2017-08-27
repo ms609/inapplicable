@@ -13,8 +13,7 @@
 #'     will be discarded;
 #' @param  return.single returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
 #'   \item{iter}{iteration number of calling function, for reporting to user only;
-#' @param  cluster a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
-#'     searches on multicore machines;
+#' @template clusterParam
 #' @template verbosityParam
 #' 
 #' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}

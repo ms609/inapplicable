@@ -24,8 +24,8 @@ will be discarded;}
 \item{return.single}{returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
 \item{iter}{iteration number of calling function, for reporting to user only;}
 
-\item{cluster}{a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
-searches on multicore machines;}
+\item{cluster}{a cluster, prepared with code{link{PrepareCluster}}, to accelerate 
+searches on multicore machines. #TODO not tested. #TODO restore code link}
 
 \item{verbosity}{Level of detail to display in console: larger numbers provides more verbose feedback to the user;}
 }

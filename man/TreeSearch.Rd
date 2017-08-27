@@ -22,7 +22,8 @@ correspond to the labels of any accompanying tree}
 
 \item{forestSize}{the maximum number of trees to return - useful in concert with \code{\link{consensus}};}
 
-\item{cluster}{a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;}
+\item{cluster}{a cluster, prepared with code{link{PrepareCluster}}, to accelerate 
+searches on multicore machines. #TODO not tested. #TODO restore code link}
 
 \item{verbosity}{Level of detail to display in console: larger numbers provides more verbose feedback to the user;}
 
@@ -40,11 +41,12 @@ Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR})
 to search for a more parsimonious tree.
 }
 \examples{
-library('ape')
+library('ape'); library('phangorn')
 data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-njtree <- ape::root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
-njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
+njtree <- ape::root(nj(phangorn::dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+njtree$edge.length <- NULL
+njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 
 \dontrun{
 TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, Rearrange=TreeSearch::NNI)

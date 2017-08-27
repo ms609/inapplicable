@@ -39,6 +39,8 @@ trees with different roots will be considered unique;}
 e.g. \code{list(TreeSearch::RootedTBR, TreeSearch::RootedNNI)}}
 
 \item{\dots}{other arguments to pass to subsequent functions.}
+
+\item{nSearch}{Number of Ratchet searches to conduct (for RatchetConsensus)}
 }
 \value{
 This function returns a tree modified by parsimony ratchet iteration, retaining the position of the root.
@@ -54,7 +56,8 @@ This function returns a tree modified by parsimony ratchet iteration, retaining 
 \examples{
 {
 data('Lobo')
-Ratchet(RandomTree(Lobo.phy), dataset=Lobo.phy, outgroup='Tubiluchus_Priapulida', maxIt=1, maxIter=50)
+Ratchet(tree=RandomTree(Lobo.phy, outgroup='Tubiluchus_Priapulida'), 
+        dataset=Lobo.phy, maxIt=1, maxIter=50)
 }
 }
 \references{

@@ -54,7 +54,7 @@ This function returns a tree modified by parsimony ratchet iteration, retaining 
 \examples{
 {
 data('Lobo')
-Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxIt=1, maxIter=50)
+Ratchet(RandomTree(Lobo.phy), dataset=Lobo.phy, outgroup='Tubiluchus_Priapulida', maxIt=1, maxIter=50)
 }
 }
 \references{

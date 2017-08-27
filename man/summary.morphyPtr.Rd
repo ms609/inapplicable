@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{A Morphy object}
+
+\item{\dots}{any other parameters...}
 }
 \value{
 A list detailing the number of taxa, internal nodes, and characters and their weigths.

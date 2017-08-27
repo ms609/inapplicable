@@ -1,3 +1,4 @@
+#library(devtools); library(testthat);
 library(ape)
 
 ## Test cases designed by Thomas Guillerme

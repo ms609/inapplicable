@@ -4,8 +4,8 @@
 \alias{RearrangeTree}
 \title{Rearrange phylogenetic tree}
 \usage{
-#' RearrangeTree(tree, data, rearrange, min.score = NULL, concavity = NULL, return.single = TRUE,
- iter = '?', cluster = NULL, verbosity = 0)
+RearrangeTree(tree, morphyObj, Rearrange, min.score = NULL,
+  return.single = TRUE, iter = "?", cluster = NULL, verbosity = 0)
 }
 \arguments{
 \item{tree}{a rooted bifurcating phylogenetic tree with the desired outgroup, with its labels
@@ -21,15 +21,13 @@ in an order that matches the Morphy object, and the attributes
 \item{min.score}{trees longer than \code{min.score}, probably the score of the starting tree,
 will be discarded;}
 
-\item{concavity}{concavity constant for implied weighting (not currently implemented!)}
-
 \item{return.single}{returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
 \item{iter}{iteration number of calling function, for reporting to user only;}
 
-\item{cluster}{a cluster, prepared with \code{\link{PrepareCluster}}, to accelerate 
-searches on multicore machines;}
+\item{cluster}{a cluster, prepared with code{link{PrepareCluster}}, to accelerate 
+searches on multicore machines. #TODO not tested. #TODO restore code link}
 
-\item{verbosity}{determines how much information to output to screen.}
+\item{verbosity}{Level of detail to display in console: larger numbers provides more verbose feedback to the user;}
 }
 \value{
 {This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}
@@ -40,12 +38,6 @@ Rearrange phylogenetic tree
 }
 \details{
 \code{RearrangeTree} performs one tree rearrangement of a specified type
-}
-\examples{
-data('SigSut')
-random.tree <- RandomTree(SigSut.phy)
-RearrangeTree(random.tree, SigSut.phy, RootedNNI)
-
 }
 \seealso{
 \itemize{

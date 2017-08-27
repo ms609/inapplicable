@@ -1,4 +1,5 @@
 #include <string.h>
+#include "mpl.h"
 
 #if defined (_WIN32) || defined(_WIN64) || defined(_WINDOWS)
 #define strcasecmp _stricmp

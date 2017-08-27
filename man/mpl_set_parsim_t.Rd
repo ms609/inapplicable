@@ -7,12 +7,12 @@
 mpl_set_parsim_t(char_id, tname = "typename", morphyobj)
 }
 \arguments{
-\item{morphyobj}{An instance of the Morphy object.}
-
-\item{charID}{The number of the character (transformation series) as defined
+\item{char_id}{The number of the character (transformation series) as defined
 in the input matrix.  The first character is numbered 1 (one).}
 
-\item{chtype}{The parsimony function type as defined in morphydefs.h}
+\item{tname}{The parsimony function type as defined in morphydefs.h}
+
+\item{morphyobj}{An instance of the Morphy object.}
 }
 \value{
 A Morphy error code.
@@ -25,3 +25,4 @@ cause it to be excluded from any further calculations.
 \author{
 Martin Brazeau
 }
+\keyword{internal}

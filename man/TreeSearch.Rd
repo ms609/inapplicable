@@ -4,32 +4,30 @@
 \alias{TreeSearch}
 \title{Search for most parsimonious trees}
 \usage{
-TreeSearch(tree, dataset, method = "NNI", maxiter = 100, 
-  maxhits = 20, forest.size = 1, cluster = NULL, verbosity = 1, ...)
+TreeSearch(tree, dataset, Rearrange = TreeSearch::RootedTBR, maxIter = 100,
+  maxHits = 20, forestSize = 1, cluster = NULL, verbosity = 1, ...)
 }
 \arguments{
-\item{tree}{a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}
+\item{tree}{a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; 
+edge lengths are not supported and will be deleted;}
 
 \item{dataset}{A phylogenetic data matrix of class \code{\link[phangorn]{phyDat}}, whose names 
 correspond to the labels of any accompanying tree}
 
-\item{method}{rearrangements to perform; one of \kbd{NNI}, \kbd{SPR}, or \kbd{TBR};}
+\item{Rearrange}{Function used to rearrange trees; default: \code{\link{RootedTBR}}}
 
-\item{maxiter}{the maximum number of iterations to perform before abandoning the search;}
+\item{maxIter}{the maximum number of iterations to perform before abandoning the search;}
 
-\item{maxhits}{the maximum times to hit the best pscore before abandoning the search;}
+\item{maxHits}{the maximum times to hit the best pscore before abandoning the search;}
 
-\item{forest.size}{the maximum number of trees to return - useful in concert with \code{\link{consensus}};}
+\item{forestSize}{the maximum number of trees to return - useful in concert with \code{\link{consensus}};}
 
-\item{cluster}{a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;}
+\item{cluster}{a cluster, prepared with code{link{PrepareCluster}}, to accelerate 
+searches on multicore machines. #TODO not tested. #TODO restore code link}
 
-\item{verbosity}{higher values provide more verbose user feedback in stdout;}
+\item{verbosity}{Level of detail to display in console: larger numbers provides more verbose feedback to the user;}
 
 \item{\dots}{other arguments to pass to subsequent functions.}
-
-\item{outgroup}{a vector listing the taxa in the outgroup;}
-
-\item{concavity}{concavity constant for implied weighting (not currently implemented!);}
 }
 \value{
 {
@@ -43,15 +41,17 @@ Run standard search algorithms (\acronym{NNI}, \acronym{SPR} or \acronym{TBR})
 to search for a more parsimonious tree.
 }
 \examples{
+library('ape'); library('phangorn')
 data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
-njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
+njtree <- ape::root(nj(phangorn::dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+njtree$edge.length <- NULL
+njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 
 \dontrun{
-TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='NNI')
-TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='SPR')
-TreeSearch(njtree, SigSut.phy, outgroup, maxiter=20, method='TBR')}
+TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, Rearrange=TreeSearch::NNI)
+TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, Rearrange=TreeSearch::RootedSPR)
+}
 
 }
 \seealso{

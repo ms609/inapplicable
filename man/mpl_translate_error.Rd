@@ -22,3 +22,4 @@ mpl_translate_error(-1) # "ERR_INVALID_SYMBOL"
 \author{
 Martin R. Smith
 }
+\keyword{internal}

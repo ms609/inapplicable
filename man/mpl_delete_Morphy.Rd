@@ -19,3 +19,4 @@ destructor for internal object completely returning the memory to the system.
 \author{
 Martin Brazeau
 }
+\keyword{internal}

@@ -4,7 +4,7 @@
 \alias{InapplicableFitch}
 \title{Calculate parsimony score with inapplicable data}
 \usage{
-InapplicableFitch(tree, dataset, ...)
+InapplicableFitch(tree, dataset)
 }
 \arguments{
 \item{tree}{A tree of class \code{\link{phylo}}}

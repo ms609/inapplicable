@@ -34,3 +34,4 @@ A null value (for now).
 \author{
 Thomas Guillerme
 }
+\keyword{internal}

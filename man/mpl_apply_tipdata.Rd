@@ -21,3 +21,4 @@ assigned, the function will fail with an error code.
 \author{
 Martin Brazeau
 }
+\keyword{internal}

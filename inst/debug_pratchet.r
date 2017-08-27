@@ -83,7 +83,7 @@ BSI <- inapplicable:::BootstrapInapp
     return.single <- !(forest.size > 1)
     
     iter <- 1 ### for (iter in 1:maxiter) {
-    ##trees <- RearrangeTree(tree, dataset, rearrange.func, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, criterion=criterion, trace=trace)
+    ##trees <- RearrangeTree(tree, dataset, rearrange.func, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, trace=trace)
     
     ### REARRRANGE TREE
       if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
@@ -149,7 +149,7 @@ BSI <- inapplicable:::BootstrapInapp
     } else tree
   
   
-  res <- TreeSearch(tree, mDat, method='NNI', criterion=criterion, maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
+  res <- TreeSearch(tree, mDat, method='NNI', maxiter=maxiter, maxhits=maxhits, trace=trace-1, ...)
   attr(res, 'pscore') <- NULL
   attr(res, 'hits') <- NULL
   res
@@ -199,7 +199,7 @@ TBR(x)
  
  
  
-# RearrangeTree(tree, dataset, rearrange.func, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, criterion=criterion, trace=trace)
+# RearrangeTree(tree, dataset, rearrange.func, min.score=best.pscore, return.single=return.single, iter=iter, cluster=cluster, trace=trace)
  if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {

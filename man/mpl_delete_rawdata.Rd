@@ -19,3 +19,4 @@ to their original values, except for the dimensions of the matrix.
 \author{
 Thomas Guillerme
 }
+\keyword{internal}

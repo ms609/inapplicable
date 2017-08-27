@@ -18,3 +18,4 @@ Retrieves the number of character (columns) in the dataset.
 \author{
 Martin Brazeau
 }
+\keyword{internal}

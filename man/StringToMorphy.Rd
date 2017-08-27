@@ -4,14 +4,14 @@
 \alias{StringToMorphy}
 \title{String to MorphyDat}
 \usage{
-StringToMorphy(x, tips, byTaxon = TRUE)
+StringToMorphy(string, tips, byTaxon = TRUE)
 }
 \arguments{
+\item{string}{a string of tokens, optionally containing newlines, with no terminating semi-colon.  Polytomies not (yet) supported; each character must correspond to a unique state, ?, or the inapplicable token (-)}
+
 \item{tips, }{a character vector corresponding to the names (in order) of each taxon in the matrix}
 
 \item{byTaxon}{= TRUE, string is one TAXON's coding at a time; FALSE: one CHARACTER's coding at a time}
-
-\item{string}{a string of tokens, optionally containing newlines, with no terminating semi-colon.  Polytomies not (yet) supported; each character must correspond to a unique state, ?, or the inapplicable token (-)}
 }
 \value{
 This function returns a data matrix in \code{\link[phangorn]{phyDat}} format

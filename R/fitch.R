@@ -26,14 +26,14 @@
 #' 
 #' @author Martin R. Smith (using C code adapted from MorphyLib, author Martin Brazeau)
 #' @importFrom phangorn phyDat
+#' @importFrom TreeSearch RenumberTips
 #' @export
-InapplicableFitch <- function (tree, dataset, ...) {
+InapplicableFitch <- function (tree, dataset) {
   if (class(dataset) != 'phyDat') stop('Invalid data type ', class(dataset), '; should be phyDat.')
-  tree <- RenumberTips(tree, names(dataset))
+  tree <- TreeSearch::RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
-  result <- MorphyLength(tree, morphyObj)
-  morphyObj <- UnloadMorphy(morphyObj)
-  result
+  on.exit(morphyObj <- UnloadMorphy(morphyObj))
+  MorphyLength(tree, morphyObj)
 }
 
 #' Calculate parsimony score with inapplicable data
@@ -47,15 +47,16 @@ InapplicableFitch <- function (tree, dataset, ...) {
 #'
 #' @author Martin R. Smith
 #' @keywords internal
+#' @importFrom TreeSearch Postorder
 #' @export
 MorphyLength <- function (tree, morphyObj) {
   nTaxa <- mpl_get_numtaxa(morphyObj)
   if (nTaxa < 1) stop("Error: ", mpl_translate_error(nTaxa))
   if (nTaxa != length(tree$tip.label)) stop ("Number of taxa in morphy object (", nTaxa, ") not equal to number of tips in tree")
   treeOrder <- attr(tree, 'order')
-  if (is.null(treeOrder) || treeOrder != "postorder") tree <- Postorder(tree)
+  if (is.null(treeOrder) || treeOrder != "postorder") tree <- TreeSearch::Postorder(tree)
   tree.edge <- tree$edge
-  parent <- tree.edge[ ,1]
+  parent <- tree.edge[, 1]
   child <- tree.edge[, 2]
   maxNode <- nTaxa + mpl_get_num_internal_nodes(morphyObj)
   rootNode <- nTaxa + 1
@@ -68,7 +69,7 @@ MorphyLength <- function (tree, morphyObj) {
   rightChild <- child[match(allNodes, parent)]
   
   ret <- .Call('MORPHYLENGTH', as.integer(parentOf -1L), as.integer(leftChild -1L), 
-               as.integer(rightChild -1L), morphyObj, PACKAGE='inapplicable')
+               as.integer(rightChild -1L), morphyObj)
   return(ret)
 }
 

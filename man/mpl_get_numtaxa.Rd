@@ -18,3 +18,4 @@ Retrieves the number of taxa (rows) in the dataset.
 \author{
 Martin Brazeau
 }
+\keyword{internal}

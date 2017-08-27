@@ -27,3 +27,4 @@ statedata.h header file.  The list must end with a semicolon.
 \author{
 Martin Brazeau
 }
+\keyword{internal}

@@ -42,7 +42,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label
   if (is.null(cluster)) {
-    rearrangedTree<-RenumberTips(Rearrange(tree), tipOrder)
+    rearrangedTree <- TreeSearch::RenumberTips(Rearrange(tree), tipOrder)
     trees <- list(rearrangedTree)
     min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)
@@ -51,7 +51,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
     warning("Not tested; likely to fail.")
     candidates <- clusterCall(cluster, Rearrange, tree)
-    candidates <- lapply(candidates, RenumberTips, tipOrder)
+    candidates <- lapply(candidates, TreeSearch::RenumberTips, tipOrder)
     scores <- vapply(candidates, MorphyLength, 1, morphyObj) # ~3x faster to do this in serial in r233.
     min.score <- min(scores)
     best.trees <- scores == min.score

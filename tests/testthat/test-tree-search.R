@@ -1,3 +1,4 @@
+# library(testthat); library(devtools);
 library(ape)
 
 context("tree search")
@@ -9,5 +10,5 @@ test_that("tree search finds shortest tree", {
   expect_equal(InapplicableFitch(TreeSearch(start_tree, dataset, method='NNI', verbosity=0), dataset), InapplicableFitch(true_tree, dataset), 3)
   expect_equal(InapplicableFitch(TreeSearch(start_tree, dataset, method='SPR', verbosity=0), dataset), InapplicableFitch(true_tree, dataset), 3)
   expect_equal(InapplicableFitch(TreeSearch(start_tree, dataset, method='TBR', verbosity=0), dataset), InapplicableFitch(true_tree, dataset), 3)
-  expect_equal(InapplicableFitch(Ratchet(start_tree, dataset, k=3, maxhits=5, verbosity=0), dataset), InapplicableFitch(true_tree, dataset), 3)
+  expect_equal(InapplicableFitch(Ratchet(start_tree, dataset, k=3, maxHits=5, verbosity=0), dataset), InapplicableFitch(true_tree, dataset), 3)
 })

@@ -27,12 +27,6 @@
 #'     \item \code{\link{RootedTBR}}
 #'   }
 #' 
-#' @examples
-#' data('SigSut')
-#' random.tree <- RandomTree(SigSut.phy)
-#' require('TreeSearch')
-#' RearrangeTree(random.tree, SigSut.phy, TreeSearch::RootedNNI)
-#' 
 #' @importFrom parallel clusterCall
 #' @importFrom TreeSearch RenumberTips
 #' @export

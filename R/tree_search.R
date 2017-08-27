@@ -42,7 +42,7 @@ maxHits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  tree <- RenumberTips(tree, names(dataset))
+  tree <- TreeSearch::RenumberTips(tree, names(dataset))
   eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) {
     attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
@@ -266,7 +266,7 @@ TreeSearch <- function
 (tree, dataset, method='NNI', maxIter=100, maxHits=20, forestSize=1, cluster=NULL, verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
-  tree <- RenumberTips(tree, names(dataset))
+  tree <- TreeSearch::RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
   ret <- DoTreeSearch(tree, morphyObj, method, maxIter, maxHits, forestSize, cluster, 
@@ -341,7 +341,7 @@ TreeSearch <- function
 #' @export
 SectorialSearch <- function (tree, dataset, concavity = NULL, rearrangements='NNI', maxIter=2000, cluster=NULL, verbosity=3, ...) {
   best.score <- attr(tree, 'pscore')
-  tree <- RenumberTips(tree, names(dataset))
+  tree <- TreeSearch::RenumberTips(tree, names(dataset))
   if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
   sect <- InapplicableSectorial(tree, dataset, cluster=cluster,
     verbosity=verbosity-1, maxIt=30, maxIter=maxIter, maxHits=15, smallest.sector=6, 

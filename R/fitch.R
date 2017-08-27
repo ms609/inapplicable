@@ -27,7 +27,7 @@
 #' @author Martin R. Smith (using C code adapted from MorphyLib, author Martin Brazeau)
 #' @importFrom phangorn phyDat
 #' @export
-InapplicableFitch <- function (tree, dataset, ...) {
+InapplicableFitch <- function (tree, dataset) {
   if (class(dataset) != 'phyDat') stop('Invalid data type ', class(dataset), '; should be phyDat.')
   tree <- RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)

@@ -31,9 +31,8 @@ InapplicableFitch <- function (tree, dataset, ...) {
   if (class(dataset) != 'phyDat') stop('Invalid data type ', class(dataset), '; should be phyDat.')
   tree <- RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
-  result <- MorphyLength(tree, morphyObj)
-  morphyObj <- UnloadMorphy(morphyObj)
-  result
+  on.exit(morphyObj <- UnloadMorphy(morphyObj))
+  MorphyLength(tree, morphyObj)
 }
 
 #' Calculate parsimony score with inapplicable data

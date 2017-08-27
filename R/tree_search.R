@@ -42,6 +42,7 @@ Ratchet <- function
 maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
+  on.exit(morphyObj <- UnloadMorphy(morphyObj))
   tree <- RenumberTips(tree, names(dataset))
   eps <- 1e-08
   if (is.null(attr(tree, "pscore"))) {
@@ -101,7 +102,6 @@ maxhits=40, k=10, verbosity=1, rearrangements=c('TBR', 'SPR', 'NNI'), ...) {
     ret$tip.label <- names(dataset)
     attr(ret, 'hits') <- NULL
   }
-  morphyObj <- UnloadMorphy(morphyObj)
   return (ret)
 }
 
@@ -279,9 +279,9 @@ TreeSearch <- function
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   tree <- RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
+  on.exit(morphyObj <- UnloadMorphy(morphyObj))
   ret <- DoTreeSearch(tree, morphyObj, method, maxiter, maxhits, forest.size, cluster, 
                       verbosity, ...)
-  morphyObj <- UnloadMorphy(morphyObj)
   return (ret)
 }
 

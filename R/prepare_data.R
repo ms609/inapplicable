@@ -89,11 +89,11 @@ MorphyDat <- function (phydat) {
 #' 
 #' @author Martin R. Smith
 #' @export
-StringToMorphy <- function (x, tips, byTaxon = TRUE) {
-  x <- strsplit(x, '')[[1]]
-  x <- matrix(x[x != '\n'], nrow=length(tips), byrow=byTaxon)
-  rownames(x) <- tips
-  phy <- phyDat(x, levels=c(0:3, '-'), type='USER')
+StringToMorphy <- function (string, tips, byTaxon = TRUE) {
+  string <- strsplit(string, '')[[1]]
+  string <- matrix(string[string != '\n'], nrow=length(tips), byrow=byTaxon)
+  rownames(string) <- tips
+  phy <- phyDat(string, levels=c(0:3, '-'), type='USER')
   MorphyDat(phy)
 }
 
@@ -118,11 +118,11 @@ StringToMorphy <- function (x, tips, byTaxon = TRUE) {
 #' @aliases StringToPhydat
 #' @importFrom phangorn phyDat
 #' @export
-StringToPhyDat <- StringToPhydat <- function (x, tips, byTaxon = TRUE) {
-  x <- strsplit(gsub('\\s+', '', x), '')[[1]]
-  x <- matrix(x[x != '\n'], nrow=length(tips), byrow=byTaxon)
-  rownames(x) <- tips
-  phy <- phyDat(x, levels=c(which(as.character(0:9) %in% x) - 1, '-'), type='USER')
+StringToPhyDat <- StringToPhydat <- function (string, tips, byTaxon = TRUE) {
+  string <- strsplit(gsub('\\s+', '', string), '')[[1]]
+  string <- matrix(string[string != '\n'], nrow=length(tips), byrow=byTaxon)
+  rownames(string) <- tips
+  phy <- phyDat(string, levels=c(which(as.character(0:9) %in% string) - 1, '-'), type='USER')
   phy
 }
 

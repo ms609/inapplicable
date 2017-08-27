@@ -5,7 +5,7 @@
 \alias{VisualiseCharacter}
 \title{VisualiseCharacter}
 \usage{
-VisualiseCharacter(tree, dataset, char.no, plot.fun = plot, inherit.ancestral = FALSE)
+VisualiseCharacter(tree, dataset, char.no, plot.fun = plot)
 }
 \arguments{
 \item{tree}{a fully-resolved tree in \code{\link{phylo}} format, with the desired outgroup; edge lengths are not supported and will be deleted;}

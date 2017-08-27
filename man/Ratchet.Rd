@@ -2,11 +2,17 @@
 % Please edit documentation in R/tree_search.R
 \name{Ratchet}
 \alias{Ratchet}
+\alias{RatchetConsensus}
 \title{Parsimony Ratchet}
 \usage{
-Ratchet(tree, dataset, keepAll = FALSE, outgroup = NULL, maxit = 100,
-  maxiter = 5000, maxhits = 40, k = 10, verbosity = 1,
-  rearrangements = c("TBR", "SPR", "NNI"), ...)
+Ratchet(tree, dataset, keepAll = FALSE, outgroup = NULL, maxIt = 100,
+  maxIter = 5000, maxHits = 40, k = 10, verbosity = 1,
+  rearrangements = list(TreeSearch::RootedTBR, TreeSearch::RootedSPR,
+  TreeSearch::RootedNNI), ...)
+
+RatchetConsensus(tree, dataset, maxIt = 5000, maxIter = 500, maxHits = 20,
+  k = 10, verbosity = 0, rearrangements = "NNI", criterion = NULL,
+  nSearch = 10, ...)
 }
 \arguments{
 \item{tree}{A tree of class \code{\link{phylo}}}
@@ -14,27 +20,25 @@ Ratchet(tree, dataset, keepAll = FALSE, outgroup = NULL, maxit = 100,
 \item{dataset}{A phylogenetic data matrix of class \code{\link[phangorn]{phyDat}}, whose names 
 correspond to the labels of any accompanying tree}
 
+\item{keepAll}{Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus}
+
 \item{outgroup}{a vector specifying all tips in the outgroup; if unspecified then identical
 trees with different roots will be considered unique;}
 
-\item{maxit}{maximum ratchet iterations to perform;}
+\item{maxIt}{maximum ratchet iterations to perform;}
 
-\item{maxiter}{maximum rearrangements to perform on each bootstrap or ratchet iteration;}
+\item{maxIter}{maximum rearrangements to perform on each bootstrap or ratchet iteration;}
 
-\item{maxhits}{maximum times to hit best score before terminating a tree search within a pratchet iteration;}
+\item{maxHits}{maximum times to hit best score before terminating a tree search within a pratchet iteration;}
 
 \item{k}{stop when k ratchet iterations have found the same best score;}
 
-\item{verbosity}{larger numbers provides more verbose feedback to the user;}
+\item{verbosity}{Level of detail to display in console: larger numbers provides more verbose feedback to the user;}
 
-\item{rearrangements}{method(s) to use when rearranging trees: 
-a vector containing any combination of the strings "NNI", "SPR" or "TBR";}
+\item{rearrangements}{(list of) function(s) to use when rearranging trees
+e.g. \code{list(TreeSearch::RootedTBR, TreeSearch::RootedNNI)}}
 
 \item{\dots}{other arguments to pass to subsequent functions.}
-
-\item{concavity}{concavity constant for implied weighting (not currently implemented!)}
-
-\item{all}{Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus}
 }
 \value{
 This function returns a tree modified by parsimony ratchet iteration, retaining the position of the root.
@@ -42,10 +46,15 @@ This function returns a tree modified by parsimony ratchet iteration, retaining 
 \description{
 \code{Ratchet} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
 }
+\section{Functions}{
+\itemize{
+\item \code{RatchetConsensus}: returns a list of optimal trees produced by a Ratchet search
+}}
+
 \examples{
 {
 data('Lobo')
-Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxit=1, maxiter=50)
+Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxIt=1, maxIter=50)
 }
 }
 \references{

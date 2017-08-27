@@ -5,7 +5,7 @@
 \title{Sectorial Search}
 \usage{
 SectorialSearch(tree, dataset, concavity = NULL, rearrangements = "NNI",
-  maxiter = 2000, cluster = NULL, verbosity = 3, ...)
+  maxIter = 2000, cluster = NULL, verbosity = 3, ...)
 }
 \arguments{
 \item{tree}{a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;}
@@ -17,17 +17,17 @@ correspond to the labels of any accompanying tree}
 
 \item{rearrangements}{method to use when rearranging subtrees: NNI, SPR or TBR;}
 
-\item{maxiter}{maximum number of rearrangements to perform on each sectorial iteration;}
+\item{maxIter}{maximum number of rearrangements to perform on each sectorial iteration;}
 
 \item{cluster}{a cluster prepared using \code{\link{PrepareCluster}}; may speed up search on multicore machines;}
 
-\item{verbosity}{integer determining how verbose the reporting to stdout will be;}
+\item{verbosity}{Level of detail to display in console: larger numbers provides more verbose feedback to the user;}
 
 \item{\dots}{other arguments to pass to subsequent functions.}
 
 \item{outgroup}{a vector listing the taxa that form the outgroup;}
 
-\item{maxit}{maximum number of sectorial iterations to perform;}
+\item{maxIt}{maximum number of sectorial iterations to perform;}
 
 \item{k}{stop when \code{k} searches have improved their sectorial score;}
 
@@ -54,30 +54,13 @@ that of the original tree.
 of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
 }
 \examples{
-{
 data('SigSut')
 outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
-InapplicableSectorial(njtree, SigSut.phy, outgroup, maxit=1, maxiter=50, largest.sector=7)
-\dontrun{SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming}
+InapplicableSectorial(njtree, SigSut.phy, outgroup, maxIt=1, maxIter=50, largest.sector=7)
+\dontrun{SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming }
 
-## SectorialSearch is currently defined as
-function (start.tree, dataset, outgroup, rearrangements='NNI') {
-  best.score <- attr(start.tree, 'pscore')
-  if (length(best.score) == 0) best.score <- InapplicableParsimony(start.tree, dataset)
-  sect <- InapplicableSectorial(start.tree, dataset, outgroup=outgroup, verbosity=0, maxit=30,
-            maxiter=200, maxhits=15, smallest.sector=6,
-            largest.sector=length(start.tree$edge[,2])*0.25, rearrangements=rearrangements)
-  sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxiter=2000, maxhits=20, verbosity=3)
-  sect <- TreeSearch(sect, dataset, outgroup, method='TBR', maxiter=2000, maxhits=25, verbosity=3)
-  sect <- TreeSearch(sect, dataset, outgroup, method='SPR', maxiter=2000, maxhits=50, verbosity=3)
-  sect <- TreeSearch(sect, dataset, outgroup, method='NNI', maxiter=2000, maxhits=50, verbosity=3)
-  if (attr(sect, 'pscore') <= best.score) {
-    return (sect)
-  } else return (SetOutgroup(start.tree, outgroup))
-}
-}
 
 }
 \references{

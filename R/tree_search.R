@@ -5,8 +5,6 @@
 #' @template treeParam 
 #' @template datasetParam
 #' @param keepAll Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus
-#' @param outgroup a vector specifying all tips in the outgroup; if unspecified then identical
-#'  trees with different roots will be considered unique;
 #' @param maxIt   maximum ratchet iterations to perform;
 #' @param maxIter maximum rearrangements to perform on each bootstrap or ratchet iteration;
 #' @param maxHits maximum times to hit best score before terminating a tree search within a pratchet iteration;
@@ -32,13 +30,13 @@
 #' 
 #' @examples{
 #' data('Lobo')
-#' Ratchet(tree=RandomTree(Lobo.phy, outgroup='Tubiluchus_Priapulida'), 
+#' Ratchet(tree=TreeSearch::RandomTree(Lobo.phy, root='Tubiluchus_Priapulida'), 
 #'         dataset=Lobo.phy, maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
 #' @export
 Ratchet <- function 
-(tree, dataset, keepAll=FALSE, outgroup=NULL, maxIt=100, maxIter=5000, 
+(tree, dataset, keepAll=FALSE, maxIt=100, maxIter=5000, 
   maxHits=40, k=10, verbosity=1, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedSPR, 
   TreeSearch::RootedNNI), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
@@ -69,7 +67,7 @@ Ratchet <- function
     if((cand.pars+eps) < best.pars) {
       if (keepAll) {
         forest <- vector('list', maxIter)
-        forest[[i]] <- if (is.null(outgroup)) candidate else TreeSearch::Root(candidate, outgroup)
+        forest[[i]] <- candidate
       }
       tree <- candidate
       best.pars <- cand.pars
@@ -79,7 +77,7 @@ Ratchet <- function
         kmax <- kmax + 1
         candidate$tip.label <- names(dataset)
         tree <- candidate
-        if (keepAll) forest[[i]] <- if (is.null(outgroup)) candidate else TreeSearch::Root(candidate, outgroup)
+        if (keepAll) forest[[i]] <- candidate
       }
     }
     if (verbosity > 0) cat("\n* Best pscore after", i, "/", maxIt, "Ratchet iterations:", 
@@ -94,7 +92,6 @@ Ratchet <- function
     class(forest) <- 'multiPhylo'
     ret <- unique(forest)
     cat('Found', length(ret), 'unique MPTs.')
-    if (is.null(outgroup)) warning('"outgroup" not specified, so some "unique" trees may have same topology but distinct roots.')
   } else {
     ret <- tree
     ret$tip.label <- names(dataset)
@@ -263,8 +260,8 @@ DoTreeSearch <- function
 #' njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 #'
 #' \dontrun{
-#' TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, Rearrange=TreeSearch::NNI)
-#' TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, Rearrange=TreeSearch::RootedSPR)
+#' TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::NNI)
+#' TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::RootedSPR)
 #' }
 #' 
 #' @keywords  tree 
@@ -320,9 +317,9 @@ TreeSearch <- function
 ### #' data('SigSut')
 ### #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
 ### #' njtree <- ape::root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
-### #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
-### #' InapplicableSectorial(njtree, SigSut.phy, outgroup, maxIt=1, maxIter=50, largest.sector=7)
-### #' \dontrun{SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming }
+### #' njtree$edge.length <- NULL; njtree<-ape::root(njtree, outgroup, resolve.root=TRUE)
+### #' InapplicableSectorial(njtree, SigSut.phy, maxIt=1, maxIter=50, largest.sector=7)
+### #' \dontrun{SectorialSearch(njtree, SigSut.phy) # Will be time-consuming }
 ### #' 
 ### #' 
 ### #' @keywords  tree 

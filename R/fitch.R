@@ -69,7 +69,7 @@ MorphyLength <- function (tree, morphyObj) {
   rightChild <- child[match(allNodes, parent)]
   
   ret <- .Call('MORPHYLENGTH', as.integer(parentOf -1L), as.integer(leftChild -1L), 
-               as.integer(rightChild -1L), morphyObj, PACKAGE='inapplicable')
+               as.integer(rightChild -1L), morphyObj)
   return(ret)
 }
 

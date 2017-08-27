@@ -31,7 +31,7 @@
 #' 
 #' @examples{
 #' data('Lobo')
-#' Ratchet(RandomTree(Lobo.phy), Lobo.phy, outgroup='Tubiluchus_Priapulida', maxIt=1, maxIter=50)
+#' Ratchet(RandomTree(Lobo.phy), dataset=Lobo.phy, outgroup='Tubiluchus_Priapulida', maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
 #' @export
@@ -212,7 +212,7 @@ DoTreeSearch <- function
     }
     if (attr(trees, 'hits') >= maxHits) break
   }
-  if (verbosity > 0) cat("\n  - Final score", attr(tree, 'pscore'), "found", attr(tree, 'hits'), "times after", iter, "iterations\n")  
+  if (verbosity > 0) cat("\n  - Final score", attr(tree, 'pscore'), "found", attr(tree, 'hits'), "times after", iter, "rearrangements\n")  
   if (forestSize > 1) {
     if (hits < forestSize) forest <- forest[-((hits+1):forestSize)]
     attr(forest, 'hits') <- hits
@@ -318,9 +318,10 @@ TreeSearch <- function
 #' @seealso \code{\link{Ratchet}}
 #' 
 #' @examples
+#' require('ape')
 #' data('SigSut')
 #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- Root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree <- ape::root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL; njtree<-SetOutgroup(njtree, outgroup)
 #' InapplicableSectorial(njtree, SigSut.phy, outgroup, maxIt=1, maxIter=50, largest.sector=7)
 #' \dontrun{SectorialSearch(njtree, SigSut.phy, outgroup, 'SPR') # Will be time-consuming }

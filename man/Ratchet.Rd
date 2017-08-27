@@ -11,7 +11,7 @@ Ratchet(tree, dataset, keepAll = FALSE, outgroup = NULL, maxIt = 100,
   TreeSearch::RootedNNI), ...)
 
 RatchetConsensus(tree, dataset, maxIt = 5000, maxIter = 500, maxHits = 20,
-  k = 10, verbosity = 0, rearrangements = "NNI", criterion = NULL,
+  k = 10, verbosity = 0, rearrangements = list(TreeSearch::NNI),
   nSearch = 10, ...)
 }
 \arguments{
@@ -48,7 +48,7 @@ This function returns a tree modified by parsimony ratchet iteration, retaining 
 }
 \section{Functions}{
 \itemize{
-\item \code{RatchetConsensus}: returns a list of optimal trees produced by a Ratchet search
+\item \code{RatchetConsensus}: returns a list of optimal trees produced by nSearch Ratchet searches
 }}
 
 \examples{

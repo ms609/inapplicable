@@ -404,8 +404,10 @@ static inline int mpl_check_down_NA_steps
 (MPLstate left, MPLstate right, MPLstate lactive, MPLstate ractive)
 {
     int steps = 0;
-    
+
+#ifdef DEBUG    
     assert(left && right);
+#endif
     
     if (!(left & right)) {
         if (left & ISAPPLIC && right & ISAPPLIC) {

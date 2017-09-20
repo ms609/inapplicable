@@ -45,6 +45,8 @@ int mpl_fitch_downpass
         }
     }
     
+    // TODO: rewrite for updated stateset checks.
+    
     return steps;
 }
 
@@ -183,6 +185,7 @@ int mpl_NA_fitch_first_update_downpass
     MPLstate*  left     = lset->downpass1;
     MPLstate*  right    = rset->downpass1;
     MPLstate*  n        = nset->downpass1;
+    MPLstate*  ntemp    = nset->temp_downpass1;
     
     for (i = 0; i < nchars; ++i) {
         
@@ -203,6 +206,10 @@ int mpl_NA_fitch_first_update_downpass
                     n[j] = (left[j] | right[j]);
                 }
             }
+        }
+        
+        if (n[j] != ntemp[j]) {
+            nset->updated = true;
         }
         
 #ifdef DEBUG
@@ -248,7 +255,7 @@ int mpl_NA_fitch_first_uppass
                 }
                 else {
                     if ((left[j] | right[j]) & ISAPPLIC
-                        && (left[j] | right[j]) != MISSING) { // TODO: This probably isn't quite safe.
+                        && (left[j] | right[j]) != MISSING) { // TODO: This possibly isn't quite safe or right.
                         nifin[j] = ((left[j] | right[j]) & ISAPPLIC);
                     }
                     else {
@@ -311,7 +318,8 @@ int mpl_NA_fitch_first_update_uppass
                     nifin[j] = NA;
                 }
                 else {
-                    if ((left[j] | right[j]) & ISAPPLIC) {
+                    if ((left[j] | right[j]) & ISAPPLIC
+                        && (left[j] | right[j]) != MISSING) { // TODO: This possibly isn't quite safe or right.
                         nifin[j] = ((left[j] | right[j]) & ISAPPLIC);
                     }
                     else {
@@ -328,7 +336,6 @@ int mpl_NA_fitch_first_update_uppass
         assert(nifin[j]);
 #endif
     }
-    
     
     return 0;
 }
@@ -397,6 +404,8 @@ static inline int mpl_check_down_NA_steps
 (MPLstate left, MPLstate right, MPLstate lactive, MPLstate ractive)
 {
     int steps = 0;
+    
+    assert(left && right);
     
     if (!(left & right)) {
         if (left & ISAPPLIC && right & ISAPPLIC) {
@@ -471,17 +480,23 @@ int mpl_NA_fitch_second_update_downpass
         
         stacts[j] = (lacts[j] | racts[j]) & ISAPPLIC;
         
-        if (npre [j] != npret[j]) {
-            /* Count whether any steps need to be taken back at this node */
-            step_recall += mpl_check_down_NA_steps(tleft[j], tright[j],
-                                                   tlacts[j], tracts[j]);
-            // TODO: Store the step recall.
-            // TODO: Flag the update.
+        /* Count whether any steps need to be taken back at this node */
+        
+        /* Flag as updated if current set is different from previous */
+        if (npre[j] != npret[j]) {
+            nset->updated = true;
+//            if (nset->temp_uppass1[j] & ISAPPLIC) {
+//                int rec = 0;
+//                rec = mpl_check_down_NA_steps(tleft[j], tright[j], tlacts[j], tracts[j]);
+//                step_recall += (weights[j] * rec);
+//            }
         }
 #ifdef DEBUG
         assert(npre[j]);
 #endif
     }
+    
+    nset->steps_to_recall = step_recall;
     
     return steps;
 }
@@ -574,20 +589,23 @@ int mpl_NA_fitch_second_update_uppass
 (MPLndsets* lset, MPLndsets* rset, MPLndsets* nset, MPLndsets* ancset,
  MPLpartition* part)
 {
-    int             i       = 0;
-    int             j       = 0;
-    int             steps   = 0;
-    const int*      indices = part->update_NA_indices;
-    int             nchars  = part->nNAtoupdate;
-    MPLstate*       left    = lset->downpass2;
-    MPLstate*       right   = rset->downpass2;
-    MPLstate*       npre    = nset->downpass2;
-    MPLstate*       nfin    = nset->uppass2;
-    MPLstate*       nfint   = nset->temp_uppass2;
-    MPLstate*       anc     = ancset->uppass2;
-    MPLstate*       lacts   = lset->subtree_actives;
-    MPLstate*       racts   = rset->subtree_actives;
-    unsigned long*  weights = part->intwts;
+    int             i           = 0;
+    int             j           = 0;
+    int             steps       = 0;
+    int             step_recall = 0;
+    const int*      indices     = part->update_NA_indices;
+    int             nchars      = part->nNAtoupdate;
+    MPLstate*       left        = lset->downpass2;
+    MPLstate*       right       = rset->downpass2;
+    MPLstate*       npre        = nset->downpass2;
+    MPLstate*       nfin        = nset->uppass2;
+    MPLstate*       nfint       = nset->temp_uppass2;
+    MPLstate*       anc         = ancset->uppass2;
+    MPLstate*       lacts       = lset->subtree_actives;
+    MPLstate*       racts       = rset->subtree_actives;
+    MPLstate*       tlacts      = lset->temp_subtr_actives;
+    MPLstate*       tracts      = lset->temp_subtr_actives;
+    unsigned long*  weights     = part->intwts;
     
     for (i = 0; i < nchars; ++i) {
         
@@ -599,7 +617,7 @@ int mpl_NA_fitch_second_update_uppass
                     nfin[j] = anc[j] & npre[j];
                 } else {
                     if (left[j] & right[j]) {
-                        nfin[j] = (npre[j] | (anc[j] & left[j] & right[j]));
+                        nfin[j] = (npre[j] | (anc[j] & (left[j] | right[j])));
                     }
                     else {
                         if ((left[j] | right[j]) & NA) {
@@ -610,9 +628,9 @@ int mpl_NA_fitch_second_update_uppass
                             }
                         } else {
                             nfin[j] = npre[j] | anc[j];
-                            if ((anc[j] & nfin[j]) == anc[j]) {
-                                nfin[j] = anc[j] & nfin[j];
-                            }
+//                            if ((anc[j] & nfin[j]) == anc[j]) {
+//                                nfin[j] = anc[j] & nfin[j];
+//                            }
                         }
                     }
                 }
@@ -629,11 +647,19 @@ int mpl_NA_fitch_second_update_uppass
             }
         }
         
-        nfint[j] = nfin[j]; // Storage of states for undoing temp updates
+        if (nfint[j] != nfin[j]) {
+            nset->updated = true;
+            int rec = 0;
+            rec = mpl_check_up_NA_steps(nfint[j], tlacts[j], tracts[j]);
+            step_recall += (rec * weights[i]);
+        }
+        
 #ifdef DEBUG
         assert(nfin[j]);
 #endif
     }
+    
+    nset->steps_to_recall = step_recall;
     
     return steps;
 }

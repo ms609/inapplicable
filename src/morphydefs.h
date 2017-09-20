@@ -129,10 +129,17 @@ typedef struct partition_s {
     MPLtipfxn       tipupdate;
     MPLtipfxn       tipfinalize;
     MPLtipfxn       tiproot;        /*!< For the function that adds length at the base of an unrooted tree. */
+    MPLtipfxn       tipupdaterecalc;
+    MPLtipfxn       tipfinalrecalc;
+    MPLtipfxn       tiprootrecalc;
     MPLdownfxn      inappdownfxn;
+    MPLdownfxn      inappdownrecalc2;
     MPLupfxn        inappupfxn;
+    MPLupfxn        inapuprecalc2;
     MPLdownfxn      prelimfxn;
+    MPLdownfxn      downrecalc1;
     MPLupfxn        finalfxn;
+    MPLupfxn        uprecalc1;
     MPLloclfxn      loclfxn;
     MPLpartition*   next;
     
@@ -142,7 +149,7 @@ typedef struct partition_s {
 
 typedef struct MPLndsets {
     
-    bool        needsupdate;
+    bool        updated;
     int         steps_to_recall;
     MPLstate*   downpass1;
     MPLstate*   uppass1;

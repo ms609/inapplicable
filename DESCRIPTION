@@ -10,9 +10,9 @@ Description: Correctly calculates tree parsimony scores when datasets contain in
   The algorithm employed herein is described in ###REFERENCE###
   This R package is deposited at Data Dryad, doi: 10.5061/dryad.d5mf2  
   For an introduction to using the package, please see the manual heading 'inapplicable-package'.
-Imports: ape, phangorn, parallel, TreeSearch
+Imports: ape, phangorn, parallel
+Suggests: testthat, TreeSearch
 Remotes: ms609/TreeSearch
-Suggests: testthat
 License: Unlimited
 URL: https://github.com/ms609/inapplicable
 BugReports: https://github.com/ms609/inapplicable/issues

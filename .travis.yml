@@ -1,8 +1,14 @@
 language: r
+cache: packages
 warnings_are_errors: false
 
-blacklist
+r_github_packages: ms609/TreeSearch
+
+#blacklist
 branches:
   except:
     - Information
+    
+git:
+  depth: 5
 

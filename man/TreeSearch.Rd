@@ -49,8 +49,8 @@ njtree$edge.length <- NULL
 njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 
 \dontrun{
-TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, Rearrange=TreeSearch::NNI)
-TreeSearch(njtree, SigSut.phy, outgroup, maxIter=20, Rearrange=TreeSearch::RootedSPR)
+TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::NNI)
+TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::RootedSPR)
 }
 
 }

@@ -486,8 +486,7 @@ mpl_second_up_recon <- function(node_id, left_id, right_id, anc_id, morphyobj)
 #' @export
 mpl_update_tip <- function(tip_id, anc_id, morphyobj)
 {
-    return(.Call("_R_wrap_mpl_update_tip", as.integer(tip_id), as.integer(anc_id), morphyobj,
-                  PACKAGE='inapplicable'))
+    return(.Call("_R_wrap_mpl_update_tip", as.integer(tip_id), as.integer(anc_id), morphyobj))
 }
 
 #' Updates the nodal sets for a lower ('dummy') root node

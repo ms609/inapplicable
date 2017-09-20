@@ -4,12 +4,14 @@ warnings_are_errors: false
 
 r_packages:
  - devtools
+ - testthat
   
 install:
  - R -e "install.packages('ape', '.', repos = 'http://ape-package.ird.fr/')"
  - R -e "devtools::install_github('KlausVigo/phangorn', ref='1167f0be62f13cfad0fca8ae8224318c407195bf')"
 
-r_github_packages: ms609/TreeSearch
+r_github_packages:
+ - ms609/TreeSearch
 
 #blacklist
 branches:

@@ -5,8 +5,8 @@
 \alias{RatchetConsensus}
 \title{Parsimony Ratchet}
 \usage{
-Ratchet(tree, dataset, keepAll = FALSE, outgroup = NULL, maxIt = 100,
-  maxIter = 5000, maxHits = 40, k = 10, verbosity = 1,
+Ratchet(tree, dataset, keepAll = FALSE, maxIt = 100, maxIter = 5000,
+  maxHits = 40, k = 10, verbosity = 1,
   rearrangements = list(TreeSearch::RootedTBR, TreeSearch::RootedSPR,
   TreeSearch::RootedNNI), ...)
 
@@ -21,9 +21,6 @@ RatchetConsensus(tree, dataset, maxIt = 5000, maxIter = 500, maxHits = 20,
 correspond to the labels of any accompanying tree}
 
 \item{keepAll}{Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus}
-
-\item{outgroup}{a vector specifying all tips in the outgroup; if unspecified then identical
-trees with different roots will be considered unique;}
 
 \item{maxIt}{maximum ratchet iterations to perform;}
 
@@ -56,7 +53,7 @@ This function returns a tree modified by parsimony ratchet iteration, retaining 
 \examples{
 {
 data('Lobo')
-Ratchet(tree=RandomTree(Lobo.phy, outgroup='Tubiluchus_Priapulida'), 
+Ratchet(tree=TreeSearch::RandomTree(Lobo.phy, root='Tubiluchus_Priapulida'), 
         dataset=Lobo.phy, maxIt=1, maxIter=50)
 }
 }

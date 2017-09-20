@@ -612,6 +612,92 @@ int mpl_do_tiproot(const int tip_id, const int node_id, Morphy m)
     return res;
 }
 
+
+int mpl_finalize_tiproot(const int tip_id, const int node_id, Morphy m)
+{
+    if (!m) {
+        return ERR_UNEXP_NULLPTR;
+    }
+    
+    Morphyp handl           = (Morphyp)m;
+    MPLndsets* lower        = handl->statesets[tip_id];
+    MPLndsets* upper        = handl->statesets[node_id];
+    MPLpartition** parts    = handl->partitions;
+    
+    MPLtipfxn tiprootfxn = NULL;
+    int i = 0;
+    int numparts = mpl_get_numparts(handl);
+    int res = 0;
+    
+    lower->updated = false;
+    
+    for (i = 0; i < numparts; ++i) {
+        if (handl->partitions[i]->isNAtype == true) {
+            tiprootfxn = parts[i]->tiprootfinal;
+            res += tiprootfxn(lower, upper, parts[i]);
+        }
+    }
+    
+    return res;
+}
+
+int mpl_na_tiproot_recalculation(const int tip_id, const int node_id, Morphy m)
+{
+    if (!m) {
+        return ERR_UNEXP_NULLPTR;
+    }
+    
+    Morphyp handl           = (Morphyp)m;
+    MPLndsets* lower        = handl->statesets[tip_id];
+    MPLndsets* upper        = handl->statesets[node_id];
+    MPLpartition** parts    = handl->partitions;
+    
+    MPLtipfxn tiprootfxn = NULL;
+    int i = 0;
+    int numparts = mpl_get_numparts(handl);
+    int res = 0;
+    
+    lower->updated = false;
+    
+    for (i = 0; i < numparts; ++i) {
+        if (handl->partitions[i]->isNAtype == true) {
+            tiprootfxn = parts[i]->tiprootrecalc;
+            res += tiprootfxn(lower, upper, parts[i]);
+        }
+    }
+    
+    return res;
+}
+
+int mpl_na_tiproot_final_recalculation
+(const int tip_id, const int node_id, Morphy m)
+{
+    if (!m) {
+        return ERR_UNEXP_NULLPTR;
+    }
+    
+    Morphyp handl           = (Morphyp)m;
+    MPLndsets* lower        = handl->statesets[tip_id];
+    MPLndsets* upper        = handl->statesets[node_id];
+    MPLpartition** parts    = handl->partitions;
+    
+    MPLtipfxn tiprootfxn = NULL;
+    int i = 0;
+    int numparts = mpl_get_numparts(handl);
+    int res = 0;
+    
+    lower->updated = false; // TODO: not going to work.
+    
+    for (i = 0; i < numparts; ++i) {
+        if (handl->partitions[i]->isNAtype == true) {
+            tiprootfxn = parts[i]->tiprootupdaterecalc;
+            res += tiprootfxn(lower, upper, parts[i]);
+        }
+    }
+    
+    return res;
+}
+
 int mpl_na_first_down_recalculation
 (const int node_id, const int left_id, const int right_id, Morphy m)
 {
@@ -738,7 +824,15 @@ int mpl_na_second_up_recalculation
 }
 
 
-int mpl_lower_root_recalculation(const int l_root_id, const int root_id, Morphy m)
+int mpl_na_update_tip_recalculation
+(const int tip_id, const int anc_id, Morphy m)
+{
+    
+}
+
+
+int mpl_lower_root_recalculation
+(const int l_root_id, const int root_id, Morphy m)
 {
     if (!m) {
         return ERR_UNEXP_NULLPTR;
@@ -761,6 +855,33 @@ int mpl_lower_root_recalculation(const int l_root_id, const int root_id, Morphy 
     return ERR_NO_ERROR;
 }
 
+
+int mpl_na_update_tip(const int tip_id, const int anc_id, Morphy m)
+{
+    if (!m) {
+        return ERR_UNEXP_NULLPTR;
+    }
+    
+    Morphyp     handl   = (Morphyp)m;
+    MPLndsets*  tipset  = handl->statesets[tip_id];
+    MPLndsets*  ancset  = handl->statesets[anc_id];
+    
+    int i = 0;
+    int numparts = mpl_get_numparts(handl);
+    MPLtipfxn tipfxn = NULL;
+    
+    tipset->updated = false;
+    
+    for (i = 0; i < numparts; ++i) {
+        if (handl->partitions[i]->isNAtype == true) {
+            tipfxn = handl->partitions[i]->tipupdaterecalc;
+            tipfxn(tipset, ancset, handl->partitions[i]);
+        }
+    }
+
+    
+    return ERR_NO_ERROR;
+}
 
 int mpl_get_step_recall(const int node_id, Morphy m)
 {
@@ -796,6 +917,7 @@ int mpl_get_insertcost
     MPLloclfxn loclfxn = NULL;
     
     for (i = 0; i < numparts; ++i) {
+        handl->partitions[i]->nNAtoupdate = 0;
         loclfxn = handl->partitions[i]->loclfxn;
         res += loclfxn(srcset, tgt1set, tgt2set, handl->partitions[i], cutoff, max);
         loclfxn = NULL;
@@ -823,6 +945,16 @@ int mpl_check_reopt_inapplics(Morphy m)
     return n;
 }
 
+bool mpl_check_updated(const int node_id, Morphy m)
+{
+    if (!m) {
+        return ERR_UNEXP_NULLPTR;
+    }
+    
+    Morphyp mi = (Morphyp)m;
+    
+    return mi->statesets[node_id]->updated;
+}
 
 int mpl_restore_original_sets(const int node_id, Morphy m)
 {

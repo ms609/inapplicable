@@ -334,12 +334,16 @@ void mpl_assign_fitch_fxns(MPLpartition* part)
         part->finalfxn          = mpl_NA_fitch_first_uppass;
         part->tipupdate         = mpl_fitch_NA_tip_update;
         part->tipfinalize       = mpl_fitch_NA_tip_finalize;
-        part->tiproot           = mpl_fitch_NA_one_branch;
+        part->tiproot           = mpl_fitch_NA_first_one_branch;
+        part->tiprootfinal      = mpl_fitch_NA_second_one_branch;
         part->loclfxn           = mpl_fitch_NA_local_reopt;
         part->downrecalc1       = mpl_NA_fitch_first_update_downpass;
         part->uprecalc1         = mpl_NA_fitch_first_update_uppass;
         part->inappdownrecalc2  = mpl_NA_fitch_second_update_downpass;
         part->inapuprecalc2     = mpl_NA_fitch_second_update_uppass;
+        part->tipupdaterecalc   = mpl_fitch_NA_tip_recalc_update;
+        part->tiprootrecalc = mpl_fitch_one_branch; // TODO: fix this mess
+        part->tiprootupdaterecalc = mpl_fitch_NA_second_one_branch_recalc;
     }
     else {
         part->prelimfxn         = mpl_fitch_downpass;
@@ -885,51 +889,6 @@ int mpl_allocate_stset_stringptrs(const int nchars, MPLndsets* set)
 }
 
 
-void mpl_swap_downpass1(MPLndsets* nset)
-{
-    MPLstate* t = NULL;
-    t = nset->downpass1;
-    nset->downpass1 = nset->temp_downpass1;
-    nset->temp_downpass1 = t;
-}
-
-
-void mpl_swap_uppass1(MPLndsets* nset)
-{
-    MPLstate* t = NULL;
-    t = nset->uppass1;
-    nset->uppass1 = nset->temp_uppass1;
-    nset->temp_uppass1 = t;
-}
-
-
-void mpl_swap_downpass2(MPLndsets* nset)
-{
-    MPLstate* t = NULL;
-    t = nset->downpass2;
-    nset->downpass2 = nset->temp_downpass2;
-    nset->temp_downpass2 = t;
-}
-
-
-void mpl_swap_uppass2(MPLndsets* nset)
-{
-    MPLstate* t = NULL;
-    t = nset->uppass2;
-    nset->uppass2 = nset->temp_uppass2;
-    nset->temp_uppass2 = t;
-}
-
-
-void mpl_swap_tempsets(MPLndsets* nset)
-{
-    mpl_swap_downpass1(nset);
-    mpl_swap_uppass1(nset);
-    mpl_swap_downpass2(nset);
-    mpl_swap_uppass2(nset);
-}
-
-
 MPLndsets* mpl_alloc_stateset(int numchars)
 {
     MPLndsets* new = (MPLndsets*)calloc(1, sizeof(MPLndsets));
@@ -996,7 +955,11 @@ MPLndsets* mpl_alloc_stateset(int numchars)
         mpl_free_stateset(numchars, new);
         return NULL;
     }
-    
+    new->changes = (bool*)calloc(numchars, sizeof(bool));
+    if (!new->changes) {
+        mpl_free_stateset(numchars, new);
+        return NULL;
+    }
     mpl_allocate_stset_stringptrs(numchars, new);
     
     return new;
@@ -1047,6 +1010,10 @@ void mpl_free_stateset(const int nchars, MPLndsets* statesets)
     if (statesets->temp_uppass2) {
         free(statesets->temp_uppass2);
         statesets->temp_uppass2 = NULL;
+    }
+    if (statesets->changes) {
+        free(statesets->changes);
+        statesets->changes = NULL;
     }
     
     mpl_delete_nodal_strings(nchars, statesets);

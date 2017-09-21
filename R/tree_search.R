@@ -184,7 +184,7 @@ DoTreeSearch <- function
   return.single <- !(forestSize > 1)
   
   for (iter in 1:maxIter) {
-    trees <- RearrangeTree(tree, morphyObj, Rearrange, min.score=best.pscore, 
+    trees <- inapplicable::RearrangeTree(tree, morphyObj, Rearrange, min.score=best.pscore, 
                            return.single=return.single, iter=iter, cluster=cluster,
                            verbosity=verbosity, ...)
     iter.pscore <- attr(trees, 'pscore')

@@ -48,6 +48,7 @@ BRAZEAU, M. D., GUILLERME, T. and SMITH, M. R. 2017. [Morphological phylogenetic
 
 ## Walkthrough of package functions
 
+## NOT UP TO DATE. WILL BE UPDATED IN EARLY NOVEMBER 2017...
 
 ## To use this script on your own data, launch R, and type (or copy-paste) the following text
 ## into the R console.  Lines starting with '#' are comments and do not need to be copied.

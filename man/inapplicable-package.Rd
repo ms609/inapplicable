@@ -34,7 +34,7 @@ These three cases should be denoted with different tokens: perhaps '-', '+' and 
 Martin R. Smith
 }
 \references{
-##REFERENCE TO FOLLOW##
+BRAZEAU, M. D., GUILLERME, T. and SMITH, M. R. 2017. [Morphological phylogenetic analysis with inapplicable data](https://www.biorxiv.org/content/early/2017/10/26/209775). BioRxiv. doi:10.1101/209775
 }
 \keyword{ package }
 \keyword{ tree }
@@ -47,6 +47,7 @@ Martin R. Smith
 \dontrun{
 
 ## Walkthrough of package functions
+
 
 ## To use this script on your own data, launch R, and type (or copy-paste) the following text
 ## into the R console.  Lines starting with '#' are comments and do not need to be copied.

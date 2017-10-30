@@ -8,7 +8,7 @@
 #' 
 #' @examples
 #' data(SigSut)
-#' tree <- RandomTree(SigSut.phy)
+#' tree <- TreeSearch::RandomTree(SigSut.phy)
 #' result <- InapplicableFitch(tree, SigSut.phy)
 #' 
 #' @return This function returns the elements from a list containing:

@@ -65,12 +65,3 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
   attr(trees, 'pscore') <- min.score
   trees
 }
-
-#' Generate random tree topology from dataset
-#' 
-#' @param dataset A dataset in \code{\link[phangorn]{phyDat}} format
-#' 
-#' @author Martin R. Smith 
-#' @importFrom ape rtree
-#' @export
-RandomTree <- function (dataset) rtree(length(dataset), tip.label=names(dataset), br=NULL)

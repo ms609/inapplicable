@@ -54,8 +54,6 @@ best <- Ratchet(best, Lobo.phy, verbosity=1)
 
 # Let's view the tree:
 plot(best)
-
-plot(ape::root(best, 'Cricocosmia', resolve.root=TRUE))
 ```
 
 # Reference

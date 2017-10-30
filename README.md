@@ -12,8 +12,12 @@ You can install inapplicable into R thus:
 # Install the devtools package from CRAN, if necessary
 if(!require(devtools)) install.packages("devtools")
 
-# Install the inapplicable package from github
-devtools::install_github('ms609/inapplicable')
+# Install need the latest version of APE...
+install.packages('ape', '.', repos = 'http://ape-package.ird.fr/')
+# And a working development version of phangorn...
+devtools::install_github('KlausVigo/phangorn', ref='1167f0be62f13cfad0fca8ae8224318c407195bf')
+# Before you install the inapplicable package from GitHub:
+if (!require(inapplicable)) devtools::install_github('ms609/inapplicable')
 
 # Load the inapplicable package into R
 library('inapplicable')
@@ -25,12 +29,38 @@ Here's an example of using the package to conduct tree search:
 
 ```r 
 library(inapplicable)
+# Here we'll use the pre-loaded Lobo matrix:
 data(Lobo)
-best <- TreeSearch(RandomTree(Lobo.phy), phy <- Lobo.phy)
-best <- TreeSearch(best, phy)
-best <- TreeSearch(best, phy, method='TBR')
-best <- TreeSearch(best, phy, maxhits=40, maxiter=100000, method='SPR', verbosity=2)
-best <- TreeSearch(best, phy, maxhits=40, maxiter=100000, method='TBR', verbosity=2)
-best <- Ratchet(best, phy, outgroup='Cricocosmia', verbosity=1)
-plot(Root(best, 'Cricocosmia'))
+# You can load your own dataset using ape::read.nexus.data.
+
+# Perform a simple search with a random starting tree
+best <- TreeSearch(tree=TreeSearch::RandomTree(Lobo.phy, root='Cricocosmia'), dataset=Lobo.phy, Rearrange=TreeSearch::RootedNNI)
+
+# Running a second search from this tree will probably see further improvements:
+best <- TreeSearch(best, Lobo.phy)
+
+# Using NNI might help to explore the region of treespace close to the local optimum:
+best <- TreeSearch(best, Lobo.phy, Rearrange=TreeSearch::RootedNNI)
+
+# SPR and TBR arrangements help to escape local optima and find better peaks 
+# further away in tree space.  Using more hits (maxHits) and more iterations (maxIter)
+# means we'll move closer to an optimal tree
+best <- TreeSearch(best, Lobo.phy, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedSPR, verbosity=2)
+best <- TreeSearch(best, Lobo.phy, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedTBR, verbosity=2)
+
+# A more comprehensive search of tree space can be accomplished using the Parsimony Ratchet
+# It might take a couple of minutes to run.
+best <- Ratchet(best, Lobo.phy, verbosity=1)
+
+# Let's view the tree:
+plot(best)
+
+plot(ape::root(best, 'Cricocosmia', resolve.root=TRUE))
 ```
+
+# Reference
+
+Details of the algorithm have been posted as a pre-print at 
+
+BRAZEAU, M. D., GUILLERME, T. and SMITH, M. R. 2017. [Morphological phylogenetic analysis with inapplicable data](https://www.biorxiv.org/content/early/2017/10/26/209775). BioRχiv. doi:10.1101/209775
+

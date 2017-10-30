@@ -152,7 +152,7 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
 #'
 #' @template labelledTreeParam
 #' @template morphyObjParam
-#' @param Rearrange Function to use to rearrange trees; default: \code{\link{RootedNNI}}
+#' @param Rearrange Function to use to rearrange trees; example: \code{\link{TreeSearch::RootedTBR}}
 #' @param maxIter maximum iterations to conduct
 #' @param maxHits stop search after this many hits
 #' @param forestSize how many trees to hold
@@ -166,7 +166,7 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
 #' @export
 
 DoTreeSearch <- function 
-(tree, morphyObj, Rearrange=TreeSearch::RootedNNI, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, 
+(tree, morphyObj, Rearrange, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, 
  verbosity=1, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 1

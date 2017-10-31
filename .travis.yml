@@ -1,6 +1,9 @@
 language: r
 cache: packages
 warnings_are_errors: false
+sudo: required
+
+env: _R_CHECK_CRAN_INCOMING_=FALSE
 
 r_packages:
  - devtools
@@ -10,7 +13,7 @@ r_packages:
 install:
  - R -e "install.packages('devtools')"
  - R -e "install.packages('testthat')"
- - R -e "install.packages('ape', '.', repos = 'http://ape-package.ird.fr/')"
+ - R -e "install.packages('ape')"
  - R -e "devtools::install_github('KlausVigo/phangorn', ref='1167f0be62f13cfad0fca8ae8224318c407195bf')"
  - R -e "devtools::install_github('ms609/TreeSearch')"
  - R -e "install.packages('roxygen2')"
@@ -18,6 +21,8 @@ install:
 
 r_github_packages:
  - ms609/TreeSearch
+ - jimhester/covr
+ - codecov/example-r
 
 #blacklist
 branches:
@@ -32,3 +37,6 @@ bioc_required: true
 bioc_packages:
   - seqLogo
   - Biostrings
+  
+after_success:
+  - Rscript -e 'library(covr); codecov()'

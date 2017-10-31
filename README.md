@@ -12,9 +12,7 @@ You can install inapplicable into R thus:
 # Install the devtools package from CRAN, if necessary
 if(!require(devtools)) install.packages("devtools")
 
-# Install need the latest version of APE...
-install.packages('ape', '.', repos = 'http://ape-package.ird.fr/')
-# And a working development version of phangorn...
+# Install a working development version of phangorn, version 2.3 or greater
 devtools::install_github('KlausVigo/phangorn', ref='1167f0be62f13cfad0fca8ae8224318c407195bf')
 # Before you install the inapplicable package from GitHub:
 if (!require(inapplicable)) devtools::install_github('ms609/inapplicable')

@@ -35,7 +35,8 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label
   if (is.null(cluster)) {
-    rearrangedTree <- TreeSearch::RenumberTips(Rearrange(tree), tipOrder)
+    rearrangedTree <- Rearrange(tree)
+    rearrangedTree <- TreeSearch::RenumberTips(rearrangedTree, tipOrder)
     trees <- list(rearrangedTree)
     min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)
@@ -64,12 +65,3 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
   attr(trees, 'pscore') <- min.score
   trees
 }
-
-#' Generate random tree topology from dataset
-#' 
-#' @param dataset A dataset in \code{\link[phangorn]{phyDat}} format
-#' 
-#' @author Martin R. Smith 
-#' @importFrom ape rtree
-#' @export
-RandomTree <- function (dataset) rtree(length(dataset), tip.label=names(dataset), br=NULL)

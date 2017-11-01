@@ -32,8 +32,8 @@ This function returns a matrix of class \code{*phyDat}.
 Converts a PhyDat object to allow processing by MorphyDat
 }
 \examples{
-data(SigSut)
-morphy <- MorphyDat(SigSut.phy)
+data(inapplicable.datasets)
+morphy <- MorphyDat(inapplicable.phyData[[1]])
 
 }
 \seealso{

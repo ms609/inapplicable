@@ -1,6 +1,7 @@
 #' Thirty Datasets with Inapplicable data
 #' 
-#' @template 30datasets
+#' These are the datasets used to evaluate the behaviour of the inapplicable algorithm 
+#' in Brazeau, Guillerme and Smith (2017).
 #'
 #' The name of each item corresponds to the datasets listed below.
 #' Datasets are sorted into two subsets, each sorted alphabetically;
@@ -9,7 +10,6 @@
 #'
 #' @template inapplicableSources
 #'
-#' @references 
 #' @template studyReference
 #'
 #' @keywords datasets
@@ -17,7 +17,8 @@
 
 #' Thirty Datasets with Inapplicable data
 #' 
-#' @template 30datasets
+#' These are the datasets used to evaluate the behaviour of the inapplicable algorithm 
+#' in Brazeau, Guillerme and Smith (2017).
 #'
 #' The name of each item corresponds to the datasets listed below.
 #' Datasets are sorted into two subsets, each sorted alphabetically;
@@ -26,7 +27,6 @@
 #'
 #' @template inapplicableSources
 #'
-#' @references 
 #' @template studyReference
 #'
 #' @keywords datasets
@@ -34,13 +34,13 @@
 
 #' Thirty Datasets with Inapplicable data
 #' 
-#' @template 30datasets
+#' These are the datasets used to evaluate the behaviour of the inapplicable algorithm 
+#' in Brazeau, Guillerme and Smith (2017).
 #'
 #' The name of each item corresponds to the datasets listed below.  The value gives its citation.
 #'
 #' @template inapplicableSources
 #'
-#' @references
 #' @template studyReference
 #'
 #' @keywords datasets

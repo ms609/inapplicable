@@ -14,7 +14,7 @@ in the corresponding Morphy object.}
 
 \item{morphyObj}{A morphy object created with \code{\link{LoadMorphy}}}
 
-\item{Rearrange}{Function to use to rearrange trees; example: \code{\link{TreeSearch::RootedTBR}}}
+\item{Rearrange}{Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}}
 
 \item{maxIter}{maximum iterations to conduct}
 

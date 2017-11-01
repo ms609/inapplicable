@@ -1,8 +1,10 @@
 [![Build Status](https://travis-ci.org/ms609/inapplicable.svg?branch=master)](https://travis-ci.org/ms609/inapplicable)
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
+[![codecov](https://codecov.io/gh/ms609/inapplicable/branch/master/graph/badge.svg)](https://codecov.io/gh/ms609/inapplicable)
+[![CRAN Status Badge](http://www.r-pkg.org/badges/version/inapplicable)](https://cran.r-project.org/package=inapplicable)
 
 # inapplicable
-inapplicable is an R package, built on Phangorn, to allow the logically consistent handling of inapplicable data in parsimony analysis.
+inapplicable is an R package, built on `phangorn`, to allow the logically consistent handling of inapplicable data in parsimony analysis.
 It incorporates modifications to phangorn that increase the rate of phylogenetic analysis, and adds support for TBR rearrangements.
 
 
@@ -12,11 +14,9 @@ You can install inapplicable into R thus:
 # Install the devtools package from CRAN, if necessary
 if(!require(devtools)) install.packages("devtools")
 
-# Install need the latest version of APE...
-install.packages('ape', '.', repos = 'http://ape-package.ird.fr/')
-# And a working development version of phangorn...
-devtools::install_github('KlausVigo/phangorn', ref='1167f0be62f13cfad0fca8ae8224318c407195bf')
-# Before you install the inapplicable package from GitHub:
+# Install a working development version of phangorn...
+devtools::install_github('KlausVigo/phangorn', ref='7192bfb4403c35c16a7b735160525d272736b061') # 30 Oct 2017
+# ... .before you install the inapplicable package from GitHub:
 if (!require(inapplicable)) devtools::install_github('ms609/inapplicable')
 
 # Load the inapplicable package into R

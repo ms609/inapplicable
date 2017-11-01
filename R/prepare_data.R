@@ -5,8 +5,8 @@
 #' @param phydat A \code{phyDat} object
 #' 
 #' @examples
-#' data(SigSut)
-#' morphy <- MorphyDat(SigSut.phy)
+#' data(inapplicable.datasets)
+#' morphy <- MorphyDat(inapplicable.phyData[[1]])
 #' 
 #' @return This function returns a matrix of class \code{*phyDat}.
 #'    \itemize{

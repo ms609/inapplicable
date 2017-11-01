@@ -103,7 +103,8 @@ plot(better.tree)
 
 ## Once you have reached the most parsimonious tree, 
 ## retain multiple trees to determine the consensus: 
-best.trees <- RatchetConsensus(better.tree, my.phyDat, nSearch=10, maxIt=25, maxIter=250, maxHits=20, k=5)
+best.trees <- RatchetConsensus(better.tree, my.phyDat, nSearch=10, maxIt=25, 
+                               maxIter=250, maxHits=20, k=5)
 
 ## Calculate and display the consensus tree
 plot(my.consensus <- consensus(best.trees))

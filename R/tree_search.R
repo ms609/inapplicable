@@ -258,7 +258,7 @@ DoTreeSearch <- function
 #' data('inapplicable.datasets')
 #' my.phyDat <- inapplicable.phyData[[1]]
 #' outgroup <- names(my.phyDat)[1]
-#' njtree <- ape::root(ape::nj(phangorn::dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' njtree <- ape::root(ape::nj(phangorn::dist.hamming(my.phyDat)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL
 #' njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 #'

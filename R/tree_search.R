@@ -154,7 +154,7 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
 #'
 #' @template labelledTreeParam
 #' @template morphyObjParam
-#' @param Rearrange Function to use to rearrange trees; example: \code{\link{TreeSearch::RootedTBR}}
+#' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}
 #' @param maxIter maximum iterations to conduct
 #' @param maxHits stop search after this many hits
 #' @param forestSize how many trees to hold

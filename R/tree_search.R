@@ -257,14 +257,14 @@ DoTreeSearch <- function
 #' library('ape'); library('phangorn')
 #' data('inapplicable.datasets')
 #' my.phyDat <- inapplicable.phyData[[1]]
-#' outgroup <- names(my.phydat)[1]
+#' outgroup <- names(my.phyDat)[1]
 #' njtree <- ape::root(ape::nj(phangorn::dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL
 #' njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 #'
 #' \dontrun{
-#' TreeSearch(njtree, my.phydat, maxIter=20, Rearrange=TreeSearch::NNI)
-#' TreeSearch(njtree, my.phydat, maxIter=20, Rearrange=TreeSearch::RootedSPR)
+#' TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::NNI)
+#' TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::RootedSPR)
 #' }
 #' 
 #' @keywords  tree 

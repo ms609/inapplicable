@@ -2,7 +2,7 @@ Package: inapplicable
 Type: Package
 Title: Inapplicable data in parsimony analysis
 Version: 0.2.3
-Date: 2017-08-21
+Date: 2017-10-31
 Authors@R:     person(given = "Martin R.", family="Smith",
                role = c("aut", "cre"),
                email = "martins@gmail.com",
@@ -13,7 +13,10 @@ Description: Correctly calculates tree parsimony scores when datasets contain in
   The algorithm employed herein is described in ###REFERENCE###
   This R package is deposited at Data Dryad, doi: 10.5061/dryad.d5mf2  
   For an introduction to using the package, please see the manual heading 'inapplicable-package'.
-Imports: ape, phangorn, parallel, TreeSearch
+Imports: ape (>= 5.0),
+         phangorn (>= 2.2),
+         parallel,
+         TreeSearch
 Remotes: ms609/TreeSearch
 Suggests: testthat
 License: Unlimited

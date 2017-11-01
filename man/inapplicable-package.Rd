@@ -64,72 +64,46 @@ library(inapplicable)
 my.data <- read.nexus.data('C:/path/to/filename.nex')
 
 ## Alternatively you can use a built-in dataset:
-data(SigSut); my.data <- SigSut.data
+data(inapplicable.datasets); my.data <- inapplicable.datasets[[1]]
 
-## A contrast matrix translates the tokens used in your dataset to the character states to 
-##    which they correspond: for example decoding 'A' to {01}.
-##    For more details, see the 'phangorn-specials' vignette in the phangorn package, accesible 
-##    by typing '?phangorn' in the R prompt and navigating to index > package vignettes.
-
-contrast.matrix <- matrix(data=c(
-# 0 1 -  # Each column corresponds to a character-state
-  1,0,0, # Each row corresponds to a token, here 0, denoting the character-state set {0} 
-  0,1,0, # 1 | {1}
-  0,0,1, # - | {-}
-  1,1,0, # A | {01}
-  1,1,0, # + | {01}
-  1,1,1  # ? | {01-}
-), ncol=3, byrow=TRUE); # ncol should correspond to the number of columns in the matrix
-dimnames(contrast.matrix) <- list(
-  # A list of the tokens corresponding to each rows in the contrast matrix
-  c(0, 1, '-', 'A', '+', '?'),
-  # A list of the character-states corresponding to the columns in the contrast matrix
-  c(0, 1, '-') 
-)
-
-## To see the annotated contrast matrix, type
-contrast.matrix
-
-## Apply the contrast matrix, using the phyDat format...
-my.phyDat <- phyDat(my.data, type='USER', contrast=contrast.matrix)
-
-## ... and optimize the data for analysis 
-my.prepdata <- PrepareData(my.phyDat)
-
-## Specify the names of the outgroup taxa
-my.outgroup <- c('taxon1', 'taxon2')
+## Data should be converted to the phyDat format, with the inapplicable token listed as a level:
+my.phyDat <- phyDat(my.data, type='USER', levels=c(0:9, '-'))
 
 ## Load a bifurcating tree,
 tree <- read.nexus(treename.nex)
 ## or generate a random starting tree, 
 tree <- rtree(length(my.phyDat), rooted=TRUE, tip.label=names(my.phyDat), br=NULL)
 ## or use neighbour joining to generate a starting tree
-tree <- root(nj(dist.hamming(my.phyDat)), my.outgroup, resolve.root=TRUE)
+tree <- ape::nj(phangorn::dist.hamming(my.phyDat))
 tree$edge.length <- NULL;
 
+## Root the tree on an appropriate outgroup, if desired
+my.outgroup <- names(my.phyDat[1])
+tree <- ape::root(tree, my.outgroup, resolve.root=TRUE)
+
 ## View the starting tree by typing
+par(mar=rep(0.5, 4)) # Shrinks the margins of the plot so there's more space for the tree
 plot(tree)
 
 ## Calculate the tree's parsimony score
-InapplicableParsimony(tree, my.prepdata)
+InapplicableFitch(tree, my.phyDat)
 
 ## Search for a better tree
-better.tree <- TreeSearch(tree, my.prepdata, my.outgroup, method='SPR')
-## Try a sectorial search (Goloboff, 1999)
-better.tree <- SectorialSearch(better.tree, my.prepdata, my.outgroup)
-## Try the parsimony ratchet (Nixon, 1999)
-better.tree <- InapplicablePratchet(better.tree, my.prepdata, my.outgroup, maxhits=50, k=20)
+better.tree <- TreeSearch(tree, my.phyDat, verbosity=5)
+## Use Nearest Neighbour interchange to find a local optimum
+better.tree <- TreeSearch(better.tree, my.phyDat, Rearrange = TreeSearch::RootedNNI,
+                          maxIter=40000, maxHits=75, verbosity=2)
+## Try the parsimony ratchet (Nixon, 1999) for a more exhaustive search of treespace
+better.tree <- Ratchet(better.tree, my.phyDat, maxIt=25, maxIter=250, maxHits=20, k=5)
 ## The default parameters may not be enough to find the most parsimonious tree; type 
-##    ?InapplicablePratchet or ?SectorialSearch to view all search parameters.
-
+##    ?Ratchet or ?SectorialSearch to view all search parameters.
 
 ## View the results
 plot(better.tree)
 
 ## Once you have reached the most parsimonious tree, 
 ## retain multiple trees to determine the consensus: 
-best.trees <- TreeSearch(better.tree, my.prepdata, my.outgroup,
-      method='SPR', forest.size=100, maxiter=10000, maxhits=100)
+best.trees <- RatchetConsensus(better.tree, my.phyDat, nSearch=10, maxIt=25, maxIter=250, maxHits=20, k=5)
 
 ## Calculate and display the consensus tree
 plot(my.consensus <- consensus(best.trees))

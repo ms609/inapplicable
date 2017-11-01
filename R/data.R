@@ -1,4 +1,7 @@
-#' Datasets used in Brazeau et al. (2017)
+#' Thirty Datasets with Inapplicable data
+#' 
+#' These are the datasets used to evaluate the behaviour of the inapplicable algorithm 
+#' in Brazeau, Guillerme and Smith (2017)
 #'
 #' @usage
 #' inapplicable.datasets

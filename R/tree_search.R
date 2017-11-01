@@ -29,9 +29,10 @@
 #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
-#' data('Lobo')
-#' Ratchet(tree=TreeSearch::RandomTree(Lobo.phy, root='Tubiluchus_Priapulida'), 
-#'         dataset=Lobo.phy, maxIt=1, maxIter=50)
+#' data('inapplicable.datasets')
+#' my.phyDat <- inapplicable.phyData[[1]]
+#' Ratchet(tree=TreeSearch::RandomTree(my.phyDat, root=names(my.phyDat)[1]), 
+#'         dataset=my.phyDat, maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
 #' @export

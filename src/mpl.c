@@ -824,13 +824,6 @@ int mpl_na_second_up_recalculation
 }
 
 
-int mpl_na_update_tip_recalculation
-(const int tip_id, const int anc_id, Morphy m)
-{
-    
-}
-
-
 int mpl_lower_root_recalculation
 (const int l_root_id, const int root_id, Morphy m)
 {

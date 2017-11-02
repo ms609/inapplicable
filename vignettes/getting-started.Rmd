@@ -50,8 +50,9 @@ You can load your own dataset like so:
 my.data <- ape::read.nexus.data('path/to/file')
 ```
 
-But for now, we'll use the Vinther _et al._ dataset that's bundled with the package, 
-as it's nice and small so runs quickly.
+But for now, we'll use the Vinther _et al._ dataset that's bundled with the package.
+This dataset is small enough that it runs reasonably quickly, but its phylogenetic
+signal is obscure enough that it can require Ratchet searches to escape from local optima.
 
 ```{r}
 data(inapplicable.datasets)

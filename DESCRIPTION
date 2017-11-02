@@ -3,7 +3,7 @@ Type: Package
 Title: Inapplicable data in parsimony analysis
 Version: 0.2.3.9001
 Date: 2017-11-02
-Authors@R:  c( person(given = "Martin R.", family="Smith",
+Authors@R: c( person(given = "Martin R.", family="Smith",
                role = c("aut", "cre"),
                email = "martins@gmail.com",
                comment=c(ORCID = "0000-0001-5660-1727")),
@@ -25,9 +25,12 @@ Imports: ape (>= 5.0),
          phangorn (>= 2.2),
          parallel,
          TreeSearch
-Suggests: testthat
+Suggests: testthat,
+    knitr,
+    rmarkdown
 License: GPL (>= 3)
 URL: https://github.com/ms609/inapplicable
 BugReports: https://github.com/ms609/inapplicable/issues
 LazyData: true
 RoxygenNote: 6.0.1
+VignetteBuilder: knitr

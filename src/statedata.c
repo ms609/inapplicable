@@ -5,11 +5,11 @@
 //  Created by mbrazeau on 26/04/2017.
 //  Copyright © 2017 brazeaulab. All rights reserved.
 //
-#include "mpl.h"
 #include "morphydefs.h"
-#include "morphy.h"
 #include "mplerror.h"
+#include "morphy.h"
 #include "statedata.h"
+#include "mpl.h"
 
 char* mpl_skip_closure(const char *closure, const char openc, const char closec)
 {
@@ -94,7 +94,7 @@ int mpl_get_states_from_rawdata(Morphyp handl)
     char *rawmatrix = handl->char_t_matrix;
     char *current = NULL;
     int listmax = MAXSTATES + 1; // +1 for terminal null.
-    char* statesymbols = (char*)calloc(listmax, sizeof(char));//[listmax];
+    char statesymbols[listmax];
 //    int dbg_loopcount = 0;
     
     statesymbols[0] = '\0';
@@ -129,7 +129,6 @@ int mpl_get_states_from_rawdata(Morphyp handl)
     int numstates = (int)strlen(statesymbols);
     mpl_set_numsymbols(numstates, handl);
     mpl_assign_symbol_list_from_matrix(statesymbols, &handl->symbols);
-    free(statesymbols);
     return count-1;
 }
 
@@ -447,6 +446,62 @@ MPLstate mpl_gap_value(Morphyp handl)
     
     return -2;
 }
+
+
+MPLmatrix* mpl_new_mpl_matrix
+(const int ntaxa, const int nchar, const int nstates)
+{
+    assert(nstates);
+    MPLmatrix* ret = NULL;
+    
+    ret = (MPLmatrix*)calloc(1, sizeof(MPLmatrix));
+    if (!ret) {
+        return NULL;
+    }
+    
+//    ret->chtypes = (MPLchtype*)calloc(nchar, sizeof(MPLchtype));
+//    if (!ret->chtypes) {
+//        mpl_delete_mpl_matrix(ret);
+//        return NULL;
+//    }
+//    
+//    ret->intweights = (int*)calloc(nchar, sizeof(int));
+//    if (!ret->intweights) {
+//        mpl_delete_mpl_matrix(ret);
+//        return NULL;
+//    }
+//    
+//    ret->fltweights = (Mflt*)calloc(nchar, sizeof(Mflt));
+//    if (!ret->fltweights) {
+//        mpl_delete_mpl_matrix(ret);
+//        return NULL;
+//    }
+    
+    ret->cells = (MPLcell*)calloc(ntaxa * nchar, sizeof(MPLcell));
+    if (!ret->cells) {
+        mpl_delete_mpl_matrix(ret);
+        return NULL;
+    }
+    
+    ret->ncells = ntaxa * nchar;
+    int i = 0;
+    
+    for (i = 0; i < ret->ncells; ++i) {
+        ret->cells[i].asstr = (char*)calloc(nstates + 1, sizeof(char));
+        if (!ret->cells[i].asstr) {
+            int j = 0;
+            for (j = 0; j < i; ++j) {
+                free(ret->cells[i].asstr);
+                ret->cells[i].asstr = NULL;
+            }
+            mpl_delete_mpl_matrix(ret);
+            return NULL;
+        }
+    }
+    
+    return ret;
+}
+
 
 int mpl_init_inmatrix(Morphyp handl)
 {

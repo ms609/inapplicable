@@ -182,14 +182,14 @@ MPLstate mpl_convert_gap_symbol(Morphyp handl, bool over_cutoff)
             return NA;
         }
         else {
-            return MISSING;
+            return MPL_MISSING;
         }
     }
     else if (handl->gaphandl == GAP_NEWSTATE) {
         return (MPLstate)1;
     }
     else if (handl->gaphandl == GAP_MISSING) {
-        return MISSING;
+        return MPL_MISSING;
     }
     
     return ERR_NO_DATA;
@@ -251,7 +251,7 @@ int mpl_convert_cells(Morphyp handl)
                 cell->asint = mpl_convert_gap_symbol(handl, over_cutoff);
             }
             else if (*celldata == handl->symbols.missing) {
-                cell->asint = MISSING;
+                cell->asint = MPL_MISSING;
             }
             else {
                 cell->asint = mpl_convert_char_to_MPLstate(celldata, handl);
@@ -433,7 +433,7 @@ MPLstate mpl_gap_value(Morphyp handl)
         case GAP_INAPPLIC:
             return NA;
         case GAP_MISSING:
-            return MISSING;
+            return MPL_MISSING;
         case GAP_NEWSTATE:
             return (MPLstate)1;
         case GAP_MAX:
@@ -734,7 +734,7 @@ char *mpl_translate_state2char(MPLstate cstates, Morphyp handl)
     }
     char* symbols = mpl_get_symbols((Morphy)handl);
     
-    if (cstates < (MISSING-NA)) {
+    if (cstates < (MPL_MISSING-NA)) {
         while (cstates) {
             if (1 & cstates) {
                 if (shift == 0 && gapshift) {

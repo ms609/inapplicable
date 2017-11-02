@@ -50,12 +50,12 @@ You can load your own dataset like so:
 my.data <- ape::read.nexus.data('path/to/file')
 ```
 
-But for now, we'll use the Asher dataset that's bundled with the package, 
+But for now, we'll use the Vinther _et al._ dataset that's bundled with the package, 
 as it's nice and small so runs quickly.
 
 ```{r}
 data(inapplicable.datasets)
-my.data <- inapplicable.datasets[['Asher2005']]
+my.data <- inapplicable.datasets[['Vinther2008']]
 my.phyDat <- phangorn::phyDat(my.data, type='USER', levels=c(0:9, '-'))
 ```
 
@@ -81,16 +81,15 @@ better.tree <- TreeSearch(tree=nj.tree, dataset=my.phyDat, Rearrange=TreeSearch:
 InapplicableFitch(better.tree, my.phyDat)
 ```
 
-With the Asher 2005 dataset, three marsupial taxa are used as an outgroup.  
+With the Vinther _et al._ 2008 dataset, brachiopods and nemerteans form an natural outgroup to 
+the other taxa. 
 If we wish, we can avoid tree-rearrangement steps that mix ingroup and outgroup taxa.
 This will accellerate tree search, but does enforce the monophyly of the ingroup and outgroup.
 First we need to ensure that the outgroup is monophyletic:
 
 ```{r}
-outgroup <- c('Didelphis', 'Macropus', 'Vombatus')
-outgroup.branch <- ape::rtree(length(outgroup), tip.label=outgroup, br=NULL)
-ingroup.branch <- ape::drop.tip(nj.tree, outgroup)
-rooted.tree <- ape::root(ape::bind.tree(outgroup.branch, ingroup.branch, 0, 1), outgroup, resolve.root=TRUE)
+outgroup <- c('Nemertean', 'Lingula', 'Terebratulina')
+plot(rooted.tree)
 ```
 
 Then we can conduct a tree search:

@@ -13,7 +13,11 @@ vignette: >
 `inapplicable` is an R package that allows parsimony search on morphological datasets that contain
 inapplicable data, following the algorithm proposed by Brazeau, Guillerme and Smith (2017).
 
-You can install inapplicable into R thus:
+In brief, this algorithm modifies the Fitch algorithm to count the total number of homoplasious 
+events on a tree.
+
+# Installation
+Before installing inapplicable, you need to install a development version of the `phangorn` package:
 
 ```r
 # Install the devtools package from CRAN, if necessary
@@ -21,25 +25,61 @@ if(!require(devtools)) install.packages("devtools")
 
 # Install a working development version of phangorn...
 devtools::install_github('KlausVigo/phangorn', ref='7192bfb4403c35c16a7b735160525d272736b061') # 30 Oct 2017
-# ... .before you install the inapplicable package from GitHub:
-if (!require(inapplicable)) devtools::install_github('ms609/inapplicable')
+```
 
-# Load the inapplicable package into R
+Then the inapplicable package can be installed as normal, and loaded into R:
+
+```r
+# Get the latest stable version from CRAN:
+install.packages('inapplicable')
+# Or get the latest development version from GitHub:
+devtools::install_github('ms609/inapplicable')
+```
+
+Once installed, load the inapplicable package into R using
+```{r}
 library('inapplicable')
 ```
 
-More details will be added here when details of the algorithm are published.
+# Scoring a tree, and conducting a tree search
 
-Here's an example of using the package to conduct tree search:
+Here's an example of using the package to conduct tree search.
+You can load your own dataset like so:
 
-```r 
-library(inapplicable)
-# Here we'll use the pre-loaded Lobo matrix:
-data(Lobo)
-# You can load your own dataset using ape::read.nexus.data.
+```r
+my.data <- ape::read.nexus.data('path/to/file')
+```
 
-# Perform a simple search with a random starting tree
-best <- TreeSearch(tree=TreeSearch::RandomTree(Lobo.phy, root='Cricocosmia'), dataset=Lobo.phy, Rearrange=TreeSearch::RootedNNI)
+But for now, we'll use the Asher dataset that's bundled with the package, 
+as it's nice and small so runs quickly.
+
+```{r}
+data(inapplicable.datasets)
+my.data <- inapplicable.datasets[['Asher2005']]
+my.phyDat <- phangorn::phyDat(my.data, type='USER', levels=c(0:9, '-'))
+```
+
+We can generate a random tree and calculate its parsimony score thus:
+```{r}
+random.tree <- TreeSearch::RandomTree(my.phyDat)
+InapplicableFitch(random.tree, my.phyDat)
+```
+
+It helps tree search if we start with a tree that's a little closer to optimal; perhaps a
+neighbour-joining tree:
+```{r}
+nj.tree <- ape::nj(phangorn::dist.hamming(my.phyDat))
+InapplicableFitch(nj.tree, my.phyDat)
+```
+
+Now let's see if we can find a better score:
+```{r}
+better.tree <- TreeSearch(tree=nj.tree, dataset=my.phyDat, Rearrange=TreeSearch::RootedNNI)
+InapplicableFitch(better.tree, my.phyDat)
+```
+
+
+outgroup <- c('Didelphis', 'Macropus', 'Vombatus')
 
 # Running a second search from this tree will probably see further improvements:
 best <- TreeSearch(best, Lobo.phy)

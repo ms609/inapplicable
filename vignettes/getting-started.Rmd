@@ -89,6 +89,7 @@ First we need to ensure that the outgroup is monophyletic:
 
 ```{r}
 outgroup <- c('Nemertean', 'Lingula', 'Terebratulina')
+rooted.tree <- TreeSearch::EnforceOutgroup(nj.tree, outgroup)
 plot(rooted.tree)
 ```
 

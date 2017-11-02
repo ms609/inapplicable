@@ -20,6 +20,8 @@ install:
  - R -e "install.packages('devtools')"
  - R -e "install.packages('testthat')"
  - R -e "install.packages('ape')"
+ - R -e "install.packages('rmarkdown')"
+ - R -e "install.packages('knitr')"
  - R -e "devtools::install_github('KlausVigo/phangorn', ref='7192bfb4403c35c16a7b735160525d272736b061')"
  - R -e "devtools::install_github('ms609/TreeSearch')"
  - R -e "install.packages('roxygen2')"

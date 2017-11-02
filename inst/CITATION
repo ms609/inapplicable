@@ -4,12 +4,12 @@
      vers <- paste("R package version", meta$Version)
      
      citEntry(entry = "Manual",
-              title = "Incorporating inapplicable data in parsimony analyses",
-              author = personList(as.person("Martin R. Smith"), as.person("Martin D. Brazeau")),
+              title = "Morphological phylogenetic analysis with inapplicable data",
+              author = personList(as.person("Martin D. Brazeau"), as.person('Thomas Guillerme'), as.person("Martin R. Smith"),),
               year = year,
               note = vers,
      
               textVersion =
-              paste0("Martin R. Smith & Martin D. Brazeau (submitted). ",
-                     "Incorporating inapplicable data in parsimony analyses. Systematic Biology XXX",
-                     ", doi: 10.1093/sysbio/syXXXX"))
+              paste0("Brazeau, Guillerme & Smith (2017). ",
+                     "Morphological phylogenetic analysis with inapplicable data. BioRxiv",
+                     ", doi: 10.1101/209775"))

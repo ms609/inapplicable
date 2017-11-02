@@ -3,7 +3,7 @@
 #' @param object A Morphy object
 #' @param \dots any other parameters... 
 #'
-#' @return A list detailing the number of taxa, internal nodes, and characters and their weigths.
+#' @return A list detailing the number of taxa, internal nodes, and characters and their weights.
 #'
 #' @author Martin R. Smith
 #' @method summary morphyPtr
@@ -102,7 +102,7 @@ LoadMorphy <- function (phy) {
 #' has already been destroyed
 #'
 #' @template morphyObjParam
-#' @return Morphy error code, deciperhable using \code{\link{mpl_translate_error}}
+#' @return Morphy error code, decipherable using \code{\link{mpl_translate_error}}
 #' @author Martin R. Smith
 #' @export
 UnloadMorphy <- function (morphyObj) {

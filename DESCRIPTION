@@ -25,7 +25,6 @@ Imports: ape (>= 5.0),
          phangorn (>= 2.2),
          parallel,
          TreeSearch
-Remotes: ms609/TreeSearch
 Suggests: testthat
 License: GPL (>= 3)
 URL: https://github.com/ms609/inapplicable

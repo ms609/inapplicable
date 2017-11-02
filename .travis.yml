@@ -3,7 +3,8 @@ r:
  - 3.4.0
  - devel
 cache: packages
-warnings_are_errors: false
+warnings_are_errors: true
+r_check_args: --as-cran
 
 git:
   depth: 5

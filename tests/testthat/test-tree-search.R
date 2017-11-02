@@ -1,8 +1,7 @@
-# library(testthat); library(devtools);
 library(ape)
 library(TreeSearch)
 
-context("Test tree search")
+testthat::context("Test tree search")
 test_that("tree search finds shortest tree", {
   true_tree <- read.tree(text = "(((((1,2),3),4),5),6);")
   dataset <- StringToPhyDat('110000 111000 111100', 1:6, byTaxon=FALSE)

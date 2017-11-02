@@ -34,4 +34,4 @@ branches:
     - Information
 
 after_success:
-  - Rscript -e "install.packages('covr'); library('testthat'); covr::codecov()"
+  - Rscript -e "install.packages('covr'); covr::codecov()"

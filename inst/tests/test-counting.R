@@ -1,7 +1,7 @@
 library(ape)
 
 ## Test suite designed by Thomas Guillerme
-context("correct step counting")
+testthat::context("correct step counting")
 test_that("right counting", {
   ## Tree
   tree <- read.tree(text = "((((((1,2),3),4),5),6),(7,(8,(9,(10,(11,12))))));")

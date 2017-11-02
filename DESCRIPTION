@@ -1,12 +1,19 @@
 Package: inapplicable
 Type: Package
 Title: Inapplicable data in parsimony analysis
-Version: 0.2.3
+Version: 0.2.3.9000
 Date: 2017-11-01
-Authors@R:     person(given = "Martin R.", family="Smith",
+Authors@R:  c( person(given = "Martin R.", family="Smith",
                role = c("aut", "cre"),
                email = "martins@gmail.com",
-               comment=c(ORCID = "0000-0001-5660-1727"))
+               comment=c(ORCID = "0000-0001-5660-1727")),
+               person(given = "Martin D.", family="Brazeau",
+               role = c("ctb"),
+               comment=c(ORCID = "0000-0002-0650-1282")),
+               person(given = "Thomas", family="Guillerme",
+               role = c("ctb"),
+               comment=c(ORCID = "0000-0003-4325-1275"))
+             )
 Maintainer: Martin R. Smith <martins@gmail.com>
 Description: Correctly calculates tree parsimony scores when datasets contain inapplicable data.
   Also provides tree rearrangement and tree search functions that preserve a tree's outgroup.

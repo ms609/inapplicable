@@ -10,13 +10,14 @@ inapplicable data, following the algorithm proposed by Brazeau, Guillerme and Sm
 You can install inapplicable into R thus:
 
 ```r
-# Install the devtools package from CRAN, if necessary
-if(!require(devtools)) install.packages("devtools")
+if(!require(inapplicable)) install.packages("inapplicable")
+library(inapplicable)
+```
 
-# Install a working development version of phangorn...
-devtools::install_github('KlausVigo/phangorn', ref='7192bfb4403c35c16a7b735160525d272736b061') # 30 Oct 2017
-# ... .before you install the inapplicable package from GitHub:
-if (!require(inapplicable)) devtools::install_github('ms609/inapplicable')
+If you're feeling brave, you can install the development version thus:
+```r
+if(!require(devtools)) install.packages("devtools")
+devtools::install_github('ms609/inapplicable')
 
 # Load the inapplicable package into R
 library('inapplicable')

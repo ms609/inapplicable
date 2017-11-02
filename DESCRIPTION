@@ -17,7 +17,7 @@ Authors@R: c( person(given = "Martin R.", family="Smith",
 Maintainer: Martin R. Smith <martins@gmail.com>
 Description: Correctly calculates tree parsimony scores when datasets contain inapplicable data.
   Also provides tree rearrangement and tree search functions that preserve a tree's outgroup.
-  The algorithm employed herein is described in BRAZEAU, M. D., GUILLERME, T. and SMITH, M. R. 2017. Morphological phylogenetic analysis with inapplicable data. BioRxiv.
+  The algorithm employed herein is described in BRAZEAU, M. D., GUILLERME, T. and SMITH, M. R. (2017). Morphological phylogenetic analysis with inapplicable data. BioRxiv. <doi:10.1101/209775>
   This R package is deposited at FigShare, doi: 10.6084/m9.figshare.c.3911821
   For an introduction to using the package, please see the manual heading 'inapplicable-package'.
 Depends: R (>= 3.4.0)

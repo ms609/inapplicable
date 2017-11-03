@@ -22,7 +22,7 @@ install:
 
 r_github_packages:
  - ms609/TreeSearch
- - jimhester/covr
+ - covr
  - codecov/example-r
 
 #blacklist

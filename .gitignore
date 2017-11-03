@@ -8,3 +8,5 @@ src/*.dll
 *.Rd
 inst/ape
 inst/doc
+vignettes/*.html
+vignettes/*_files

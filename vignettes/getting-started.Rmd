@@ -24,7 +24,7 @@ Before installing inapplicable, you need to install a development version of the
 if(!require(devtools)) install.packages("devtools")
 
 # Install a working development version of phangorn...
-devtools::install_github('KlausVigo/phangorn', ref='7192bfb4403c35c16a7b735160525d272736b061') # 30 Oct 2017
+devtools::install_github('KlausVigo/phangorn', ref='7192bfb4403c35c16a7b735160525d272736b061', INSTALL_opts='--byte-compile') # 30 Oct 2017
 ```
 
 Then the inapplicable package can be installed as normal, and loaded into R:
@@ -35,6 +35,13 @@ install.packages('inapplicable')
 # Or get the latest development version from GitHub:
 devtools::install_github('ms609/inapplicable')
 ```
+
+It's also worth installing a compiled version of `ape` for additional speed:
+
+```r
+install.packages('ape', INSTALL_opts='--byte-compile')
+```
+
 
 Once installed, load the inapplicable package into R using
 ```{r Load library}

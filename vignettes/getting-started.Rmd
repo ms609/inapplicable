@@ -62,6 +62,7 @@ my.phyDat <- phangorn::phyDat(my.data, type='USER', levels=c(0:9, '-'))
 
 We can generate a random tree and calculate its parsimony score thus:
 ```{r}
+set.seed(0) # Set random seed so that random functions will generate consistent output in this document
 random.tree <- TreeSearch::RandomTree(my.phyDat)
 InapplicableFitch(random.tree, my.phyDat)
 ```
@@ -91,6 +92,7 @@ First we need to ensure that the outgroup is monophyletic:
 ```{r}
 outgroup <- c('Nemertean', 'Lingula', 'Terebratulina')
 rooted.tree <- TreeSearch::EnforceOutgroup(nj.tree, outgroup)
+par(mar=rep(0.25, 4), cex=0.75) # set plot parameters so trees are almost legible
 plot(rooted.tree)
 ```
 

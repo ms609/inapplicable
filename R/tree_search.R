@@ -1,6 +1,6 @@
 #' Parsimony Ratchet
 #'
-#' \code{Ratchet} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
+#' \code{RatchetSearch} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
 #'
 #' @template treeParam 
 #' @template datasetParam
@@ -31,13 +31,13 @@
 #' @examples{
 #' data('inapplicable.datasets')
 #' my.phyDat <- inapplicable.phyData[[1]]
-#' Ratchet(tree=TreeSearch::RandomTree(my.phyDat, root=names(my.phyDat)[1]), 
+#' RatchetSearch(tree=TreeSearch::RandomTree(my.phyDat, root=names(my.phyDat)[1]), 
 #'         dataset=my.phyDat, maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
 #' @importFrom TreeSearch Renumber RenumberTips
 #' @export
-Ratchet <- function 
+RatchetSearch <- function 
 (tree, dataset, keepAll=FALSE, maxIt=100, maxIter=5000, 
   maxHits=40, k=10, verbosity=1, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedSPR, 
   TreeSearch::RootedNNI), ...) {
@@ -106,7 +106,7 @@ Ratchet <- function
 #' @export
 RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0, 
   rearrangements=list(TreeSearch::NNI), nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxIt, maxIter, maxHits, 
+  trees <- lapply(1:nSearch, function (x) inapplicable::RatchetSearch(tree, dataset, maxIt, maxIter, maxHits, 
                                                   k=1, verbosity, rearrangements, ...))
   scores <- vapply(trees, function (x) attr(x, 'score'), double(1))
   trees <- unique(trees[scores == min(scores)])
@@ -151,7 +151,7 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1,
 #' 
 #' Does the hard work of searching for a most parsimonious tree.
 #' End-users are expected to access this function through its wrapper, TreeSearch
-#' It is also called directly by Ratchet and Sectorial functions
+#' It is also called directly by RatchetSearch and Sectorial functions
 #'
 #' @template labelledTreeParam
 #' @template morphyObjParam
@@ -250,7 +250,7 @@ DoTreeSearch <- function
 #' \item \code{\link{InapplicableFitch}}, calculates parsimony score, supports inapplicable tokens;
 #' \item \code{\link{RootedNNI}}, conducts tree rearrangements;
 #' \item \code{\link{SectorialSearch}}, alternative heuristic, useful for larger trees;
-#' \item \code{\link{Ratchet}}, alternative heuristic, useful to escape local optima.
+#' \item \code{\link{RatchetSearch}}, alternative heuristic, useful to escape local optima.
 #' }
 #'
 #' @examples
@@ -316,7 +316,7 @@ BasicSearch <- function
 ### #' @author Martin R. Smith
 ### #' 
 ### #' @seealso \code{\link{BasicSearch}}
-### #' @seealso \code{\link{Ratchet}}
+### #' @seealso \code{\link{RatchetSearch}}
 ### #' 
 ### #' @examples
 ### #' require('ape')

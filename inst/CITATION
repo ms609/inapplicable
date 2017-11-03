@@ -5,7 +5,7 @@
      
      citEntry(entry = "Manual",
               title = "Morphological phylogenetic analysis with inapplicable data",
-              author = personList(as.person("Martin D. Brazeau"), as.person('Thomas Guillerme'), as.person("Martin R. Smith"),),
+              author = personList(as.person("Martin D. Brazeau"), as.person("Thomas Guillerme"), as.person("Martin R. Smith")),
               year = year,
               note = vers,
      

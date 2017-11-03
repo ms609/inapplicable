@@ -36,7 +36,7 @@
 #'                    the Burgess Shale and the influence of inapplicable states on stem arthropod
 #'                     phylogeny. Palaeontology, 58, 629--660.}
 #'  \item{Asher2005}{ASHER, R. J. and HOFREITER, M. 2006. Tenrec phylogeny and the noninvasive
-#'                   extraction of nuclear DNA. Systematic biology, 55, 181–94.}
+#'                   extraction of nuclear DNA. Systematic biology, 55, 181--94.}
 #'  \item{Baker2009}{ BAKER, W. J., SAVOLAINEN, V., ASMUSSEN-LANGE, C. B., CHASE, M. W., 
 #'                    DRANSFIELD, J., FOREST, F., HARLEY, M. M., UHL, N. W. and WILKINSON, M. 2009.
 #'                     Complete generic-level phylogenetic analyses of palms (Arecaceae) with 

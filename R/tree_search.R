@@ -102,7 +102,7 @@ RatchetSearch <- function
   return (ret)
 }
 
-#' @describeIn Ratchet returns a list of optimal trees produced by nSearch Ratchet searches
+#' @describeIn RatchetSearch returns a list of optimal trees produced by nSearch Ratchet searches
 #' @export
 RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0, 
   rearrangements=list(TreeSearch::NNI), nSearch=10, ...) {

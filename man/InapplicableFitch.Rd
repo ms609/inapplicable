@@ -7,10 +7,10 @@
 InapplicableFitch(tree, dataset)
 }
 \arguments{
-\item{tree}{A tree of class \code{\link{phylo}}}
+\item{tree}{A tree of class \code{\link{phylo}}.}
 
 \item{dataset}{A phylogenetic data matrix of class \code{\link[phangorn]{phyDat}}, whose names 
-correspond to the labels of any accompanying tree}
+correspond to the labels of any accompanying tree.}
 }
 \value{
 This function returns the elements from a list containing:
@@ -36,7 +36,7 @@ result <- InapplicableFitch(tree, inapplicable.phyData[[1]])
 \seealso{
 \code{\link{MorphyDat}}
 
-\code{\link{TreeSearch}}
+\code{\link{BasicSearch}}
 }
 \author{
 Martin R. Smith (using C code adapted from MorphyLib, author Martin Brazeau)

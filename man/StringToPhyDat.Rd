@@ -15,7 +15,7 @@ StringToPhyDat(string, tips, byTaxon = TRUE)
 \item{byTaxon}{= TRUE, string is one TAXON's coding at a time; FALSE: one CHARACTER's coding at a time}
 }
 \value{
-This function returns a data matrix in \code{\link[phangorn]{phyDat}} format
+This function returns a data matrix in \code{\link[phangorn]{phyDat}} format.
 }
 \description{
 Converts a PhyDat object to allow processing by MorphyDat

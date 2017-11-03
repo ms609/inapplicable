@@ -172,7 +172,7 @@ DoTreeSearch <- function
 (tree, morphyObj, Rearrange, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, 
  verbosity=1, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
-  attr(tree, 'hits') <- 1
+  attr(tree, 'hits') <- 0
   if (!is.null(forestSize) && length(forestSize)) {
     if (forestSize > 1) {
       forest <- empty.forest <- vector('list', forestSize)

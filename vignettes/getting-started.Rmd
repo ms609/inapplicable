@@ -79,7 +79,7 @@ InapplicableFitch(nj.tree, my.phyDat)
 
 Now let's see if we can find a better score:
 ```{r}
-better.tree <- TreeSearch(tree=nj.tree, dataset=my.phyDat, Rearrange=TreeSearch::RootedNNI)
+better.tree <- BasicSearch(tree=nj.tree, dataset=my.phyDat, Rearrange=TreeSearch::RootedNNI)
 InapplicableFitch(better.tree, my.phyDat)
 ```
 
@@ -98,12 +98,12 @@ plot(rooted.tree)
 
 Then we can conduct a tree search:
 ```{r}
-better.tree <- TreeSearch(rooted.tree, my.phyDat)
+better.tree <- BasicSearch(rooted.tree, my.phyDat)
 ```
 
 Using NNI might help to explore the region of treespace close to the local optimum:
 ```{r}
-better.tree <- TreeSearch(better.tree, my.phyDat, Rearrange=TreeSearch::RootedNNI)
+better.tree <- BasicSearch(better.tree, my.phyDat, Rearrange=TreeSearch::RootedNNI)
 attr(better.tree, 'score')
 ```
 
@@ -111,15 +111,15 @@ SPR and TBR arrangements help to escape local optima and find better peaks
 further away in tree space.  Using more hits (maxHits) and more iterations (maxIter)
 means we'll move closer to an optimal tree
 ```{r}
-better.tree <- TreeSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedSPR, verbosity=2)
-better.tree <- TreeSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedTBR, verbosity=2)
+better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedSPR, verbosity=2)
+better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedTBR, verbosity=2)
 attr(better.tree, 'score')
 ```
 
 A more comprehensive search of tree space can be accomplished using the Parsimony Ratchet
 It might take a couple of minutes to run.
 ```{r}
-best.tree <- Ratchet(better.tree, my.phyDat, verbosity=0)
+best.tree <- RatchetSearch(better.tree, my.phyDat, verbosity=3)
 attr(best.tree, 'score')
 ```
 

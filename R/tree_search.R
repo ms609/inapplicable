@@ -57,7 +57,7 @@ Ratchet <- function
   kmax <- 0 
   for (i in 1:maxIt) {
     if (verbosity > 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
-    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
+    candidate <- inapplicable::MorphyBootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
                                verbosity=verbosity-1, ...)
     
     for (Rearrange in rearrangements) {
@@ -126,7 +126,7 @@ RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @importFrom TreeSearch RootedNNI
 #' @export
-BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) {
+MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   startWeights <- MorphyWeights(morphyObj)[1, ]
   eachChar <- seq_along(startWeights)
@@ -161,7 +161,7 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
 #' @param forestSize how many trees to hold.
 #' @template clusterParam
 #' @template verbosityParam
-#' @param \dots additional variables to pass to \code{\link{RearrangeTree}}.
+#' @param \dots additional variables to pass to \code{\link{MorphyRearrangeTree}}.
 #'
 #' @author Martin R. Smith
 #' 
@@ -187,7 +187,7 @@ DoTreeSearch <- function
   return.single <- !(forestSize > 1)
   
   for (iter in 1:maxIter) {
-    trees <- inapplicable::RearrangeTree(tree, morphyObj, Rearrange, min.score=best.score, 
+    trees <- inapplicable::MorphyRearrangeTree(tree, morphyObj, Rearrange, min.score=best.score, 
                            return.single=return.single, iter=iter, cluster=cluster,
                            verbosity=verbosity, ...)
     iter.score <- attr(trees, 'score')

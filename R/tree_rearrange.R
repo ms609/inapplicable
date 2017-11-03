@@ -1,6 +1,6 @@
 
 #' Rearrange phylogenetic tree
-#' @details \code{RearrangeTree} performs one tree rearrangement of a specified type
+#' @details \code{MorphyRearrangeTree} performs one tree rearrangement of a specified type
 #' 
 #' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, with its labels
 #'             in an order that matches the Morphy object, and the attributes
@@ -29,7 +29,7 @@
 #' @importFrom parallel clusterCall
 #' @importFrom TreeSearch Renumber RenumberTips
 #' @export
-RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.single=TRUE,
+MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.single=TRUE,
                            iter='?', cluster=NULL, verbosity=0) {
   if (is.null(attr(tree, 'score'))) best.score <- 1e+07 else best.score <- attr(tree, 'score')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')

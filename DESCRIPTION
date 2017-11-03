@@ -4,11 +4,11 @@ Title: Inapplicable data in parsimony analysis
 Version: 0.2.3.9002
 Date: 2017-11-03
 Authors@R: c( person(given = "Martin R.", family="Smith",
-               role = c("aut", "cre"),
+               role = c("aut", "cre", "cph"),
                email = "martins@gmail.com",
                comment=c(ORCID = "0000-0001-5660-1727")),
                person(given = "Martin D.", family="Brazeau",
-               role = c("ctb"),
+               role = c("ctb", "cph"),
                comment=c(ORCID = "0000-0002-0650-1282")),
                person(given = "Thomas", family="Guillerme",
                role = c("ctb"),

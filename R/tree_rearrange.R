@@ -4,7 +4,7 @@
 #' 
 #' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, with its labels
 #'             in an order that matches the Morphy object, and the attributes
-#'             \code{pscore}, the tree's parsimony score, and 
+#'             \code{score}, the tree's optimality score, and 
 #'             \code{hits}, the number of times the best score has been hit in the calling function;
 #' @template morphyObjParam
 #' @param Rearrange a rearrangement function that returns a tree: probably one of 
@@ -16,7 +16,7 @@
 #' @template clusterParam
 #' @template verbosityParam
 #' 
-#' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}
+#' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{score}
 #'  as described for argument \code{tree}, and with tip labels ordered to match morphyObj.}
 #' @author Martin R. Smith
 #' @seealso
@@ -31,7 +31,7 @@
 #' @export
 RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.single=TRUE,
                            iter='?', cluster=NULL, verbosity=0) {
-  if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
+  if (is.null(attr(tree, 'score'))) best.score <- 1e+07 else best.score <- attr(tree, 'score')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label
   if (is.null(cluster)) {
@@ -40,7 +40,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
     min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)
   } else {
-    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
+    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'score') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
     warning("Not tested; likely to fail.")
     candidates <- clusterCall(cluster, Rearrange, tree)
@@ -61,6 +61,6 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
   }
   if (length(return.single) && return.single) trees <- sample(trees, 1)[[1]]
   attr(trees, 'hits') <- hits
-  attr(trees, 'pscore') <- min.score
+  attr(trees, 'score') <- min.score
   trees
 }

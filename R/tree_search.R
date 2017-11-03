@@ -46,11 +46,11 @@ Ratchet <- function
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
   tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
   eps <- 1e-08
-  if (is.null(attr(tree, "pscore"))) {
-    attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
+  if (is.null(attr(tree, "score"))) {
+    attr(tree, "score") <- MorphyLength(tree, morphyObj, ...)
   }
-  best.pars <- attr(tree, "pscore")
-  if (verbosity > 0) cat("* Initial pscore:", best.pars)
+  best.pars <- attr(tree, "score")
+  if (verbosity > 0) cat("* Initial score:", best.pars)
   if (keepAll) forest <- vector('list', maxIter)
 
   if (class(rearrangements) == 'function') rearrangements <- list(rearrangements)
@@ -65,7 +65,7 @@ Ratchet <- function
       candidate <- DoTreeSearch(candidate, morphyObj, Rearrange=Rearrange, 
                                 verbosity=verbosity-1, maxIter=maxIter, maxHits=maxHits, ...)
     }
-    cand.pars <- attr(candidate, 'pscore')
+    cand.pars <- attr(candidate, 'score')
     if((cand.pars+eps) < best.pars) {
       if (keepAll) {
         forest <- vector('list', maxIter)
@@ -82,12 +82,12 @@ Ratchet <- function
         if (keepAll) forest[[i]] <- candidate
       }
     }
-    if (verbosity > 0) cat("\n* Best pscore after", i, "/", maxIt, "Ratchet iterations:", 
+    if (verbosity > 0) cat("\n* Best score after", i, "/", maxIt, "Ratchet iterations:", 
                            best.pars, "( hit", kmax, "/", k, ")")
     if (kmax >= k) break()
   } # for
   if (verbosity > 0)
-    cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
+    cat ("\nCompleted parsimony ratchet with score", best.pars, "\n")
     
   if (keepAll) {
     forest <- forest[!vapply(forest, is.null, logical(1))]
@@ -108,7 +108,7 @@ RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20
   rearrangements=list(TreeSearch::NNI), nSearch=10, ...) {
   trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxIt, maxIter, maxHits, 
                                                   k=1, verbosity, rearrangements, ...))
-  scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
+  scores <- vapply(trees, function (x) attr(x, 'score'), double(1))
   trees <- unique(trees[scores == min(scores)])
   cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')
   return (trees)
@@ -135,9 +135,9 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)#
-  attr(tree, 'pscore') <- NULL
+  attr(tree, 'score') <- NULL
   res <- DoTreeSearch(tree, morphyObj, Rearrange=TreeSearch::RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1, ...)
-  attr(res, 'pscore') <- NULL
+  attr(res, 'score') <- NULL
   attr(res, 'hits') <- NULL
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, startWeights[i], morphyObj), integer(1))
@@ -181,44 +181,44 @@ DoTreeSearch <- function
       forestSize <- 1 
     }
   }
-  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- MorphyLength(tree, morphyObj)
-  best.pscore <- attr(tree, 'pscore')
-  if (verbosity > 0) cat("\n  - Performing search.  Initial pscore:", best.pscore)
+  if (is.null(attr(tree, 'score'))) attr(tree, 'score') <- MorphyLength(tree, morphyObj)
+  best.score <- attr(tree, 'score')
+  if (verbosity > 0) cat("\n  - Performing search.  Initial score:", best.score)
   return.single <- !(forestSize > 1)
   
   for (iter in 1:maxIter) {
-    trees <- inapplicable::RearrangeTree(tree, morphyObj, Rearrange, min.score=best.pscore, 
+    trees <- inapplicable::RearrangeTree(tree, morphyObj, Rearrange, min.score=best.score, 
                            return.single=return.single, iter=iter, cluster=cluster,
                            verbosity=verbosity, ...)
-    iter.pscore <- attr(trees, 'pscore')
+    iter.score <- attr(trees, 'score')
     if (length(forestSize) && forestSize > 1) {
       hits <- attr(trees, 'hits')
-      if (iter.pscore == best.pscore) {
+      if (iter.score == best.score) {
         forest[(hits-length(trees)+1L):hits] <- trees
         tree <- sample(forest[1:hits], 1)[[1]]
-        attr(tree, 'pscore') <- iter.pscore
+        attr(tree, 'score') <- iter.score
         attr(tree, 'hits') <- hits
-      } else if (iter.pscore < best.pscore) {
-        best.pscore <- iter.pscore
+      } else if (iter.score < best.score) {
+        best.score <- iter.score
         forest <- empty.forest
         forest[1:hits] <- trees
         tree <- sample(trees, 1)[[1]]
-        attr(tree, 'pscore') <- iter.pscore
+        attr(tree, 'score') <- iter.score
         attr(tree, 'hits') <- hits
       }      
     } else {
-      if (iter.pscore <= best.pscore) {
-        best.pscore <- iter.pscore
+      if (iter.score <= best.score) {
+        best.score <- iter.score
         tree <- trees
       }
     }
     if (attr(trees, 'hits') >= maxHits) break
   }
-  if (verbosity > 0) cat("\n  - Final score", attr(tree, 'pscore'), "found", attr(tree, 'hits'), "times after", iter, "rearrangements\n")  
+  if (verbosity > 0) cat("\n  - Final score", attr(tree, 'score'), "found", attr(tree, 'hits'), "times after", iter, "rearrangements\n")  
   if (forestSize > 1) {
     if (hits < forestSize) forest <- forest[-((hits+1):forestSize)]
     attr(forest, 'hits') <- hits
-    attr(forest, 'pscore') <- best.pscore
+    attr(forest, 'score') <- best.score
     return (unique(forest))
   } else tree
 }
@@ -233,14 +233,14 @@ DoTreeSearch <- function
 #' @template datasetParam
 #' @param Rearrange Function used to rearrange trees; default: \code{\link{RootedTBR}}
 #' @param maxIter the maximum number of iterations to perform before abandoning the search;
-#' @param maxHits the maximum times to hit the best pscore before abandoning the search;
+#' @param maxHits the maximum times to hit the best score before abandoning the search;
 #' @param forestSize the maximum number of trees to return - useful in concert with \code{\link{consensus}};
 #' @template clusterParam
 #' @template verbosityParam
 #' @param \dots other arguments to pass to subsequent functions.
 #' 
 #' @return{
-#' This function returns a tree, with an attribute \code{pscore} conveying its parsimony score.
+#' This function returns a tree, with an attribute \code{score} conveying its parsimony score.
 #' Note that the parsimony score will be inherited from the tree's attributes, which is only valid if it 
 #' was generated using the same \code{data} that is passed here.
 #' }
@@ -292,13 +292,13 @@ TreeSearch <- function
 ### #' \code{InapplicableSectorial} performs a sectorial search on the tree specified. A sectorial search 
 ### #' detaches a random part of the tree, performs rearrangments on this subtree, then reattaches it 
 ### #' to the main tree (Goloboff, 1999).
-### #' The improvement to local \var{pscore} hopefully (but not necessarily) improves the overall \var{pscore}.
+### #' The improvement to local \var{score} hopefully (but not necessarily) improves the overall \var{score}.
 ### #' As such, the output of \code{InapplicableSectorial} should be treated by further \acronym{TBR (/SPR/NNI)}
 ### #' rearrangements and only retained if the ultimate parsimony score is better than 
 ### #' that of the original tree.
 ### #' 
 ### #' \code{SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial} followed by a few rounds
-### #' of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
+### #' of tree rearrangement, returning a tree whose \var{score} is no worse than that of \code{start.tree}.
 ### #' 
 ### #' @param tree a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;
 ### #' @template datasetParam
@@ -333,7 +333,7 @@ TreeSearch <- function
 ### #' @export
 ### SectorialSearch <- function
 ### (tree, dataset, concavity = NULL, rearrangements='NNI', maxIter=2000, cluster=NULL, verbosity=3, ...) {
-###   best.score <- attr(tree, 'pscore')
+###   best.score <- attr(tree, 'score')
 ###   tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
 ###   if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
 ###   sect <- InapplicableSectorial(tree, dataset, cluster=cluster,
@@ -343,7 +343,7 @@ TreeSearch <- function
 ###   sect <- TreeSearch(sect, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=maxIter, maxHits=20, cluster=cluster, verbosity=verbosity)
 ###   sect <- TreeSearch(sect, dataset, Rearrange=TreeSearch::RootedSPR, maxIter=maxIter, maxHits=50, cluster=cluster, verbosity=verbosity)
 ###   sect <- TreeSearch(sect, dataset, Rearrange=TreeSearch::RootedNNI, maxIter=maxIter, maxHits=60, cluster=cluster, verbosity=verbosity)
-###   if (attr(sect, 'pscore') <= best.score) {
+###   if (attr(sect, 'score') <= best.score) {
 ###     return (sect)
 ###   } else return (tree)
 ### }

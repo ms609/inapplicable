@@ -7,7 +7,7 @@
 #'             \code{pscore}, the tree's parsimony score, and 
 #'             \code{hits}, the number of times the best score has been hit in the calling function;
 #' @template morphyObjParam
-#' @param Rearrange a rearrangement function: probably one of 
+#' @param Rearrange a rearrangement function that returns a tree: probably one of 
 #'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};
 #' @param  min.score trees longer than \code{min.score}, probably the score of the starting tree,
 #'     will be discarded;
@@ -27,7 +27,7 @@
 #'   }
 #' 
 #' @importFrom parallel clusterCall
-#' @importFrom TreeSearch RenumberTips
+#' @importFrom TreeSearch Renumber RenumberTips
 #' @export
 RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.single=TRUE,
                            iter='?', cluster=NULL, verbosity=0) {
@@ -35,8 +35,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label
   if (is.null(cluster)) {
-    rearrangedTree <- Rearrange(tree)
-    rearrangedTree <- TreeSearch::RenumberTips(rearrangedTree, tipOrder)
+    rearrangedTree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), tipOrder)
     trees <- list(rearrangedTree)
     min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)

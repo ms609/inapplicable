@@ -15,7 +15,7 @@ in an order that matches the Morphy object, and the attributes
 
 \item{morphyObj}{A morphy object created with \code{\link{LoadMorphy}}}
 
-\item{Rearrange}{a rearrangement function: probably one of 
+\item{Rearrange}{a rearrangement function that returns a tree: probably one of 
 \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};}
 
 \item{min.score}{trees longer than \code{min.score}, probably the score of the starting tree,

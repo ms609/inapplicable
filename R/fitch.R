@@ -26,11 +26,11 @@
 #' 
 #' @author Martin R. Smith (using C code adapted from MorphyLib, author Martin Brazeau)
 #' @importFrom phangorn phyDat
-#' @importFrom TreeSearch RenumberTips
+#' @importFrom TreeSearch Renumber RenumberTips
 #' @export
 InapplicableFitch <- function (tree, dataset) {
   if (class(dataset) != 'phyDat') stop('Invalid data type ', class(dataset), '; should be phyDat.')
-  tree <- TreeSearch::RenumberTips(tree, names(dataset))
+  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
   MorphyLength(tree, morphyObj)

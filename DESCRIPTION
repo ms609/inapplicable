@@ -2,6 +2,7 @@ Package: inapplicable
 Type: Package
 Title: Inapplicable data in parsimony analysis
 Version: 0.2.3.9002
+ByteCompile: true
 Date: 2017-11-03
 Authors@R: c( person(given = "Martin R.", family="Smith",
                role = c("aut", "cre", "cph"),

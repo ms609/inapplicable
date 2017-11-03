@@ -35,7 +35,7 @@ MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, ret
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label
   if (is.null(cluster)) {
-    rearrangedTree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), tipOrder)
+    rearrangedTree <- TreeSearch::RenumberTips(Rearrange(tree), tipOrder)
     trees <- list(rearrangedTree)
     min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)

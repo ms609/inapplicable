@@ -106,8 +106,8 @@ RatchetSearch <- function
 #' @export
 RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0, 
   rearrangements=list(TreeSearch::RootedNNI), nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) inapplicable::RatchetSearch(tree, dataset, maxIt, maxIter, maxHits, 
-                                                  k=1, verbosity, rearrangements, ...))
+  trees <- lapply(1:nSearch, function (x) inapplicable::RatchetSearch(tree, dataset, maxIt=maxIt, 
+              maxIter=maxIter, maxHits=maxHits, k=1, verbosity=verbosity, rearrangements=rearrangements, ...))
   scores <- vapply(trees, function (x) attr(x, 'score'), double(1))
   trees <- unique(trees[scores == min(scores)])
   cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')

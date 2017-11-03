@@ -17,31 +17,24 @@ In brief, this algorithm modifies the Fitch algorithm to count the total number 
 events on a tree.
 
 # Installation
-Before installing inapplicable, you need to install a development version of the `phangorn` package:
-
+The inapplicable package can be installed as any other package. 
+To get the latest stable version from CRAN, type
 ```r
-# Install the devtools package from CRAN, if necessary
-if(!require(devtools)) install.packages("devtools")
-
-# Install a working development version of phangorn...
-devtools::install_github('KlausVigo/phangorn', ref='7192bfb4403c35c16a7b735160525d272736b061', INSTALL_opts='--byte-compile') # 30 Oct 2017
-```
-
-Then the inapplicable package can be installed as normal, and loaded into R:
-
-```r
-# Get the latest stable version from CRAN:
 install.packages('inapplicable')
-# Or get the latest development version from GitHub:
+```
+into the R command line.  To get the latest development version from GitHub, it's
+```r
+if (!require('devtools')) install.packages('devtools')
 devtools::install_github('ms609/inapplicable')
 ```
 
-It's also worth installing a compiled version of `ape` for additional speed:
+You'll probably need to install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) to install
+the latest version, which may be complicated.  If that's well within your comfort zone, then you 
+may wish to install a byte-compiled version of `ape` for additional speed:
 
 ```r
-install.packages('ape', INSTALL_opts='--byte-compile')
+install.packages('ape', type='source', INSTALL_opts='--byte-compile')
 ```
-
 
 Once installed, load the inapplicable package into R using
 ```{r Load library}

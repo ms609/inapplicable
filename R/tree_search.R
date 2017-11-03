@@ -82,12 +82,12 @@ RatchetSearch <- function
         if (keepAll) forest[[i]] <- candidate
       }
     }
-    if (verbosity > 0) cat("\n* Best score after", i, "/", maxIt, "Ratchet iterations:", 
-                           best.pars, "( hit", kmax, "/", k, ")")
+    if (verbosity > 0) cat("\n* Best score after", i, "/", maxIt, "ratchet iterations:", 
+                           best.pars, "( hit", kmax, "/", k, ")\n")
     if (kmax >= k) break()
   } # for
   if (verbosity > 0)
-    cat ("\nCompleted parsimony ratchet with score", best.pars, "\n")
+    cat ("\n* Completed ratchet search with score", best.pars, "\n")
     
   if (keepAll) {
     forest <- forest[!vapply(forest, is.null, logical(1))]
@@ -105,7 +105,7 @@ RatchetSearch <- function
 #' @describeIn RatchetSearch returns a list of optimal trees produced by nSearch Ratchet searches
 #' @export
 RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0, 
-  rearrangements=list(TreeSearch::NNI), nSearch=10, ...) {
+  rearrangements=list(TreeSearch::RootedNNI), nSearch=10, ...) {
   trees <- lapply(1:nSearch, function (x) inapplicable::RatchetSearch(tree, dataset, maxIt, maxIter, maxHits, 
                                                   k=1, verbosity, rearrangements, ...))
   scores <- vapply(trees, function (x) attr(x, 'score'), double(1))

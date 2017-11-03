@@ -12,7 +12,7 @@
 \item{\dots}{any other parameters...}
 }
 \value{
-A list detailing the number of taxa, internal nodes, and characters and their weigths.
+A list detailing the number of taxa, internal nodes, and characters and their weights.
 }
 \description{
 Details the attributes of a morphy object

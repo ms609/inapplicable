@@ -1,58 +1,29 @@
 [![Build Status](https://travis-ci.org/ms609/inapplicable.svg?branch=master)](https://travis-ci.org/ms609/inapplicable)
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](http://www.repostatus.org/badges/latest/wip.svg)](http://www.repostatus.org/#wip)
+[![codecov](https://codecov.io/gh/ms609/inapplicable/branch/master/graph/badge.svg)](https://codecov.io/gh/ms609/inapplicable)
+[![CRAN Status Badge](http://www.r-pkg.org/badges/version/inapplicable)](https://cran.r-project.org/package=inapplicable)
 
 # inapplicable
-inapplicable is an R package, built on Phangorn, to allow the logically consistent handling of inapplicable data in parsimony analysis.
-It incorporates modifications to phangorn that increase the rate of phylogenetic analysis, and adds support for TBR rearrangements.
-
+`inapplicable` is an R package that allows parsimony search on morphological datasets that contain
+inapplicable data, following the algorithm proposed by Brazeau, Guillerme and Smith (2017).
 
 You can install inapplicable into R thus:
 
 ```r
-# Install the devtools package from CRAN, if necessary
-if(!require(devtools)) install.packages("devtools")
+if(!require(inapplicable)) install.packages("inapplicable")
+library(inapplicable)
+```
 
-# Install a working development version of phangorn - version 2.2.1 or greater
-devtools::install_github('KlausVigo/phangorn', ref='1167f0be62f13cfad0fca8ae8224318c407195bf')
-# Before you install the inapplicable package from GitHub:
-if (!require(inapplicable)) devtools::install_github('ms609/inapplicable')
+If you're feeling brave, you can install the development version thus:
+```r
+if(!require(devtools)) install.packages("devtools")
+devtools::install_github('ms609/inapplicable')
 
 # Load the inapplicable package into R
 library('inapplicable')
 ```
 
-More details will be added here when details of the algorithm are published.
-
-Here's an example of using the package to conduct tree search:
-
-```r 
-library(inapplicable)
-# Here we'll use the pre-loaded Lobo matrix:
-data(Lobo)
-# You can load your own dataset using ape::read.nexus.data.
-
-# Perform a simple search with a random starting tree
-best <- TreeSearch(tree=TreeSearch::RandomTree(Lobo.phy, root='Cricocosmia'), dataset=Lobo.phy, Rearrange=TreeSearch::RootedNNI)
-
-# Running a second search from this tree will probably see further improvements:
-best <- TreeSearch(best, Lobo.phy)
-
-# Using NNI might help to explore the region of treespace close to the local optimum:
-best <- TreeSearch(best, Lobo.phy, Rearrange=TreeSearch::RootedNNI)
-
-# SPR and TBR arrangements help to escape local optima and find better peaks 
-# further away in tree space.  Using more hits (maxHits) and more iterations (maxIter)
-# means we'll move closer to an optimal tree
-best <- TreeSearch(best, Lobo.phy, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedSPR, verbosity=2)
-best <- TreeSearch(best, Lobo.phy, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedTBR, verbosity=2)
-
-# A more comprehensive search of tree space can be accomplished using the Parsimony Ratchet
-# It might take a couple of minutes to run.
-best <- Ratchet(best, Lobo.phy, verbosity=1)
-
-# Let's view the tree:
-plot(best)
-```
+Details on how to use the package are provided in the 'Getting started' vignette.
 
 # Reference
 

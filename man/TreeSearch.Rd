@@ -42,15 +42,16 @@ to search for a more parsimonious tree.
 }
 \examples{
 library('ape'); library('phangorn')
-data('SigSut')
-outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-njtree <- ape::root(nj(phangorn::dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+data('inapplicable.datasets')
+my.phyDat <- inapplicable.phyData[[1]]
+outgroup <- names(my.phyDat)[1]
+njtree <- ape::root(ape::nj(phangorn::dist.hamming(my.phyDat)), outgroup, resolve.root=TRUE)
 njtree$edge.length <- NULL
 njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 
 \dontrun{
-TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::NNI)
-TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::RootedSPR)
+TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::NNI)
+TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::RootedSPR)
 }
 
 }

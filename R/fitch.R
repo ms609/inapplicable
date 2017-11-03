@@ -7,9 +7,9 @@
 #' @template datasetParam
 #' 
 #' @examples
-#' data(SigSut)
-#' tree <- TreeSearch::RandomTree(SigSut.phy)
-#' result <- InapplicableFitch(tree, SigSut.phy)
+#' data(inapplicable.datasets)
+#' tree <- TreeSearch::RandomTree(inapplicable.phyData[[1]])
+#' result <- InapplicableFitch(tree, inapplicable.phyData[[1]])
 #' 
 #' @return This function returns the elements from a list containing:
 #'    \itemize{

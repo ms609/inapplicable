@@ -1,4 +1,5 @@
 library(ape)
+library(testthat)
 
 ## Test suite designed by Thomas Guillerme
 context("correct step counting")

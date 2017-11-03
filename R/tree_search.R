@@ -29,9 +29,10 @@
 #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
-#' data('Lobo')
-#' Ratchet(tree=TreeSearch::RandomTree(Lobo.phy, root='Tubiluchus_Priapulida'), 
-#'         dataset=Lobo.phy, maxIt=1, maxIter=50)
+#' data('inapplicable.datasets')
+#' my.phyDat <- inapplicable.phyData[[1]]
+#' Ratchet(tree=TreeSearch::RandomTree(my.phyDat, root=names(my.phyDat)[1]), 
+#'         dataset=my.phyDat, maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
 #' @export
@@ -104,7 +105,8 @@ Ratchet <- function
 #' @export
 RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0, 
   rearrangements=list(TreeSearch::NNI), nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxIt, maxIter, maxHits, k=1, verbosity, rearrangements, ...))
+  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxIt, maxIter, maxHits, 
+                                                  k=1, verbosity, rearrangements, ...))
   scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
   trees <- unique(trees[scores == min(scores)])
   cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')
@@ -152,7 +154,7 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
 #'
 #' @template labelledTreeParam
 #' @template morphyObjParam
-#' @param Rearrange Function to use to rearrange trees; example: \code{\link{TreeSearch::RootedTBR}}
+#' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}
 #' @param maxIter maximum iterations to conduct
 #' @param maxHits stop search after this many hits
 #' @param forestSize how many trees to hold
@@ -253,15 +255,16 @@ DoTreeSearch <- function
 #'
 #' @examples
 #' library('ape'); library('phangorn')
-#' data('SigSut')
-#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- ape::root(nj(phangorn::dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' data('inapplicable.datasets')
+#' my.phyDat <- inapplicable.phyData[[1]]
+#' outgroup <- names(my.phyDat)[1]
+#' njtree <- ape::root(ape::nj(phangorn::dist.hamming(my.phyDat)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL
 #' njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 #'
 #' \dontrun{
-#' TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::NNI)
-#' TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::RootedSPR)
+#' TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::NNI)
+#' TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::RootedSPR)
 #' }
 #' 
 #' @keywords  tree 
@@ -271,6 +274,7 @@ TreeSearch <- function
 (tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
+  if (dim(tree$edge)[1] != 2 * tree$Nnode) stop("tree must be bifurcating; try rooting with ape::root")
   tree <- TreeSearch::RenumberTips(tree, names(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))

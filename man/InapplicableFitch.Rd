@@ -28,9 +28,9 @@ Uses code modified from the Morphy library to calculate a parsimony score
 in datasets that contain inapplicable data
 }
 \examples{
-data(SigSut)
-tree <- TreeSearch::RandomTree(SigSut.phy)
-result <- InapplicableFitch(tree, SigSut.phy)
+data(inapplicable.datasets)
+tree <- TreeSearch::RandomTree(inapplicable.phyData[[1]])
+result <- InapplicableFitch(tree, inapplicable.phyData[[1]])
 
 }
 \seealso{

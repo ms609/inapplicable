@@ -24,8 +24,8 @@
 #' 
 #' Adapted from \code{\link[phangorn]{pratchet}} in the \pkg{phangorn} package, which does not preserve the position of the root.
 #' 
-#' @seealso \code{\link{pratchet}}
-#' @seealso \code{\link{TreeSearch}}
+#' @seealso \code{\link[phangorn]{pratchet}}
+#' @seealso \code{\link{BasicSearch}}
 #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
@@ -155,13 +155,13 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
 #'
 #' @template labelledTreeParam
 #' @template morphyObjParam
-#' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}
-#' @param maxIter maximum iterations to conduct
-#' @param maxHits stop search after this many hits
-#' @param forestSize how many trees to hold
+#' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}.
+#' @param maxIter maximum iterations to conduct.
+#' @param maxHits stop search after this many hits.
+#' @param forestSize how many trees to hold.
 #' @template clusterParam
 #' @template verbosityParam
-#' @param \dots additional variables to pass to RearrangeTree
+#' @param \dots additional variables to pass to \code{\link{RearrangeTree}}.
 #'
 #' @author Martin R. Smith
 #' 
@@ -235,7 +235,6 @@ DoTreeSearch <- function
 #' @param maxIter the maximum number of iterations to perform before abandoning the search;
 #' @param maxHits the maximum times to hit the best score before abandoning the search;
 #' @param forestSize the maximum number of trees to return - useful in concert with \code{\link{consensus}};
-#' @template clusterParam
 #' @template verbosityParam
 #' @param \dots other arguments to pass to subsequent functions.
 #' 
@@ -272,15 +271,16 @@ DoTreeSearch <- function
 #' 
 #' @importFrom TreeSearch Renumber RenumberTips
 #' @export
-TreeSearch <- function 
-(tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, verbosity=1, ...) {
+BasicSearch <- function 
+(tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   if (dim(tree$edge)[1] != 2 * tree$Nnode) stop("tree must be bifurcating; try rooting with ape::root")
   tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
   morphyObj <- LoadMorphy(dataset)
+  # TODO this is the place to initialise a cluster, if that's worth doing.
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  ret <- DoTreeSearch(tree, morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster, 
+  ret <- DoTreeSearch(tree, morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster=NULL, 
                       verbosity, ...)
   return (ret)
 }
@@ -315,7 +315,7 @@ TreeSearch <- function
 ### #' 
 ### #' @author Martin R. Smith
 ### #' 
-### #' @seealso \code{\link{TreeSearch}}
+### #' @seealso \code{\link{BasicSearch}}
 ### #' @seealso \code{\link{Ratchet}}
 ### #' 
 ### #' @examples

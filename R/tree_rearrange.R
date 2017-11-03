@@ -5,14 +5,14 @@
 #' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, with its labels
 #'             in an order that matches the Morphy object, and the attributes
 #'             \code{score}, the tree's optimality score, and 
-#'             \code{hits}, the number of times the best score has been hit in the calling function;
+#'             \code{hits}, the number of times the best score has been hit in the calling function.
 #' @template morphyObjParam
 #' @param Rearrange a rearrangement function that returns a tree: probably one of 
-#'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};
+#'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}}.
 #' @param  min.score trees longer than \code{min.score}, probably the score of the starting tree,
-#'     will be discarded;
+#'     will be discarded.
 #' @param  return.single returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
-#'   \item{iter}{iteration number of calling function, for reporting to user only;
+#'   \item{iter}{iteration number of calling function, for reporting to user only.
 #' @template clusterParam
 #' @template verbosityParam
 #' 

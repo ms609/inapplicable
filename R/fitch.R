@@ -22,7 +22,7 @@
 #' If multiple elements are requested then these will be returned in a list.
 #' 
 #' @seealso \code{\link{MorphyDat}}
-#' @seealso \code{\link{TreeSearch}}
+#' @seealso \code{\link{BasicSearch}}
 #' 
 #' @author Martin R. Smith (using C code adapted from MorphyLib, author Martin Brazeau)
 #' @importFrom phangorn phyDat

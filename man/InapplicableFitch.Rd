@@ -7,10 +7,10 @@
 InapplicableFitch(tree, dataset)
 }
 \arguments{
-\item{tree}{A tree of class \code{\link{phylo}}}
+\item{tree}{A tree of class \code{\link{phylo}}.}
 
 \item{dataset}{A phylogenetic data matrix of class \code{\link[phangorn]{phyDat}}, whose names 
-correspond to the labels of any accompanying tree}
+correspond to the labels of any accompanying tree.}
 }
 \value{
 This function returns the elements from a list containing:
@@ -28,15 +28,15 @@ Uses code modified from the Morphy library to calculate a parsimony score
 in datasets that contain inapplicable data
 }
 \examples{
-data(SigSut)
-tree <- RandomTree(SigSut.phy)
-result <- InapplicableFitch(tree, SigSut.phy)
+data(inapplicable.datasets)
+tree <- TreeSearch::RandomTree(inapplicable.phyData[[1]])
+result <- InapplicableFitch(tree, inapplicable.phyData[[1]])
 
 }
 \seealso{
 \code{\link{MorphyDat}}
 
-\code{\link{TreeSearch}}
+\code{\link{BasicSearch}}
 }
 \author{
 Martin R. Smith (using C code adapted from MorphyLib, author Martin Brazeau)

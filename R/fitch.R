@@ -7,9 +7,9 @@
 #' @template datasetParam
 #' 
 #' @examples
-#' data(SigSut)
-#' tree <- RandomTree(SigSut.phy)
-#' result <- InapplicableFitch(tree, SigSut.phy)
+#' data(inapplicable.datasets)
+#' tree <- TreeSearch::RandomTree(inapplicable.phyData[[1]])
+#' result <- InapplicableFitch(tree, inapplicable.phyData[[1]])
 #' 
 #' @return This function returns the elements from a list containing:
 #'    \itemize{
@@ -22,15 +22,15 @@
 #' If multiple elements are requested then these will be returned in a list.
 #' 
 #' @seealso \code{\link{MorphyDat}}
-#' @seealso \code{\link{TreeSearch}}
+#' @seealso \code{\link{BasicSearch}}
 #' 
 #' @author Martin R. Smith (using C code adapted from MorphyLib, author Martin Brazeau)
 #' @importFrom phangorn phyDat
-#' @importFrom TreeSearch RenumberTips
+#' @importFrom TreeSearch Renumber RenumberTips
 #' @export
 InapplicableFitch <- function (tree, dataset) {
   if (class(dataset) != 'phyDat') stop('Invalid data type ', class(dataset), '; should be phyDat.')
-  tree <- TreeSearch::RenumberTips(tree, names(dataset))
+  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
   MorphyLength(tree, morphyObj)

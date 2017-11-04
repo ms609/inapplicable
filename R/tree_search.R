@@ -1,6 +1,6 @@
 #' Parsimony Ratchet
 #'
-#' \code{Ratchet} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
+#' \code{RatchetSearch} uses the parsimony ratchet (Nixon 1999) to search for a more parsimonious tree.
 #'
 #' @template treeParam 
 #' @template datasetParam
@@ -24,38 +24,40 @@
 #' 
 #' Adapted from \code{\link[phangorn]{pratchet}} in the \pkg{phangorn} package, which does not preserve the position of the root.
 #' 
-#' @seealso \code{\link{pratchet}}
-#' @seealso \code{\link{TreeSearch}}
+#' @seealso \code{\link[phangorn]{pratchet}}
+#' @seealso \code{\link{BasicSearch}}
 #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
-#' data('Lobo')
-#' Ratchet(tree=TreeSearch::RandomTree(Lobo.phy, root='Tubiluchus_Priapulida'), 
-#'         dataset=Lobo.phy, maxIt=1, maxIter=50)
+#' data('inapplicable.datasets')
+#' my.phyDat <- inapplicable.phyData[[1]]
+#' RatchetSearch(tree=TreeSearch::RandomTree(my.phyDat, root=names(my.phyDat)[1]), 
+#'         dataset=my.phyDat, maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
+#' @importFrom TreeSearch Renumber RenumberTips
 #' @export
-Ratchet <- function 
+RatchetSearch <- function 
 (tree, dataset, keepAll=FALSE, maxIt=100, maxIter=5000, 
   maxHits=40, k=10, verbosity=1, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedSPR, 
   TreeSearch::RootedNNI), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  tree <- TreeSearch::RenumberTips(tree, names(dataset))
+  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
   eps <- 1e-08
-  if (is.null(attr(tree, "pscore"))) {
-    attr(tree, "pscore") <- MorphyLength(tree, morphyObj, ...)
+  if (is.null(attr(tree, "score"))) {
+    attr(tree, "score") <- MorphyLength(tree, morphyObj, ...)
   }
-  best.pars <- attr(tree, "pscore")
-  if (verbosity > 0) cat("* Initial pscore:", best.pars)
+  best.pars <- attr(tree, "score")
+  if (verbosity > 0) cat("* Initial score:", best.pars)
   if (keepAll) forest <- vector('list', maxIter)
 
   if (class(rearrangements) == 'function') rearrangements <- list(rearrangements)
   kmax <- 0 
   for (i in 1:maxIt) {
     if (verbosity > 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
-    candidate <- BootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
+    candidate <- inapplicable::MorphyBootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
                                verbosity=verbosity-1, ...)
     
     for (Rearrange in rearrangements) {
@@ -63,7 +65,7 @@ Ratchet <- function
       candidate <- DoTreeSearch(candidate, morphyObj, Rearrange=Rearrange, 
                                 verbosity=verbosity-1, maxIter=maxIter, maxHits=maxHits, ...)
     }
-    cand.pars <- attr(candidate, 'pscore')
+    cand.pars <- attr(candidate, 'score')
     if((cand.pars+eps) < best.pars) {
       if (keepAll) {
         forest <- vector('list', maxIter)
@@ -80,12 +82,12 @@ Ratchet <- function
         if (keepAll) forest[[i]] <- candidate
       }
     }
-    if (verbosity > 0) cat("\n* Best pscore after", i, "/", maxIt, "Ratchet iterations:", 
-                           best.pars, "( hit", kmax, "/", k, ")")
+    if (verbosity > 0) cat("\n* Best score after", i, "/", maxIt, "ratchet iterations:", 
+                           best.pars, "( hit", kmax, "/", k, ")\n")
     if (kmax >= k) break()
   } # for
   if (verbosity > 0)
-    cat ("\nCompleted parsimony ratchet with pscore", best.pars, "\n")
+    cat ("\n* Completed ratchet search with score", best.pars, "\n")
     
   if (keepAll) {
     forest <- forest[!vapply(forest, is.null, logical(1))]
@@ -100,12 +102,13 @@ Ratchet <- function
   return (ret)
 }
 
-#' @describeIn Ratchet returns a list of optimal trees produced by nSearch Ratchet searches
+#' @describeIn RatchetSearch returns a list of optimal trees produced by nSearch Ratchet searches
 #' @export
 RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0, 
-  rearrangements=list(TreeSearch::NNI), nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) Ratchet(tree, dataset, maxIt, maxIter, maxHits, k=1, verbosity, rearrangements, ...))
-  scores <- vapply(trees, function (x) attr(x, 'pscore'), double(1))
+  rearrangements=list(TreeSearch::RootedNNI), nSearch=10, ...) {
+  trees <- lapply(1:nSearch, function (x) inapplicable::RatchetSearch(tree, dataset, maxIt=maxIt, 
+              maxIter=maxIter, maxHits=maxHits, k=1, verbosity=verbosity, rearrangements=rearrangements, ...))
+  scores <- vapply(trees, function (x) attr(x, 'score'), double(1))
   trees <- unique(trees[scores == min(scores)])
   cat ("Found", length(trees), 'unique trees from ', nSearch, 'searches.')
   return (trees)
@@ -123,7 +126,7 @@ RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @importFrom TreeSearch RootedNNI
 #' @export
-BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) {
+MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   startWeights <- MorphyWeights(morphyObj)[1, ]
   eachChar <- seq_along(startWeights)
@@ -132,9 +135,9 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)#
-  attr(tree, 'pscore') <- NULL
+  attr(tree, 'score') <- NULL
   res <- DoTreeSearch(tree, morphyObj, Rearrange=TreeSearch::RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1, ...)
-  attr(res, 'pscore') <- NULL
+  attr(res, 'score') <- NULL
   attr(res, 'hits') <- NULL
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, startWeights[i], morphyObj), integer(1))
@@ -148,17 +151,17 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
 #' 
 #' Does the hard work of searching for a most parsimonious tree.
 #' End-users are expected to access this function through its wrapper, TreeSearch
-#' It is also called directly by Ratchet and Sectorial functions
+#' It is also called directly by RatchetSearch and Sectorial functions
 #'
 #' @template labelledTreeParam
 #' @template morphyObjParam
-#' @param Rearrange Function to use to rearrange trees; default: \code{\link{RootedNNI}}
-#' @param maxIter maximum iterations to conduct
-#' @param maxHits stop search after this many hits
-#' @param forestSize how many trees to hold
+#' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}.
+#' @param maxIter maximum iterations to conduct.
+#' @param maxHits stop search after this many hits.
+#' @param forestSize how many trees to hold.
 #' @template clusterParam
 #' @template verbosityParam
-#' @param \dots additional variables to pass to RearrangeTree
+#' @param \dots additional variables to pass to \code{\link{MorphyRearrangeTree}}.
 #'
 #' @author Martin R. Smith
 #' 
@@ -166,10 +169,10 @@ BootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) 
 #' @export
 
 DoTreeSearch <- function 
-(tree, morphyObj, Rearrange=TreeSearch::RootedNNI, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, 
+(tree, morphyObj, Rearrange, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, 
  verbosity=1, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
-  attr(tree, 'hits') <- 1
+  attr(tree, 'hits') <- 0
   if (!is.null(forestSize) && length(forestSize)) {
     if (forestSize > 1) {
       forest <- empty.forest <- vector('list', forestSize)
@@ -178,44 +181,44 @@ DoTreeSearch <- function
       forestSize <- 1 
     }
   }
-  if (is.null(attr(tree, 'pscore'))) attr(tree, 'pscore') <- MorphyLength(tree, morphyObj)
-  best.pscore <- attr(tree, 'pscore')
-  if (verbosity > 0) cat("\n  - Performing search.  Initial pscore:", best.pscore)
+  if (is.null(attr(tree, 'score'))) attr(tree, 'score') <- MorphyLength(tree, morphyObj)
+  best.score <- attr(tree, 'score')
+  if (verbosity > 0) cat("\n  - Performing search.  Initial score:", best.score)
   return.single <- !(forestSize > 1)
   
   for (iter in 1:maxIter) {
-    trees <- RearrangeTree(tree, morphyObj, Rearrange, min.score=best.pscore, 
+    trees <- inapplicable::MorphyRearrangeTree(tree, morphyObj, Rearrange, min.score=best.score, 
                            return.single=return.single, iter=iter, cluster=cluster,
                            verbosity=verbosity, ...)
-    iter.pscore <- attr(trees, 'pscore')
+    iter.score <- attr(trees, 'score')
     if (length(forestSize) && forestSize > 1) {
       hits <- attr(trees, 'hits')
-      if (iter.pscore == best.pscore) {
+      if (iter.score == best.score) {
         forest[(hits-length(trees)+1L):hits] <- trees
         tree <- sample(forest[1:hits], 1)[[1]]
-        attr(tree, 'pscore') <- iter.pscore
+        attr(tree, 'score') <- iter.score
         attr(tree, 'hits') <- hits
-      } else if (iter.pscore < best.pscore) {
-        best.pscore <- iter.pscore
+      } else if (iter.score < best.score) {
+        best.score <- iter.score
         forest <- empty.forest
         forest[1:hits] <- trees
         tree <- sample(trees, 1)[[1]]
-        attr(tree, 'pscore') <- iter.pscore
+        attr(tree, 'score') <- iter.score
         attr(tree, 'hits') <- hits
       }      
     } else {
-      if (iter.pscore <= best.pscore) {
-        best.pscore <- iter.pscore
+      if (iter.score <= best.score) {
+        best.score <- iter.score
         tree <- trees
       }
     }
     if (attr(trees, 'hits') >= maxHits) break
   }
-  if (verbosity > 0) cat("\n  - Final score", attr(tree, 'pscore'), "found", attr(tree, 'hits'), "times after", iter, "rearrangements\n")  
+  if (verbosity > 0) cat("\n  - Final score", attr(tree, 'score'), "found", attr(tree, 'hits'), "times after", iter, "rearrangements\n")  
   if (forestSize > 1) {
     if (hits < forestSize) forest <- forest[-((hits+1):forestSize)]
     attr(forest, 'hits') <- hits
-    attr(forest, 'pscore') <- best.pscore
+    attr(forest, 'score') <- best.score
     return (unique(forest))
   } else tree
 }
@@ -230,14 +233,13 @@ DoTreeSearch <- function
 #' @template datasetParam
 #' @param Rearrange Function used to rearrange trees; default: \code{\link{RootedTBR}}
 #' @param maxIter the maximum number of iterations to perform before abandoning the search;
-#' @param maxHits the maximum times to hit the best pscore before abandoning the search;
+#' @param maxHits the maximum times to hit the best score before abandoning the search;
 #' @param forestSize the maximum number of trees to return - useful in concert with \code{\link{consensus}};
-#' @template clusterParam
 #' @template verbosityParam
 #' @param \dots other arguments to pass to subsequent functions.
 #' 
 #' @return{
-#' This function returns a tree, with an attribute \code{pscore} conveying its parsimony score.
+#' This function returns a tree, with an attribute \code{score} conveying its parsimony score.
 #' Note that the parsimony score will be inherited from the tree's attributes, which is only valid if it 
 #' was generated using the same \code{data} that is passed here.
 #' }
@@ -248,33 +250,37 @@ DoTreeSearch <- function
 #' \item \code{\link{InapplicableFitch}}, calculates parsimony score, supports inapplicable tokens;
 #' \item \code{\link{RootedNNI}}, conducts tree rearrangements;
 #' \item \code{\link{SectorialSearch}}, alternative heuristic, useful for larger trees;
-#' \item \code{\link{Ratchet}}, alternative heuristic, useful to escape local optima.
+#' \item \code{\link{RatchetSearch}}, alternative heuristic, useful to escape local optima.
 #' }
 #'
 #' @examples
 #' library('ape'); library('phangorn')
-#' data('SigSut')
-#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- ape::root(nj(phangorn::dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+#' data('inapplicable.datasets')
+#' my.phyDat <- inapplicable.phyData[[1]]
+#' outgroup <- names(my.phyDat)[1]
+#' njtree <- ape::root(ape::nj(phangorn::dist.hamming(my.phyDat)), outgroup, resolve.root=TRUE)
 #' njtree$edge.length <- NULL
 #' njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
 #'
 #' \dontrun{
-#' TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::NNI)
-#' TreeSearch(njtree, SigSut.phy, maxIter=20, Rearrange=TreeSearch::RootedSPR)
+#' TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::NNI)
+#' TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::RootedSPR)
 #' }
 #' 
 #' @keywords  tree 
 #' 
+#' @importFrom TreeSearch Renumber RenumberTips
 #' @export
-TreeSearch <- function 
-(tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, verbosity=1, ...) {
+BasicSearch <- function 
+(tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
-  tree <- TreeSearch::RenumberTips(tree, names(dataset))
+  if (dim(tree$edge)[1] != 2 * tree$Nnode) stop("tree must be bifurcating; try rooting with ape::root")
+  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
   morphyObj <- LoadMorphy(dataset)
+  # TODO this is the place to initialise a cluster, if that's worth doing.
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  ret <- DoTreeSearch(tree, morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster, 
+  ret <- DoTreeSearch(tree, morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster=NULL, 
                       verbosity, ...)
   return (ret)
 }
@@ -286,13 +292,13 @@ TreeSearch <- function
 ### #' \code{InapplicableSectorial} performs a sectorial search on the tree specified. A sectorial search 
 ### #' detaches a random part of the tree, performs rearrangments on this subtree, then reattaches it 
 ### #' to the main tree (Goloboff, 1999).
-### #' The improvement to local \var{pscore} hopefully (but not necessarily) improves the overall \var{pscore}.
+### #' The improvement to local \var{score} hopefully (but not necessarily) improves the overall \var{score}.
 ### #' As such, the output of \code{InapplicableSectorial} should be treated by further \acronym{TBR (/SPR/NNI)}
 ### #' rearrangements and only retained if the ultimate parsimony score is better than 
 ### #' that of the original tree.
 ### #' 
 ### #' \code{SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial} followed by a few rounds
-### #' of tree rearrangement, returning a tree whose \var{pscore} is no worse than that of \code{start.tree}.
+### #' of tree rearrangement, returning a tree whose \var{score} is no worse than that of \code{start.tree}.
 ### #' 
 ### #' @param tree a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;
 ### #' @template datasetParam
@@ -309,8 +315,8 @@ TreeSearch <- function
 ### #' 
 ### #' @author Martin R. Smith
 ### #' 
-### #' @seealso \code{\link{TreeSearch}}
-### #' @seealso \code{\link{Ratchet}}
+### #' @seealso \code{\link{BasicSearch}}
+### #' @seealso \code{\link{RatchetSearch}}
 ### #' 
 ### #' @examples
 ### #' require('ape')
@@ -323,12 +329,12 @@ TreeSearch <- function
 ### #' 
 ### #' 
 ### #' @keywords  tree 
-### #' @importFrom TreeSearch RootedNNI RootedSPR RootedTBR
+### #' @importFrom TreeSearch Renumber RenumberTips RootedNNI RootedSPR RootedTBR
 ### #' @export
 ### SectorialSearch <- function
 ### (tree, dataset, concavity = NULL, rearrangements='NNI', maxIter=2000, cluster=NULL, verbosity=3, ...) {
-###   best.score <- attr(tree, 'pscore')
-###   tree <- TreeSearch::RenumberTips(tree, names(dataset))
+###   best.score <- attr(tree, 'score')
+###   tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
 ###   if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
 ###   sect <- InapplicableSectorial(tree, dataset, cluster=cluster,
 ###     verbosity=verbosity-1, maxIt=30, maxIter=maxIter, maxHits=15, smallest.sector=6, 
@@ -337,7 +343,7 @@ TreeSearch <- function
 ###   sect <- TreeSearch(sect, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=maxIter, maxHits=20, cluster=cluster, verbosity=verbosity)
 ###   sect <- TreeSearch(sect, dataset, Rearrange=TreeSearch::RootedSPR, maxIter=maxIter, maxHits=50, cluster=cluster, verbosity=verbosity)
 ###   sect <- TreeSearch(sect, dataset, Rearrange=TreeSearch::RootedNNI, maxIter=maxIter, maxHits=60, cluster=cluster, verbosity=verbosity)
-###   if (attr(sect, 'pscore') <= best.score) {
+###   if (attr(sect, 'score') <= best.score) {
 ###     return (sect)
 ###   } else return (tree)
 ### }

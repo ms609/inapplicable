@@ -1,22 +1,22 @@
 
 #' Rearrange phylogenetic tree
-#' @details \code{RearrangeTree} performs one tree rearrangement of a specified type
+#' @details \code{MorphyRearrangeTree} performs one tree rearrangement of a specified type
 #' 
 #' @param tree a rooted bifurcating phylogenetic tree with the desired outgroup, with its labels
 #'             in an order that matches the Morphy object, and the attributes
-#'             \code{pscore}, the tree's parsimony score, and 
-#'             \code{hits}, the number of times the best score has been hit in the calling function;
+#'             \code{score}, the tree's optimality score, and 
+#'             \code{hits}, the number of times the best score has been hit in the calling function.
 #' @template morphyObjParam
-#' @param Rearrange a rearrangement function: probably one of 
-#'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}};
+#' @param Rearrange a rearrangement function that returns a tree: probably one of 
+#'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}}.
 #' @param  min.score trees longer than \code{min.score}, probably the score of the starting tree,
-#'     will be discarded;
+#'     will be discarded.
 #' @param  return.single returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
-#'   \item{iter}{iteration number of calling function, for reporting to user only;
+#'   \item{iter}{iteration number of calling function, for reporting to user only.
 #' @template clusterParam
 #' @template verbosityParam
 #' 
-#' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{pscore}
+#' @return{This function returns the most parsimonious of the trees generated, with attributes \code{hits} and \code{score}
 #'  as described for argument \code{tree}, and with tip labels ordered to match morphyObj.}
 #' @author Martin R. Smith
 #' @seealso
@@ -27,11 +27,11 @@
 #'   }
 #' 
 #' @importFrom parallel clusterCall
-#' @importFrom TreeSearch RenumberTips
+#' @importFrom TreeSearch Renumber RenumberTips
 #' @export
-RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.single=TRUE,
+MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.single=TRUE,
                            iter='?', cluster=NULL, verbosity=0) {
-  if (is.null(attr(tree, 'pscore'))) best.score <- 1e+07 else best.score <- attr(tree, 'pscore')
+  if (is.null(attr(tree, 'score'))) best.score <- 1e+07 else best.score <- attr(tree, 'score')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   tipOrder <- tree$tip.label
   if (is.null(cluster)) {
@@ -40,7 +40,7 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
     min.score <- MorphyLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)
   } else {
-    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'pscore') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
+    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'score') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
     #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
     warning("Not tested; likely to fail.")
     candidates <- clusterCall(cluster, Rearrange, tree)
@@ -61,15 +61,6 @@ RearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, return.si
   }
   if (length(return.single) && return.single) trees <- sample(trees, 1)[[1]]
   attr(trees, 'hits') <- hits
-  attr(trees, 'pscore') <- min.score
+  attr(trees, 'score') <- min.score
   trees
 }
-
-#' Generate random tree topology from dataset
-#' 
-#' @param dataset A dataset in \code{\link[phangorn]{phyDat}} format
-#' 
-#' @author Martin R. Smith 
-#' @importFrom ape rtree
-#' @export
-RandomTree <- function (dataset) rtree(length(dataset), tip.label=names(dataset), br=NULL)

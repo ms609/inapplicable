@@ -1,17 +1,34 @@
 language: r
+r:
+ - 3.4.0
+ - devel
 cache: packages
-warnings_are_errors: false
+warnings_are_errors: true
+r_check_args: --as-cran
+env: _R_CHECK_CRAN_INCOMING_=TRUE
 
+git:
+  depth: 5
+
+r_binary_packages:
+ - testthat
+ 
 r_packages:
  - devtools
- - testthat
+ - roxygen2
+# - covr
   
 install:
  - R -e "install.packages('devtools')"
  - R -e "install.packages('testthat')"
- - R -e "install.packages('ape', '.', repos = 'http://ape-package.ird.fr/')"
- - R -e "devtools::install_github('KlausVigo/phangorn', ref='1167f0be62f13cfad0fca8ae8224318c407195bf')"
+# - R -e "install.packages('ape')"
+ - R -e "install.packages('phangorn')"
+# - R -e "devtools::install_github('KlausVigo/phangorn', ref='7192bfb4403c35c16a7b735160525d272736b061')"
+ - R -e "install.packages('rmarkdown')"
+ - R -e "install.packages('knitr')"
  - R -e "devtools::install_github('ms609/TreeSearch')"
+ - R -e "install.packages('roxygen2')"
+ - R -e "devtools::document()"
 
 r_github_packages:
  - ms609/TreeSearch
@@ -20,12 +37,6 @@ r_github_packages:
 branches:
   except:
     - Information
-    
-git:
-  depth: 5
 
-# Needed for phangorn install?  
-bioc_required: true
-bioc_packages:
-  - seqLogo
-  - Biostrings
+#after_success:
+#  - Rscript -e "install.packages('covr'); covr::codecov()"

@@ -39,7 +39,7 @@
 #' @export
 RatchetSearch <- function 
 (tree, dataset, keepAll=FALSE, maxIt=100, maxIter=5000, 
-  maxHits=40, k=10, verbosity=1, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedSPR, 
+  maxHits=40, k=10, verbosity=1L, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedSPR, 
   TreeSearch::RootedNNI), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
@@ -50,20 +50,20 @@ RatchetSearch <- function
     attr(tree, "score") <- MorphyLength(tree, morphyObj, ...)
   }
   best.score <- attr(tree, "score")
-  if (verbosity > 0) cat("* Initial score:", best.score)
+  if (verbosity > 0L) cat("* Initial score:", best.score)
   if (keepAll) forest <- vector('list', maxIter)
 
   if (class(rearrangements) == 'function') rearrangements <- list(rearrangements)
   kmax <- 0 
   for (i in 1:maxIt) {
-    if (verbosity > 0) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
+    if (verbosity > 0L) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
     candidate <- inapplicable::MorphyBootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
-                               verbosity=verbosity-1, ...)
+                               verbosity=verbosity-1L, ...)
     
     for (Rearrange in rearrangements) {
-      if (verbosity > 0) cat ("\n - Rearranging new candidate tree...")
+      if (verbosity > 0L) cat ("\n - Rearranging new candidate tree...")
       candidate <- DoTreeSearch(candidate, morphyObj, Rearrange=Rearrange, 
-                                verbosity=verbosity-1, maxIter=maxIter, maxHits=maxHits, ...)
+                                verbosity=verbosity-1L, maxIter=maxIter, maxHits=maxHits, ...)
     }
     cand.pars <- attr(candidate, 'score')
     if((cand.pars+eps) < best.score) {
@@ -82,11 +82,11 @@ RatchetSearch <- function
         if (keepAll) forest[[i]] <- candidate
       }
     }
-    if (verbosity > 0) cat("\n* Best score after", i, "/", maxIt, "ratchet iterations:", 
+    if (verbosity > 0L) cat("\n* Best score after", i, "/", maxIt, "ratchet iterations:", 
                            best.score, "( hit", kmax, "/", k, ")\n")
     if (kmax >= k) break()
   } # for
-  if (verbosity > 0)
+  if (verbosity > 0L)
     cat ("\n* Completed ratchet search with score", best.score, "\n")
     
   if (keepAll) {
@@ -104,7 +104,7 @@ RatchetSearch <- function
 
 #' @describeIn RatchetSearch returns a list of optimal trees produced by nSearch Ratchet searches
 #' @export
-RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0, 
+RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0L, 
   rearrangements=list(TreeSearch::RootedNNI), nSearch=10, ...) {
   trees <- lapply(1:nSearch, function (x) inapplicable::RatchetSearch(tree, dataset, maxIt=maxIt, 
               maxIter=maxIter, maxHits=maxHits, k=1, verbosity=verbosity, rearrangements=rearrangements, ...))
@@ -126,7 +126,7 @@ RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @importFrom TreeSearch RootedNNI
 #' @export
-MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1, ...) {
+MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   startWeights <- MorphyWeights(morphyObj)[1, ]
   eachChar <- seq_along(startWeights)
@@ -136,7 +136,7 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1,
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)#
   attr(tree, 'score') <- NULL
-  res <- DoTreeSearch(tree, morphyObj, Rearrange=TreeSearch::RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1, ...)
+  res <- DoTreeSearch(tree, morphyObj, Rearrange=TreeSearch::RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
   attr(res, 'score') <- NULL
   attr(res, 'hits') <- NULL
   vapply(eachChar, function (i) 
@@ -169,8 +169,8 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1,
 #' @export
 
 DoTreeSearch <- function 
-(tree, morphyObj, Rearrange, maxIter=100, maxHits=20, forestSize=1, cluster=NULL, 
- verbosity=1, ...) {
+(tree, morphyObj, Rearrange, maxIter=100, maxHits=20, forestSize=1L, cluster=NULL, 
+ verbosity=1L, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
   attr(tree, 'hits') <- 0
   if (!is.null(forestSize) && length(forestSize)) {
@@ -183,7 +183,7 @@ DoTreeSearch <- function
   }
   if (is.null(attr(tree, 'score'))) attr(tree, 'score') <- MorphyLength(tree, morphyObj)
   best.score <- attr(tree, 'score')
-  if (verbosity > 0) cat("\n  - Performing search.  Initial score:", best.score)
+  if (verbosity > 0L) cat("  - Initial score:", best.score)
   return.single <- !(forestSize > 1)
   
   for (iter in 1:maxIter) {
@@ -214,8 +214,8 @@ DoTreeSearch <- function
     }
     if (attr(trees, 'hits') >= maxHits) break
   }
-  if (verbosity > 0) cat("\n  - Final score", attr(tree, 'score'), "found", attr(tree, 'hits'), "times after", iter, "rearrangements\n")  
-  if (forestSize > 1) {
+  if (verbosity > 0L) cat("\n  - Final score", attr(tree, 'score'), "found", attr(tree, 'hits'), "times after", iter, "rearrangements\n")  
+  if (forestSize > 1L) {
     if (hits < forestSize) forest <- forest[-((hits+1):forestSize)]
     attr(forest, 'hits') <- hits
     attr(forest, 'score') <- best.score
@@ -298,77 +298,76 @@ BasicSearch <- function
   return (ret)
 }
 
-#' Sectorial Search
-#'
-#' \code{SectorialSearch} performs a sectorial search on a tree, preserving the position of the root.
-#'
-#' \code{InapplicableSectorial} performs a sectorial search on the tree specified. A sectorial search 
-#' detaches a random part of the tree, performs rearrangments on this subtree, then reattaches it 
-#' to the main tree (Goloboff, 1999).
-#' The improvement to local \var{score} hopefully (but not necessarily) improves the overall \var{score}.
-#' As such, the output of \code{InapplicableSectorial} should be treated by further \acronym{TBR (/SPR/NNI)}
-#' rearrangements and only retained if the ultimate parsimony score is better than 
-#' that of the original tree.
-#' 
-#' \code{SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial} followed by a few rounds
-#' of tree rearrangement, returning a tree whose \var{score} is no worse than that of \code{start.tree}.
-#' 
-#' @param tree a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;
-#' @template datasetParam
-#' @template concavityParam
-#' @param maxIter maximum number of rearrangements to perform on each sectorial iteration;
-#' @template clusterParam
-#' @template verbosityParam
-#' @param rearrangements method to use when rearranging subtrees: NNI, SPR or TBR;
-#' @param \dots other arguments to pass to subsequent functions.
-#' 
-#' @return a rooted tree of class \code{phylo}.
-#' 
-#' @references Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:\href{http://dx.doi.org/10.1006/clad.1999.0122}{10.1006/clad.1999.0122}
-#' 
-#' @author Martin R. Smith
-#' 
-#' @seealso \code{\link{BasicSearch}}
-#' @seealso \code{\link{RatchetSearch}}
-#' 
-#' @examples
-#' require('ape')
-#' data('SigSut')
-#' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
-#' njtree <- ape::root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
-#' njtree$edge.length <- NULL; njtree<-ape::root(njtree, outgroup, resolve.root=TRUE)
-#' InapplicableSectorial(njtree, SigSut.phy, maxIt=1, maxIter=50, largest.sector=7)
-#' \dontrun{SectorialSearch(njtree, SigSut.phy) # Will be time-consuming }
-#' 
-#' 
-#' @keywords  tree 
-#' @importFrom TreeSearch Renumber RenumberTips RootedNNI RootedSPR RootedTBR
-#' @export
-SectorialSearch <- function
-(tree, dataset, concavity = NULL, SectorialRearrangements=TreeSearch::NNI, maxIter=2000,
- subsequentRearrangements <- list(TreeSearch::RootedNNI, TreeSearch::RootedTBR, 
-  TreeSearch::RootedSPR, TreeSearch::RootedNNI), verbosity=3, ...) {
-  if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
-  morphyObj <- LoadMorphy(dataset)
-  on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
-  if (is.null(attr(tree, "score"))) {
-    attr(tree, "score") <- MorphyLength(tree, morphyObj, ...)
-  }
-  best.score <- attr(tree, "score")
-  if (verbosity > 0) cat("* Initial score:", best.score)
-  if (keepAll) forest <- vector('list', maxIter)
-
-  if (class(rearrangements) == 'function') rearrangements <- list(rearrangements)
-  
-  best.score <- attr(tree, 'score')
-  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
-  if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
-  sect <- InapplicableSectorial(tree, dataset, cluster=cluster,
-    verbosity=verbosity-1, maxIt=30, maxIter=maxIter, maxHits=15, smallest.sector=6, 
-    largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)
-  sect <- BasicSearch(sect, dataset, Rearrange=subsequentRearrangements, maxIter=maxIter, maxHits=30, cluster=cluster, verbosity=verbosity)
-  if (attr(sect, 'score') <= best.score) {
-    return (sect)
-  } else return (tree)
-}
+###   #' Sectorial Search
+###   #'
+###   #' \code{SectorialSearch} performs a sectorial search on a tree, preserving the position of the root.
+###   #'
+###   #' \code{InapplicableSectorial} performs a sectorial search on the tree specified. A sectorial search 
+###   #' detaches a random part of the tree, performs rearrangments on this subtree, then reattaches it 
+###   #' to the main tree (Goloboff, 1999).
+###   #' The improvement to local \var{score} hopefully (but not necessarily) improves the overall \var{score}.
+###   #' As such, the output of \code{InapplicableSectorial} should be treated by further \acronym{TBR (/SPR/NNI)}
+###   #' rearrangements and only retained if the ultimate parsimony score is better than 
+###   #' that of the original tree.
+###   #' 
+###   #' \code{SectorialSearch} is a basic recipe that runs \code{InapplicableSectorial} followed by a few rounds
+###   #' of tree rearrangement, returning a tree whose \var{score} is no worse than that of \code{start.tree}.
+###   #' 
+###   #' @param tree a rooted, resolved tree in \code{\link{phylo}} format from which to start the search;
+###   #' @template datasetParam
+###   #' @param maxIter maximum number of rearrangements to perform on each sectorial iteration;
+###   #' @template verbosityParam
+###   #' @param rearrangements method to use when rearranging subtrees: NNI, SPR or TBR;
+###   #' @param \dots other arguments to pass to subsequent functions.
+###   #' 
+###   #' @return a rooted tree of class \code{phylo}.
+###   #' 
+###   #' @references Goloboff, P. (1999). \cite{Analyzing large data sets in reasonable times: solutions for composite optima.} Cladistics, 15(4), 415-428. doi:\href{http://dx.doi.org/10.1006/clad.1999.0122}{10.1006/clad.1999.0122}
+###   #' 
+###   #' @author Martin R. Smith
+###   #' 
+###   #' @seealso \code{\link{BasicSearch}}
+###   #' @seealso \code{\link{RatchetSearch}}
+###   #' 
+###   #' @examples
+###   #' require('ape')
+###   #' data('SigSut')
+###   #' outgroup <- c('Lingula', 'Mickwitzia', 'Neocrania')
+###   #' njtree <- ape::root(nj(dist.hamming(SigSut.phy)), outgroup, resolve.root=TRUE)
+###   #' njtree$edge.length <- NULL; njtree<-ape::root(njtree, outgroup, resolve.root=TRUE)
+###   #' InapplicableSectorial(njtree, SigSut.phy, maxIt=1, maxIter=50, largest.sector=7)
+###   #' \dontrun{SectorialSearch(njtree, SigSut.phy) # Will be time-consuming }
+###   #' 
+###   #' 
+###   #' @keywords  tree 
+###   #' @importFrom TreeSearch Renumber RenumberTips RootedNNI RootedSPR RootedTBR
+###   #' @export
+###   SectorialSearch <- function
+###   (tree, dataset, SectorialRearrangements=TreeSearch::NNI, maxIter=2000,
+###    subsequentRearrangements = list(TreeSearch::RootedNNI, TreeSearch::RootedTBR, 
+###     TreeSearch::RootedSPR, TreeSearch::RootedNNI), verbosity=3, ...) {
+###     if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
+###     morphyObj <- LoadMorphy(dataset)
+###     on.exit(morphyObj <- UnloadMorphy(morphyObj))
+###     tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
+###     if (is.null(attr(tree, "score"))) {
+###       attr(tree, "score") <- MorphyLength(tree, morphyObj, ...)
+###     }
+###     best.score <- attr(tree, "score")
+###     if (verbosity > 0) cat("* Initial score:", best.score)
+###   
+###     if (class(subsequentRearrangements) == 'function') rearrangements <- list(rearrangements)
+###     if (class(SectorialRearrangements) != 'function') stop("SectorialRearrangements must be a function, e.g. TreeSearch::NNI")
+###     
+###     best.score <- attr(tree, 'score')
+###     tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
+###     if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
+###     sect <- MorphySectorial(tree, morphyObj, verbosity=verbosity-1, maxIt=30, 
+###       maxIter=maxIter, maxHits=15, smallest.sector=6, 
+###       largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)
+###     sect <- BasicSearch(sect, dataset, Rearrange=subsequentRearrangements, maxIter=maxIter, maxHits=30, cluster=cluster, verbosity=verbosity)
+###     if (attr(sect, 'score') <= best.score) {
+###       return (sect)
+###     } else return (tree)
+###   }
+###   

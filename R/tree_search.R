@@ -229,12 +229,13 @@ DoTreeSearch <- function
 #' to search for a more parsimonious tree.
 #'  
 #' @param tree a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; 
-#'        edge lengths are not supported and will be deleted;
+#'        edge lengths are not supported and will be deleted.
 #' @template datasetParam
-#' @param Rearrange Function used to rearrange trees; default: \code{\link{RootedTBR}}
-#' @param maxIter the maximum number of iterations to perform before abandoning the search;
-#' @param maxHits the maximum times to hit the best score before abandoning the search;
-#' @param forestSize the maximum number of trees to return - useful in concert with \code{\link{consensus}};
+#' @param Rearrange Function used to rearrange trees; default: \code{\link{RootedTBR}}.
+#' @param maxIter the maximum number of iterations to perform before abandoning the search.
+#' @param maxHits the maximum times to hit the best score before abandoning the search.
+#' @param forestSize the maximum number of trees to return - useful in concert with \code{\link{consensus}}.
+#' @template nCoresParam
 #' @template verbosityParam
 #' @param \dots other arguments to pass to subsequent functions.
 #' 
@@ -270,17 +271,28 @@ DoTreeSearch <- function
 #' @keywords  tree 
 #' 
 #' @importFrom TreeSearch Renumber RenumberTips
+#' @importFrom parallel makeCluster parLapply clusterExport stopCluster
 #' @export
 BasicSearch <- function 
-(tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, verbosity=1, ...) {
+(tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, 
+ nCores=1, verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   if (dim(tree$edge)[1] != 2 * tree$Nnode) stop("tree must be bifurcating; try rooting with ape::root")
   tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
   morphyObj <- LoadMorphy(dataset)
-  # TODO this is the place to initialise a cluster, if that's worth doing.
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  ret <- DoTreeSearch(tree, morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster=NULL, 
+  if (nCores > 1) {
+    cluster <- parallel::makeCluster(nCores)
+    on.exit(parallel::stopCluster(cluster), add=TRUE)
+    parallel::parLapply( cluster, seq_len(nCores), function(clusterNumber) {
+        require(inapplicable)
+    })
+    parallel::clusterExport(cluster, c('morphyObj'))
+  } else {
+    cluster <- NULL
+  }
+  ret <- DoTreeSearch(tree, morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster, 
                       verbosity, ...)
   return (ret)
 }

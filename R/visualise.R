@@ -60,7 +60,7 @@
 ###   if (char.no > at$nr || char.no < 1) stop(paste0("char.no must be between 1 and ", at$nr, ' (', sum(at$weight), 'TS, ', at$nr, ' unique)'))
 ###   char.dat <- dataset[char.no,]
 ###   char.index <- at$index[char.no]
-###   if (is.null(at$order) || at$order != "postorder") tree <- TreeSearch::Postorder(tree)
+###   if (is.null(at$order) || at$order != "postorder") tree <- Postorder(tree)
 ###   tree.edge <- tree$edge
 ###   parent <- tree.edge[,1]
 ###   child <- tree.edge[,2]

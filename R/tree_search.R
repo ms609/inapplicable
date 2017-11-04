@@ -44,7 +44,7 @@ RatchetSearch <- function
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
+  tree <- RenumberTips(Renumber(tree), names(dataset))
   eps <- 1e-08
   if (is.null(attr(tree, "score"))) {
     attr(tree, "score") <- MorphyLength(tree, morphyObj, ...)
@@ -57,7 +57,7 @@ RatchetSearch <- function
   kmax <- 0 
   for (i in 1:maxIt) {
     if (verbosity > 0L) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
-    candidate <- inapplicable::MorphyBootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
+    candidate <- MorphyBootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
                                verbosity=verbosity-1L, ...)
     
     for (Rearrange in rearrangements) {
@@ -105,8 +105,8 @@ RatchetSearch <- function
 #' @describeIn RatchetSearch returns a list of optimal trees produced by nSearch Ratchet searches
 #' @export
 RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20, k=10, verbosity=0L, 
-  rearrangements=list(TreeSearch::RootedNNI), nSearch=10, ...) {
-  trees <- lapply(1:nSearch, function (x) inapplicable::RatchetSearch(tree, dataset, maxIt=maxIt, 
+  rearrangements=list(RootedNNI), nSearch=10, ...) {
+  trees <- lapply(1:nSearch, function (x) RatchetSearch(tree, dataset, maxIt=maxIt, 
               maxIter=maxIter, maxHits=maxHits, k=1, verbosity=verbosity, rearrangements=rearrangements, ...))
   scores <- vapply(trees, function (x) attr(x, 'score'), double(1))
   trees <- unique(trees[scores == min(scores)])
@@ -136,7 +136,7 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)#
   attr(tree, 'score') <- NULL
-  res <- DoTreeSearch(tree, morphyObj, Rearrange=TreeSearch::RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
+  res <- DoTreeSearch(tree, morphyObj, Rearrange=RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
   attr(res, 'score') <- NULL
   attr(res, 'hits') <- NULL
   vapply(eachChar, function (i) 
@@ -187,7 +187,7 @@ DoTreeSearch <- function
   return.single <- !(forestSize > 1)
   
   for (iter in 1:maxIter) {
-    trees <- inapplicable::MorphyRearrangeTree(tree, morphyObj, Rearrange, min.score=best.score, 
+    trees <- MorphyRearrangeTree(tree, morphyObj, Rearrange, min.score=best.score, 
                            return.single=return.single, iter=iter, cluster=cluster,
                            verbosity=verbosity, ...)
     iter.score <- attr(trees, 'score')
@@ -270,15 +270,15 @@ DoTreeSearch <- function
 #' 
 #' @keywords  tree 
 #' 
-#' @importFrom TreeSearch Renumber RenumberTips
+#' @importFrom TreeSearch Renumber RenumberTips RootedTBR
 #' @export
 BasicSearch <- function 
-(tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, 
+(tree, dataset, Rearrange=RootedTBR, maxIter=100, maxHits=20, forestSize=1, 
  nCores=1L, verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   if (dim(tree$edge)[1] != 2 * tree$Nnode) stop("tree must be bifurcating; try rooting with ape::root")
-  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
+  tree <- RenumberTips(Renumber(tree), names(dataset))
   if (nCores > 1L) {
     stop("Clusters are not yet supported (#23).")
     ### cluster <- snow::makeCluster(nCores)

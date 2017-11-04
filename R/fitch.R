@@ -30,7 +30,7 @@
 #' @export
 InapplicableFitch <- function (tree, dataset) {
   if (class(dataset) != 'phyDat') stop('Invalid data type ', class(dataset), '; should be phyDat.')
-  tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
+  tree <- RenumberTips(Renumber(tree), names(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
   MorphyLength(tree, morphyObj)
@@ -54,7 +54,7 @@ MorphyLength <- function (tree, morphyObj) {
   if (nTaxa < 1) stop("Error: ", mpl_translate_error(nTaxa))
   if (nTaxa != length(tree$tip.label)) stop ("Number of taxa in morphy object (", nTaxa, ") not equal to number of tips in tree")
   treeOrder <- attr(tree, 'order')
-  if (is.null(treeOrder) || treeOrder != "postorder") tree <- TreeSearch::Postorder(tree)
+  if (is.null(treeOrder) || treeOrder != "postorder") tree <- Postorder(tree)
   tree.edge <- tree$edge
   parent <- tree.edge[, 1]
   child <- tree.edge[, 2]

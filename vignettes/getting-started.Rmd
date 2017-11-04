@@ -104,7 +104,7 @@ Using `RootedNNI` instead of `NNI` retains the position of the root, which you'l
 better.tree <- BasicSearch(tree=rooted.tree, dataset=my.phyDat, Rearrange=TreeSearch::RootedNNI, verbosity=3)
 ```
 
-We've got a score of 82: better than the 85 of the original neighbour-joining tree, but is this the best we can do?
+This score is better than the 85 of the original neighbour-joining tree, but is this the best we can do?
 
 Using NNI helps to explore the region of treespace close to the local optimum, but SPR and TBR 
 rearrangements are better at escaping local optima, and find better trees

@@ -280,15 +280,14 @@ BasicSearch <- function
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   if (dim(tree$edge)[1] != 2 * tree$Nnode) stop("tree must be bifurcating; try rooting with ape::root")
   tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
-  morphyObj <- LoadMorphy(dataset)
-  on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  if (nCores > 1) {
-    cluster <- parallel::makeCluster(nCores)
-    on.exit(parallel::stopCluster(cluster), add=TRUE)
-    parallel::parLapply( cluster, seq_len(nCores), function(clusterNumber) {
-        require(inapplicable)
-    })
-    parallel::clusterExport(cluster, c('morphyObj'))
+  if (nCores > 1L) {
+    stop("Clusters are not yet supported (#23).")
+    cluster <- snow::makeCluster(nCores)
+    on.exit(snow::stopCluster(cluster), add=TRUE)
+    snow::clusterEvalQ(cluster, {library(inapplicable); NULL})
+    morphyObj <- lapply(seq_len(nCores), function(xx) LoadMorphy(dataset))
+    on.exit(morphyObj <- vapply(morphyObj, UnloadMorphy, integer(1)), add=TRUE)
+    snow::clusterExport(cluster, c('dataset'))
   } else {
     morphyObj <- LoadMorphy(dataset)
     cluster <- NULL

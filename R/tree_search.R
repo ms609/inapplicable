@@ -271,7 +271,6 @@ DoTreeSearch <- function
 #' @keywords  tree 
 #' 
 #' @importFrom TreeSearch Renumber RenumberTips
-#' @importFrom parallel makeCluster parLapply clusterExport stopCluster
 #' @export
 BasicSearch <- function 
 (tree, dataset, Rearrange=TreeSearch::RootedTBR, maxIter=100, maxHits=20, forestSize=1, 
@@ -282,12 +281,12 @@ BasicSearch <- function
   tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
   if (nCores > 1L) {
     stop("Clusters are not yet supported (#23).")
-    cluster <- snow::makeCluster(nCores)
-    on.exit(snow::stopCluster(cluster), add=TRUE)
-    snow::clusterEvalQ(cluster, {library(inapplicable); NULL})
-    morphyObj <- lapply(seq_len(nCores), function(xx) LoadMorphy(dataset))
-    on.exit(morphyObj <- vapply(morphyObj, UnloadMorphy, integer(1)), add=TRUE)
-    snow::clusterExport(cluster, c('dataset'))
+    ### cluster <- snow::makeCluster(nCores)
+    ### on.exit(snow::stopCluster(cluster), add=TRUE)
+    ### snow::clusterEvalQ(cluster, {library(inapplicable); NULL})
+    ### morphyObj <- lapply(seq_len(nCores), function(xx) LoadMorphy(dataset))
+    ### on.exit(morphyObj <- vapply(morphyObj, UnloadMorphy, integer(1)), add=TRUE)
+    ### snow::clusterExport(cluster, c('dataset'))
   } else {
     morphyObj <- LoadMorphy(dataset)
     cluster <- NULL

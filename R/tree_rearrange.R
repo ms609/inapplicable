@@ -41,15 +41,15 @@ MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, ret
     best.trees <- c(TRUE)
   } else {
     stop("Cluster not implemented.")
-    #candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'score') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
-    #scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
-    candidates <- lapply(seq_along(cl), function (x) Rearrange(tree)) # TODO don't pick the same tree twice
-    warning("Not tested; likely to fail.")
-    
-    scores <- parLapply(cluster, seq_along(cluster), function (i) MorphyLength(candidates[[i]], morphyObj[[i]])) # ~3x faster to do this in serial in r233.
-    min.score <- min(scores)
-    best.trees <- scores == min.score
-    trees <- candidates[best.trees]
+    # candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'score') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
+    # scores <- vapply(candidates, function(x) attr(x, 'ps'), 1)
+    # candidates <- lapply(seq_along(cl), function (x) Rearrange(tree)) # TODO don't pick the same tree twice
+    # warning("Not tested; likely to fail.")
+    # 
+    # scores <- parLapply(cluster, seq_along(cluster), function (i) MorphyLength(candidates[[i]], morphyObj[[i]])) # ~3x faster to do this in serial in r233.
+    # min.score <- min(scores)
+    # best.trees <- scores == min.score
+    # trees <- candidates[best.trees]
   }
   if (best.score < min.score) {
     if (verbosity > 3L) cat("\n    . Iteration", iter, '- Min score', min.score, ">", best.score)

@@ -191,7 +191,7 @@ DoTreeSearch <- function
                            return.single=return.single, iter=iter, cluster=cluster,
                            verbosity=verbosity, ...)
     iter.score <- attr(trees, 'score')
-    if (length(forestSize) && forestSize > 1) {
+    if (length(forestSize) && forestSize > 1L) {
       hits <- attr(trees, 'hits')
       if (iter.score == best.score) {
         forest[(hits-length(trees)+1L):hits] <- trees

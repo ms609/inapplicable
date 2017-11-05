@@ -47,7 +47,7 @@ RatchetSearch <- function
   tree <- RenumberTips(Renumber(tree), names(dataset))
   eps <- 1e-08
   if (is.null(attr(tree, "score"))) {
-    attr(tree, "score") <- MorphyLength(tree, morphyObj, ...)
+    attr(tree, "score") <- MorphyTreeLength(tree, morphyObj, ...)
   }
   best.score <- attr(tree, "score")
   if (verbosity > 0L) cat("* Initial score:", best.score)
@@ -62,6 +62,7 @@ RatchetSearch <- function
     
     for (Rearrange in rearrangements) {
       if (verbosity > 0L) cat ("\n - Rearranging new candidate tree...")
+      stop("TODO: Use edgeList approach")
       candidate <- DoTreeSearch(candidate, morphyObj, Rearrange=Rearrange, 
                                 verbosity=verbosity-1L, maxIter=maxIter, maxHits=maxHits, ...)
     }
@@ -136,6 +137,7 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)#
   attr(tree, 'score') <- NULL
+  stop("TODO: Use edgeList approach")
   res <- DoTreeSearch(tree, morphyObj, Rearrange=RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
   attr(res, 'score') <- NULL
   attr(res, 'hits') <- NULL
@@ -149,11 +151,14 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
 #'
 #' Performs a tree search
 #' 
-#' Does the hard work of searching for a most parsimonious tree.
+#' Does the hard work of searching for a most parsimonious tree, given the
+#' parent and child vectors of a tree arranged in preorder (perhaps with \code{\link[TreeSearch]
+#' {RenumberTreeList}}).
 #' End-users are expected to access this function through its wrapper, TreeSearch
 #' It is also called directly by RatchetSearch and Sectorial functions
 #'
-#' @template labelledTreeParam
+#' @template treeChild
+#' @template treeParent
 #' @template morphyObjParam
 #' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}.
 #' @param maxIter maximum iterations to conduct.
@@ -169,19 +174,18 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
 #' @export
 
 DoTreeSearch <- function 
-(tree, morphyObj, Rearrange, maxIter=100, maxHits=20, forestSize=1L, cluster=NULL, 
+(parent, child, score=NULL, morphyObj, Rearrange, maxIter=100, maxHits=20, forestSize=1L, cluster=NULL, 
  verbosity=1L, ...) {
-  tree$edge.length <- NULL # Edge lengths are not supported
-  attr(tree, 'hits') <- 0
   if (!is.null(forestSize) && length(forestSize)) {
     if (forestSize > 1) {
+      stop("TODO: Forests not supported")
       forest <- empty.forest <- vector('list', forestSize)
       forest[[1]] <- tree
     } else {
       forestSize <- 1 
     }
   }
-  if (is.null(attr(tree, 'score'))) attr(tree, 'score') <- MorphyLength(tree, morphyObj)
+  if (is.null(score)) score <- MorphyTreeLength(tree, morphyObj)
   best.score <- attr(tree, 'score')
   if (verbosity > 0L) cat("  - Initial score:", best.score)
   return.single <- !(forestSize > 1)
@@ -270,15 +274,16 @@ DoTreeSearch <- function
 #' 
 #' @keywords  tree 
 #' 
-#' @importFrom TreeSearch Renumber RenumberTips RootedTBR
+#' @importFrom TreeSearch Renumber RenumberTips TBRCore
 #' @export
 BasicSearch <- function 
-(tree, dataset, Rearrange=RootedTBR, maxIter=100, maxHits=20, forestSize=1, 
+(tree, dataset, Rearrange=TBRCore, maxIter=100, maxHits=20, forestSize=1, 
  nCores=1L, verbosity=1, ...) {
   # Initialize morphy object
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   if (dim(tree$edge)[1] != 2 * tree$Nnode) stop("tree must be bifurcating; try rooting with ape::root")
-  tree <- RenumberTips(Renumber(tree), names(dataset))
+  tree <- RenumberTips(tree, names(dataset))
+  edgeList <- RenumberTreeList(tree)
   if (nCores > 1L) {
     stop("Clusters are not yet supported (#23).")
     ### cluster <- snow::makeCluster(nCores)
@@ -292,7 +297,7 @@ BasicSearch <- function
     cluster <- NULL
     on.exit(morphyObj <- UnloadMorphy(morphyObj))
   }
-  ret <- DoTreeSearch(tree, morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster, 
+  ret <- DoTreeSearch(edgeList[[1]], edgeList[[2]], morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster, 
                       verbosity, ...)
   return (ret)
 }
@@ -350,7 +355,7 @@ BasicSearch <- function
 ###     on.exit(morphyObj <- UnloadMorphy(morphyObj))
 ###     tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
 ###     if (is.null(attr(tree, "score"))) {
-###       attr(tree, "score") <- MorphyLength(tree, morphyObj, ...)
+###       attr(tree, "score") <- MorphyTreeLength(tree, morphyObj, ...)
 ###     }
 ###     best.score <- attr(tree, "score")
 ###     if (verbosity > 0) cat("* Initial score:", best.score)

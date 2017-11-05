@@ -33,7 +33,7 @@ InapplicableFitch <- function (tree, dataset) {
   tree <- RenumberTips(Renumber(tree), names(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  MorphyLength(tree, morphyObj)
+  MorphyTreeLength(tree, morphyObj)
 }
 
 #' Calculate parsimony score with inapplicable data
@@ -49,17 +49,20 @@ InapplicableFitch <- function (tree, dataset) {
 #' @keywords internal
 #' @importFrom TreeSearch Postorder
 #' @export
-MorphyLength <- function (tree, morphyObj) {
+MorphyTreeLength <- function (tree, morphyObj) {
   nTaxa <- mpl_get_numtaxa(morphyObj)
-  if (nTaxa < 1) stop("Error: ", mpl_translate_error(nTaxa))
   if (nTaxa != length(tree$tip.label)) stop ("Number of taxa in morphy object (", nTaxa, ") not equal to number of tips in tree")
   treeOrder <- attr(tree, 'order')
-  if (is.null(treeOrder) || treeOrder != "postorder") tree <- Postorder(tree)
+  inPostorder <- (!is.null(treeOrder) && treeOrder == "postorder")
   tree.edge <- tree$edge
-  parent <- tree.edge[, 1]
-  child <- tree.edge[, 2]
+  return(MorphyLength(tree.edge[, 1], tree.edge[, 2], morphyObj, inPostorder, nTaxa)) 
+}
+
+MorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE, nTaxa=mpl_get_numtaxa(morphyObj)) {
+  if (inPostorder) stop("TODO next; PostordeEdges") ##############
+  if (nTaxa < 1L) stop("Error: ", mpl_translate_error(nTaxa))
   maxNode <- nTaxa + mpl_get_num_internal_nodes(morphyObj)
-  rootNode <- nTaxa + 1
+  rootNode <- nTaxa + 1L
   allNodes <- rootNode:maxNode
   
   parentOf <- parent[match(1:maxNode, child )]
@@ -72,5 +75,4 @@ MorphyLength <- function (tree, morphyObj) {
                as.integer(rightChild -1L), morphyObj)
   return(ret)
 }
-
 

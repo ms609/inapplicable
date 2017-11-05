@@ -37,7 +37,7 @@ MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, ret
     rearrangedTree <- Rearrange(tree)
     #rearrangedTree <- RenumberTips(Rearrange(tree), tipOrder)
     trees <- list(rearrangedTree)
-    min.score <- MorphyLength(rearrangedTree, morphyObj)
+    min.score <- MorphyTreeLength(rearrangedTree, morphyObj)
     best.trees <- c(TRUE)
   } else {
     stop("Cluster not implemented.")
@@ -46,7 +46,7 @@ MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, min.score=NULL, ret
     # candidates <- lapply(seq_along(cl), function (x) Rearrange(tree)) # TODO don't pick the same tree twice
     # warning("Not tested; likely to fail.")
     # 
-    # scores <- parLapply(cluster, seq_along(cluster), function (i) MorphyLength(candidates[[i]], morphyObj[[i]])) # ~3x faster to do this in serial in r233.
+    # scores <- parLapply(cluster, seq_along(cluster), function (i) MorphyTreeLength(candidates[[i]], morphyObj[[i]])) # ~3x faster to do this in serial in r233.
     # min.score <- min(scores)
     # best.trees <- scores == min.score
     # trees <- candidates[best.trees]

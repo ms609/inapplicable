@@ -124,7 +124,7 @@ RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20
 #' @param maxIter maximum number of iterations to perform in tree search
 #' @param maxHits maximum number of hits to accomplish in tree search
 #' @template verbosityParam
-#' @param \dots further parameters to send to DoTreeSearch
+#' @param \dots further parameters to send to \code{DoTreeSearch}
 #'
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @importFrom TreeSearch RootedNNI

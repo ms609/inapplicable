@@ -49,8 +49,8 @@ RatchetSearch <- function
   if (is.null(attr(tree, "score"))) {
     attr(tree, "score") <- MorphyTreeLength(tree, morphyObj, ...)
   }
-  best.score <- attr(tree, "score")
-  if (verbosity > 0L) cat("* Initial score:", best.score)
+  bestScore <- attr(tree, "score")
+  if (verbosity > 0L) cat("* Initial score:", bestScore)
   if (keepAll) forest <- vector('list', maxIter)
 
   if (class(rearrangements) == 'function') rearrangements <- list(rearrangements)
@@ -67,16 +67,16 @@ RatchetSearch <- function
                                 verbosity=verbosity-1L, maxIter=maxIter, maxHits=maxHits, ...)
     }
     cand.pars <- attr(candidate, 'score')
-    if((cand.pars+eps) < best.score) {
+    if((cand.pars+eps) < bestScore) {
       if (keepAll) {
         forest <- vector('list', maxIter)
         forest[[i]] <- candidate
       }
       tree <- candidate
-      best.score <- cand.pars
+      bestScore <- cand.pars
       kmax <- 1
     } else {
-      if (best.score+eps > cand.pars) { # i.e. best == cand, allowing for floating point error
+      if (bestScore+eps > cand.pars) { # i.e. best == cand, allowing for floating point error
         kmax <- kmax + 1
         candidate$tip.label <- names(dataset)
         tree <- candidate
@@ -84,11 +84,11 @@ RatchetSearch <- function
       }
     }
     if (verbosity > 0L) cat("\n* Best score after", i, "/", maxIt, "ratchet iterations:", 
-                           best.score, "( hit", kmax, "/", k, ")\n")
+                           bestScore, "( hit", kmax, "/", k, ")\n")
     if (kmax >= k) break()
   } # for
   if (verbosity > 0L)
-    cat ("\n* Completed ratchet search with score", best.score, "\n")
+    cat ("\n* Completed ratchet search with score", bestScore, "\n")
     
   if (keepAll) {
     forest <- forest[!vapply(forest, is.null, logical(1))]
@@ -185,25 +185,25 @@ DoTreeSearch <- function
       forestSize <- 1 
     }
   }
-  if (is.null(score)) score <- MorphyTreeLength(tree, morphyObj)
-  best.score <- attr(tree, 'score')
-  if (verbosity > 0L) cat("  - Initial score:", best.score)
-  return.single <- !(forestSize > 1)
+  if (is.null(score)) score <- MorphyLength(parent, child, morphyObj)
+  bestScore <- attr(tree, 'score')
+  if (verbosity > 0L) cat("  - Initial score:", bestScore)
+  returnSingle <- !(forestSize > 1)
   
   for (iter in 1:maxIter) {
-    trees <- MorphyRearrangeTree(tree, morphyObj, Rearrange, min.score=best.score, 
-                           return.single=return.single, iter=iter, cluster=cluster,
+    trees <- MorphyRearrange(parent, child, morphyObj, Rearrange, minScore=bestScore, 
+                           returnSingle=returnSingle, iter=iter, cluster=cluster,
                            verbosity=verbosity, ...)
     iter.score <- attr(trees, 'score')
     if (length(forestSize) && forestSize > 1L) {
       hits <- attr(trees, 'hits')
-      if (iter.score == best.score) {
+      if (iter.score == bestScore) {
         forest[(hits-length(trees)+1L):hits] <- trees
         tree <- sample(forest[1:hits], 1)[[1]]
         attr(tree, 'score') <- iter.score
         attr(tree, 'hits') <- hits
-      } else if (iter.score < best.score) {
-        best.score <- iter.score
+      } else if (iter.score < bestScore) {
+        bestScore <- iter.score
         forest <- empty.forest
         forest[1:hits] <- trees
         tree <- sample(trees, 1)[[1]]
@@ -211,8 +211,8 @@ DoTreeSearch <- function
         attr(tree, 'hits') <- hits
       }      
     } else {
-      if (iter.score <= best.score) {
-        best.score <- iter.score
+      if (iter.score <= bestScore) {
+        bestScore <- iter.score
         tree <- trees
       }
     }
@@ -222,7 +222,7 @@ DoTreeSearch <- function
   if (forestSize > 1L) {
     if (hits < forestSize) forest <- forest[-((hits+1):forestSize)]
     attr(forest, 'hits') <- hits
-    attr(forest, 'score') <- best.score
+    attr(forest, 'score') <- bestScore
     return (unique(forest))
   } else tree
 }
@@ -283,7 +283,8 @@ BasicSearch <- function
   if (class(dataset) != 'phyDat') stop ("dataset must be of class phyDat, not ", class(dataset))
   if (dim(tree$edge)[1] != 2 * tree$Nnode) stop("tree must be bifurcating; try rooting with ape::root")
   tree <- RenumberTips(tree, names(dataset))
-  edgeList <- RenumberTreeList(tree)
+  edge <- tree$edge
+  edgeList <- RenumberEdges(edge[, 1], edge[, 2])
   if (nCores > 1L) {
     stop("Clusters are not yet supported (#23).")
     ### cluster <- snow::makeCluster(nCores)
@@ -357,20 +358,20 @@ BasicSearch <- function
 ###     if (is.null(attr(tree, "score"))) {
 ###       attr(tree, "score") <- MorphyTreeLength(tree, morphyObj, ...)
 ###     }
-###     best.score <- attr(tree, "score")
-###     if (verbosity > 0) cat("* Initial score:", best.score)
+###     bestScore <- attr(tree, "score")
+###     if (verbosity > 0) cat("* Initial score:", bestScore)
 ###   
 ###     if (class(subsequentRearrangements) == 'function') rearrangements <- list(rearrangements)
 ###     if (class(SectorialRearrangements) != 'function') stop("SectorialRearrangements must be a function, e.g. TreeSearch::NNI")
 ###     
-###     best.score <- attr(tree, 'score')
+###     bestScore <- attr(tree, 'score')
 ###     tree <- TreeSearch::RenumberTips(TreeSearch::Renumber(tree), names(dataset))
-###     if (length(best.score) == 0) best.score <- InapplicableFitch(tree, dataset, ...)[[1]]
+###     if (length(bestScore) == 0) bestScore <- InapplicableFitch(tree, dataset, ...)[[1]]
 ###     sect <- MorphySectorial(tree, morphyObj, verbosity=verbosity-1, maxIt=30, 
 ###       maxIter=maxIter, maxHits=15, smallest.sector=6, 
 ###       largest.sector=length(tree$edge[,2L])*0.25, rearrangements=rearrangements)
 ###     sect <- BasicSearch(sect, dataset, Rearrange=subsequentRearrangements, maxIter=maxIter, maxHits=30, cluster=cluster, verbosity=verbosity)
-###     if (attr(sect, 'score') <= best.score) {
+###     if (attr(sect, 'score') <= bestScore) {
 ###       return (sect)
 ###     } else return (tree)
 ###   }

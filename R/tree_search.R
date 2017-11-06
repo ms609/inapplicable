@@ -176,6 +176,7 @@ DoTreeSearch <- function
 (tree, morphyObj, Rearrange, maxIter=100, maxHits=20, stopAtScore = NULL, 
  forestSize=1L, cluster=NULL, verbosity=1L, ...) {
   tree$edge.length <- NULL # Edge lengths are not supported
+  eps <- 1e-08
   attr(tree, 'hits') <- 0
   if (!is.null(forestSize) && length(forestSize)) {
     if (forestSize > 1) {
@@ -296,8 +297,8 @@ BasicSearch <- function
     cluster <- NULL
     on.exit(morphyObj <- UnloadMorphy(morphyObj))
   }
-  ret <- DoTreeSearch(tree, morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster, 
-                      verbosity, ...)
+  ret <- DoTreeSearch(tree, morphyObj, Rearrange=Rearrange, maxIter=maxIter, maxHits=maxHits, 
+                      forestSize=forestSize, cluster=cluster, verbosity=verbosity, ...)
   return (ret)
 }
 

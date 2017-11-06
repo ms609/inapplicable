@@ -138,7 +138,7 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
   mpl_apply_tipdata(morphyObj)#
   attr(tree, 'score') <- NULL
   stop("TODO: Use edgeList approach")
-  res <- DoTreeSearch(tree, morphyObj, Rearrange=RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
+  res <- DoTreeSearch(edgeList, morphyObj, Rearrange=RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
   attr(res, 'score') <- NULL
   attr(res, 'hits') <- NULL
   vapply(eachChar, function (i) 
@@ -157,8 +157,7 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
 #' End-users are expected to access this function through its wrapper, TreeSearch
 #' It is also called directly by RatchetSearch and Sectorial functions
 #'
-#' @template treeChild
-#' @template treeParent
+#' @template edgeListParam
 #' @template morphyObjParam
 #' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}.
 #' @param maxIter maximum iterations to conduct.
@@ -173,58 +172,65 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
 #' @keywords internal
 #' @export
 
-DoTreeSearch <- function 
-(parent, child, score=NULL, morphyObj, Rearrange, maxIter=100, maxHits=20, forestSize=1L, cluster=NULL, 
- verbosity=1L, ...) {
+DoTreeSearch <- function (edgeList, morphyObj,
+                          Rearrange, maxIter=100, maxHits=20, forestSize=1L, 
+                          cluster=NULL, verbosity=1L, ...) {
   if (!is.null(forestSize) && length(forestSize)) {
-    if (forestSize > 1) {
+    if (forestSize > 1L) {
       stop("TODO: Forests not supported")
       forest <- empty.forest <- vector('list', forestSize)
       forest[[1]] <- tree
     } else {
-      forestSize <- 1 
+      forestSize <- 1L
     }
   }
-  if (is.null(score)) score <- MorphyLength(parent, child, morphyObj)
-  bestScore <- attr(tree, 'score')
+  if (length(edgeList < 3)) {
+    bestScore <- MorphyLength(edgeList[[1]], edgeList[[2]], morphyObj)
+  } else {
+    bestScore <- edgeList[[3]]
+  }
   if (verbosity > 0L) cat("  - Initial score:", bestScore)
-  returnSingle <- !(forestSize > 1)
+  returnSingle <- !(forestSize > 1L)
   
   for (iter in 1:maxIter) {
-    trees <- MorphyRearrange(parent, child, morphyObj, Rearrange, minScore=bestScore, 
-                           returnSingle=returnSingle, iter=iter, cluster=cluster,
-                           verbosity=verbosity, ...)
-    iter.score <- attr(trees, 'score')
-    if (length(forestSize) && forestSize > 1L) {
-      hits <- attr(trees, 'hits')
-      if (iter.score == bestScore) {
-        forest[(hits-length(trees)+1L):hits] <- trees
-        tree <- sample(forest[1:hits], 1)[[1]]
-        attr(tree, 'score') <- iter.score
-        attr(tree, 'hits') <- hits
-      } else if (iter.score < bestScore) {
-        bestScore <- iter.score
+    candidateLists <- MorphyRearrange(edgeList[[1]], edgeList[[2]], morphyObj, 
+                             inputScore=bestScore, hits=hits, RearrangeEdges=Rearrange,
+                             minScore=bestScore, returnSingle=returnSingle, iter=iter, 
+                             cluster=cluster, verbosity=verbosity, ...)
+    scoreThisIteration <- attr(candidateLists, 'score')
+    if (forestSize > 1L) {
+      stop("TODO re-code this")
+      hits <- attr(edgeLists, 'hits')
+      if (scoreThisIteration == bestScore) {
+        forest[(hits-length(edgeLists)+1L):hits] <- trees ## TODO Check that length still hojlds
+        edgeList <- sample(forest[1:hits], 1)[[1]]
+        attr(edgeList, 'score') <- scoreThisIteration
+        attr(edgeList, 'hits') <- hits
+      } else if (scoreThisIteration < bestScore) {
+        bestScore <- scoreThisIteration
         forest <- empty.forest
-        forest[1:hits] <- trees
-        tree <- sample(trees, 1)[[1]]
-        attr(tree, 'score') <- iter.score
-        attr(tree, 'hits') <- hits
-      }      
+        forest[1:hits] <- candidateLists
+        edgeList <- sample(candidateLists , 1)[[1]]
+        attr(edgeList, 'score') <- scoreThisIteration
+        attr(edgeList, 'hits') <- hits
+      }
     } else {
-      if (iter.score <= bestScore) {
-        bestScore <- iter.score
-        tree <- trees
+      if (scoreThisIteration <= bestScore) {
+        bestScore <- scoreThisIteration
+        edgeList <- candidateLists
       }
     }
-    if (attr(trees, 'hits') >= maxHits) break
+    if (attr(edgeList, 'hits') >= maxHits) break
   }
-  if (verbosity > 0L) cat("\n  - Final score", attr(tree, 'score'), "found", attr(tree, 'hits'), "times after", iter, "rearrangements\n")  
+  if (verbosity > 0L) cat("\n  - Final score", attr(edgeList, 'score'), "found", attr(edgeList, 'hits'), "times after", iter, "rearrangements\n")  
   if (forestSize > 1L) {
     if (hits < forestSize) forest <- forest[-((hits+1):forestSize)]
     attr(forest, 'hits') <- hits
     attr(forest, 'score') <- bestScore
     return (unique(forest))
-  } else tree
+  } else {
+    return(edgeList)
+  }
 }
 
 #' Search for most parsimonious trees
@@ -298,8 +304,10 @@ BasicSearch <- function
     cluster <- NULL
     on.exit(morphyObj <- UnloadMorphy(morphyObj))
   }
-  ret <- DoTreeSearch(edgeList[[1]], edgeList[[2]], morphyObj, Rearrange, maxIter, maxHits, forestSize, cluster, 
+  ret <- DoTreeSearch(edgeList, morphyObj, Rearrange=Rearrange,
+                      maxIter=maxIter, maxHits=maxHits, forestSize=forestSize, cluster=cluster, 
                       verbosity, ...)
+                      
   return (ret)
 }
 

@@ -38,7 +38,7 @@ MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, minScore=NULL, retu
     #rearrangedTree <- RenumberTips(Rearrange(tree), tipOrder)
     trees <- list(rearrangedTree)
     minScore <- MorphyTreeLength(rearrangedTree, morphyObj)
-    best.trees <- c(TRUE)
+    bestTrees <- c(TRUE)
   } else {
     stop("Cluster not implemented.")
     # candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'score') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
@@ -48,16 +48,16 @@ MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, minScore=NULL, retu
     # 
     # scores <- parLapply(cluster, seq_along(cluster), function (i) MorphyTreeLength(candidates[[i]], morphyObj[[i]])) # ~3x faster to do this in serial in r233.
     # minScore <- min(scores)
-    # best.trees <- scores == minScore
-    # trees <- candidates[best.trees]
+    # bestTrees <- scores == minScore
+    # trees <- candidates[bestTrees]
   }
   if (bestScore < minScore) {
     if (verbosity > 3L) cat("\n    . Iteration", iter, '- Min score', minScore, ">", bestScore)
   } else if (bestScore == minScore) {
-    hits <- hits + sum(best.trees)
+    hits <- hits + sum(bestTrees)
     if (verbosity > 2L) cat("\n    - Iteration", iter, "- Best score", minScore, "hit", hits, "times")
   } else {
-    hits <- sum(best.trees)
+    hits <- sum(bestTrees)
     if (verbosity > 1L) cat("\n    * Iteration", iter, "- New best score", minScore, "found on", hits, "trees")
   }
   if (length(returnSingle) && returnSingle) trees <- sample(trees, 1)[[1]]
@@ -67,16 +67,20 @@ MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, minScore=NULL, retu
 }
 
 #' @describeIn MorphyRearrangeTree optimised version that requires parent and child vectors to be extracted from a tree
-MorphyRearrange <- function (parent, child, morphyObj, Rearrange, minScore=NULL, returnSingle=TRUE,
-                           iter='?', cluster=NULL, verbosity=0L) {
-  if (is.null(attr(tree, 'score'))) bestScore <- 1e+07 else bestScore <- attr(tree, 'score')
-  if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
+#' @param score the score of the tree, if known
+#' @param hits number of times that this score has been hit
+#' @param RearrangeEdges a function that rearranges a parent and child vector, 
+#'                       and returns a list with modified vectors; for example \code{\link[TreeSearch]
+#'                       {SPRCore}}.
+MorphyRearrange <- function (parent, child, morphyObj, inputScore=1e+07, hits=0, 
+                             RearrangeEdges, minScore=NULL, returnSingle=TRUE,
+                             iter='?', cluster=NULL, verbosity=0L) {
+  bestScore <- inputScore
   if (is.null(cluster)) {
-    rearrangedTree <- Rearrange(tree)
-    #rearrangedTree <- RenumberTips(Rearrange(tree), tipOrder)
-    trees <- list(rearrangedTree)
-    minScore <- MorphyTreeLength(rearrangedTree, morphyObj)
-    best.trees <- c(TRUE)
+    rearrangedEdges <- Rearrange(parent, child) # TODO we probably want to get ALL trees 1 REARRANGE step away
+    trees <- list(rearrangedEdges)
+    minScore <- MorphyLength(rearrangedEdges[[1]], rearrangedEdges[[2]], morphyObj)
+    bestTrees <- c(TRUE)
   } else {
     stop("Cluster not implemented.")
     # candidates <- clusterCall(cluster, function(re, tr, k) {ret <- re(tr); attr(ret, 'score') <- InapplicableFitch(ret, cl.data, k); ret}, rearrange, tree, concavity)
@@ -86,20 +90,20 @@ MorphyRearrange <- function (parent, child, morphyObj, Rearrange, minScore=NULL,
     # 
     # scores <- parLapply(cluster, seq_along(cluster), function (i) MorphyTreeLength(candidates[[i]], morphyObj[[i]])) # ~3x faster to do this in serial in r233.
     # minScore <- min(scores)
-    # best.trees <- scores == minScore
-    # trees <- candidates[best.trees]
+    # bestTrees <- scores == minScore
+    # trees <- candidates[bestTrees]
   }
   if (bestScore < minScore) {
     if (verbosity > 3L) cat("\n    . Iteration", iter, '- Min score', minScore, ">", bestScore)
   } else if (bestScore == minScore) {
-    hits <- hits + sum(best.trees)
+    hits <- hits + sum(bestTrees)
     if (verbosity > 2L) cat("\n    - Iteration", iter, "- Best score", minScore, "hit", hits, "times")
   } else {
-    hits <- sum(best.trees)
+    hits <- sum(bestTrees)
     if (verbosity > 1L) cat("\n    * Iteration", iter, "- New best score", minScore, "found on", hits, "trees")
   }
   if (length(returnSingle) && returnSingle) trees <- sample(trees, 1)[[1]]
-  attr(trees, 'hits') <- hits
+  attr(trees, 'hits') <- hits ## TODO not sure the best way to return hits / minScore.
   attr(trees, 'score') <- minScore
   trees
 }

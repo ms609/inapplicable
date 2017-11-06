@@ -64,7 +64,8 @@ my.phyDat <- phangorn::phyDat(my.data, type='USER', levels=c(0:9, '-'))
 
 We can generate a random tree and calculate its parsimony score thus:
 ```{r Random tree}
-set.seed(0) # Set random seed so that random functions will generate consistent output in this document
+# Set random seed so that random functions will generate consistent output in this document
+set.seed(0) 
 random.tree <- TreeSearch::RandomTree(my.phyDat)
 par(mar=rep(0.25, 4), cex=0.75) # make plot easier to read
 plot(random.tree)
@@ -108,7 +109,8 @@ single-taxon outgroup, using `RootedNNI` retains the position of the root, which
 comparison and interpretation easier later on.
 
 ```{r Basic NNI search}
-better.tree <- BasicSearch(tree=rooted.tree, dataset=my.phyDat, Rearrange=TreeSearch::RootedNNI, verbosity=3)
+better.tree <- BasicSearch(tree=rooted.tree, dataset=my.phyDat, 
+                           Rearrange=TreeSearch::RootedNNI, verbosity=3)
 ```
 
 This score is better than the 85 of the original neighbour-joining tree, but is this the best we can do?
@@ -118,8 +120,10 @@ rearrangements are better at escaping local optima, and find better trees
 further away in tree space.  Using more hits (`maxHits`) and more iterations (`maxIter`) also
 means we'll move closer to an optimal tree.
 ```{r SPR and TBR}
-better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedSPR, verbosity=2)
-better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedTBR, verbosity=2)
+better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000,
+                           Rearrange=TreeSearch::RootedSPR, verbosity=2)
+better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, 
+                           Rearrange=TreeSearch::RootedTBR, verbosity=2)
 ```
 
 That score's looking better, but we might still be caught in a local optimum. 
@@ -147,7 +151,8 @@ For each Ratchet iteration, we'll conduct a TBR search to scan tree space,
 then an NNI search to hone in on the local optimum.
 
 ```{r Consensus}
-my.consensus <- RatchetConsensus(best.tree, my.phyDat, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedNNI))
+my.consensus <- RatchetConsensus(best.tree, my.phyDat, rearrangements=
+                                 list(TreeSearch::RootedTBR, TreeSearch::RootedNNI))
 ```
 
 If ten independent runs all ended up at different trees, there are probably many more optimal trees out there to 

@@ -1,4 +1,3 @@
-
 #' Rearrange phylogenetic tree
 #' @details \code{MorphyRearrangeTree} performs one tree rearrangement of a specified type
 #' 
@@ -8,7 +7,8 @@
 #'             \code{hits}, the number of times the best score has been hit in the calling function.
 #' @template morphyObjParam
 #' @param Rearrange a rearrangement function that returns a tree: probably one of 
-#'     \code{\link{RootedNNI}}, \code{\link{RootedSPR}} or \code{\link{RootedTBR}}.
+#'     \code{\link[TreeSearch]{RootedNNI}}, \code{\link[TreeSearch]{RootedSPR}} or
+#'     \code{\link[TreeSearch]{RootedTBR}}.
 #' @param  min.score trees longer than \code{min.score}, probably the score of the starting tree,
 #'     will be discarded.
 #' @param  return.single returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
@@ -21,9 +21,9 @@
 #' @author Martin R. Smith
 #' @seealso
 #'   \itemize{
-#'     \item \code{\link{RootedNNI}}
-#'     \item \code{\link{RootedSPR}}
-#'     \item \code{\link{RootedTBR}}
+#'     \item \code{\link[TreeSearch]{RootedNNI}}
+#'     \item \code{\link[TreeSearch]{RootedSPR}}
+#'     \item \code{\link[TreeSearch]{RootedTBR}}
 #'   }
 #' 
 #' @importFrom parallel clusterCall

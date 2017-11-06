@@ -26,7 +26,7 @@
 #' 
 #' @seealso \code{\link[phangorn]{pratchet}}
 #' @seealso \code{\link{BasicSearch}}
-#' @seealso \code{\link{SectorialSearch}}
+### #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
 #' data('inapplicable.datasets')
@@ -250,7 +250,7 @@ DoTreeSearch <- function
 #' \itemize{
 #' \item \code{\link{InapplicableFitch}}, calculates parsimony score, supports inapplicable tokens;
 #' \item \code{\link{RootedNNI}}, conducts tree rearrangements;
-#' \item \code{\link{SectorialSearch}}, alternative heuristic, useful for larger trees;
+### #' \item \code{\link{SectorialSearch}}, alternative heuristic, useful for larger trees;
 #' \item \code{\link{RatchetSearch}}, alternative heuristic, useful to escape local optima.
 #' }
 #'

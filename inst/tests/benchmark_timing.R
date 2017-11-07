@@ -32,15 +32,22 @@ scores <- c(
 "Zhu2013" =        638 )
 
 nj.tree <- lapply(inapplicable.phyData, NJTree)
-
+timestart <- double(length(scores))
+timeend   <- double(length(scores))
+names(timestart) <- names(timeend) <- names(scores)
 
 install_github('ms609/inapplicable', rel='cefb5669352aca6425516805f60108063383b6c2')
 
-profvis::profvis(
 for (dataset in names(inapplicable.phyData)) {
-  cat("\n\n\n ======== NEXT DATASET: ", dataset, "========\n\n\n"
+  cat("\n ========", format(Sys.time(), "%b %d %X"), ":", dataset, "========\n")
+  timestart[dataset] <- Sys.time()
   oTree <- RatchetSearch(nj.tree[[dataset]], inapplicable.phyData[[dataset]], stopAtScore=scores[[dataset]],
-  k=1000, maxIt=10000, maxIter=3200, maxHits=12)
+  k=1000, maxIt=10000, maxIter=3200, maxHits=12, verbosity=0)
+  timeend[dataset] <- Sys.time()
+  cat("\n > Time taken: ", timeend[dataset] - timestart[dataset], "s\n")
 }
-)
+
+timetaken <- timeend - timestart
+sum(timetaken)
+
                    

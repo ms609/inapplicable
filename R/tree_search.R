@@ -36,12 +36,11 @@
 #'         dataset=my.phyDat, maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
-#' @importFrom TreeSearch Renumber RenumberTips
+#' @importFrom TreeSearch Renumber RenumberTips RootedTBR RootedSPR RootedNNI
 #' @export
 RatchetSearch <- function 
 (tree, dataset, keepAll=FALSE, maxIt=100, maxIter=5000, maxHits=40, k=10, stopAtScore=NULL,
-  verbosity=1L, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedSPR, 
-  TreeSearch::RootedNNI), ...) {
+  verbosity=1L, rearrangements=list(RootedTBR, RootedSPR, RootedNNI), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))

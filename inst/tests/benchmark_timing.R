@@ -44,7 +44,7 @@ for (dataset in names(inapplicable.phyData)) {
   oTree <- RatchetSearch(nj.tree[[dataset]], inapplicable.phyData[[dataset]], stopAtScore=scores[[dataset]],
   k=1000, maxIt=10000, maxIter=3200, maxHits=12, verbosity=0)
   timeend[dataset] <- Sys.time()
-  cat("\n > Time taken: ", timeend[dataset] - timestart[dataset], "s\n")
+  cat("\n > Time taken: ", (timeend[dataset] - timestart[dataset]) / 60, "mins\n")
 }
 
 timetaken <- timeend - timestart

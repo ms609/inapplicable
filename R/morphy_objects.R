@@ -20,7 +20,8 @@ summary.morphyPtr <- function (object, ...) {
   ans$nInternal <- mpl_get_num_internal_nodes(object)
   ans$charWeights <- charWeights
   ans$allStates <- mpl_get_symbols(object)
-  return(ans)
+  # Return:
+  ans
 }
 
 #' Report the character weightings associated with a Morphy object

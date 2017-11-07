@@ -141,6 +141,7 @@ MorphyBootstrap <- function (edgeList, morphyObj, maxIter, maxHits, verbosity=1L
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)
+  # TODO Optimisation exploration: is NNICore better than TBRCore?
   res <- DoTreeSearch(edgeList, morphyObj, Rearrange=NNICore, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, startWeights[i], morphyObj), integer(1))
@@ -186,11 +187,12 @@ DoTreeSearch <- function (edgeList, morphyObj,
       forestSize <- 1L
     }
   }
-  if (length(edgeList < 3)) {
+  if (length(edgeList) < 3) {
     bestScore <- MorphyLength(edgeList[[1]], edgeList[[2]], morphyObj)
   } else {
     bestScore <- edgeList[[3]]
   }
+  hits <- if (length(edgeList) < 5) edgeList[[4]] else 0
   if (verbosity > 0L) cat("  - Initial score:", bestScore)
   returnSingle <- !(forestSize > 1L)
   
@@ -202,7 +204,6 @@ DoTreeSearch <- function (edgeList, morphyObj,
     scoreThisIteration <- attr(candidateLists, 'score')
     if (forestSize > 1L) {
       stop("TODO re-code this")
-      hits <- attr(edgeLists, 'hits')
       if (scoreThisIteration == bestScore) {
         forest[(hits-length(edgeLists)+1L):hits] <- trees ## TODO Check that length still hojlds
         edgeList <- sample(forest[1:hits], 1)[[1]]
@@ -214,7 +215,6 @@ DoTreeSearch <- function (edgeList, morphyObj,
         forest[1:hits] <- candidateLists
         edgeList <- sample(candidateLists , 1)[[1]]
         attr(edgeList, 'score') <- scoreThisIteration
-        attr(edgeList, 'hits') <- hits
       }
     } else {
       if (scoreThisIteration <= bestScore) {
@@ -222,7 +222,7 @@ DoTreeSearch <- function (edgeList, morphyObj,
         edgeList <- candidateLists
       }
     }
-    if (attr(edgeList, 'hits') >= maxHits) break
+    if (hits >= maxHits) break
   }
   if (verbosity > 0L) cat("\n  - Final score", attr(edgeList, 'score'), "found", attr(edgeList, 'hits'), "times after", iter, "rearrangements\n")  
   if (forestSize > 1L) {
@@ -231,6 +231,7 @@ DoTreeSearch <- function (edgeList, morphyObj,
     attr(forest, 'score') <- bestScore
     return (unique(forest))
   } else {
+    edgeList[3:4] <- c(bestScore, hits)
     return(edgeList)
   }
 }

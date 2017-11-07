@@ -93,7 +93,8 @@ LoadMorphy <- function (phy) {
     stop("Error ", mpl_translate_error(error), "in mpl_apply_tipdata")
   }
   class(morphyObj) <- 'morphyPtr'
-  return(morphyObj)
+  # Return:
+  morphyObj
 }
 
 #' Destroy a Morphy Object

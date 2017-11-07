@@ -65,13 +65,11 @@ RatchetSearch <- function
     
     for (Rearrange in rearrangements) {
       if (verbosity > 0L) cat ("\n - Rearranging new candidate tree...")
-      stop("TODO: Use edgeList approach")
       candidate <- DoTreeSearch(candidate, morphyObj, Rearrange=Rearrange, stopAtScore=stopAtScore,
                                 verbosity=verbosity-1L, maxIter=maxIter, maxHits=maxHits, ...)
-      candScore <- attr(candidate, 'score')
+      candScore <- candidate[[3]]
       if (!is.null(stopAtScore) && candScore < stopAtScore + eps) return(candidate)
     }
-    cand.pars <- attr(candidate, 'score')
     if ((candScore + eps) < bestScore) {
       if (keepAll) {
         forest <- vector('list', maxIter)
@@ -192,7 +190,7 @@ DoTreeSearch <- function (edgeList, morphyObj,
   } else {
     bestScore <- edgeList[[3]]
   }
-  hits <- if (length(edgeList) < 5) edgeList[[4]] else 0
+  hits <- if (length(edgeList) < 4) 0 else edgeList[[4]]
   if (verbosity > 0L) cat("  - Initial score:", bestScore)
   returnSingle <- !(forestSize > 1L)
   

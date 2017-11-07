@@ -78,7 +78,7 @@ MorphyRearrange <- function (parent, child, morphyObj, inputScore=1e+07, hits=0,
   bestScore <- inputScore
   if (is.null(cluster)) {
     rearrangedEdges <- Rearrange(parent, child) # TODO we probably want to get ALL trees 1 REARRANGE step away
-    trees <- list(rearrangedEdges)
+    edgeLists <- list(rearrangedEdges)
     minScore <- MorphyLength(rearrangedEdges[[1]], rearrangedEdges[[2]], morphyObj)
     bestTrees <- c(TRUE)
   } else {
@@ -102,8 +102,14 @@ MorphyRearrange <- function (parent, child, morphyObj, inputScore=1e+07, hits=0,
     hits <- sum(bestTrees)
     if (verbosity > 1L) cat("\n    * Iteration", iter, "- New best score", minScore, "found on", hits, "trees")
   }
-  if (length(returnSingle) && returnSingle) trees <- sample(trees, 1)[[1]]
-  attr(trees, 'hits') <- hits ## TODO not sure the best way to return hits / minScore.
-  attr(trees, 'score') <- minScore
-  trees
+  if (length(returnSingle) && returnSingle) {
+    ret <- sample(edgeLists, 1)[[1]]
+    ret[3:4] <- c(hits, minScore)
+    # Return:
+    ret 
+    # It's faster not to call return().
+  } else {
+    # Return:
+    lapply(edgeLists, function (x) x[3:4] <- c(hits, minScore))
+  }
 }

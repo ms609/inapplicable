@@ -34,9 +34,13 @@ scores <- c(
 nj.tree <- lapply(inapplicable.phyData, NJTree)
 
 
+install_github('ms609/inapplicable', rel='cefb5669352aca6425516805f60108063383b6c2')
+
 profvis::profvis(
 for (dataset in names(inapplicable.phyData)) {
-  RatchetSearch(nj.tree[[dataset]], inapplicable.phyData[[dataset]], stop.at=scores[[dataset]], verbosity=0)
+  cat("\n\n\n ======== NEXT DATASET: ", dataset, "========\n\n\n"
+  oTree <- RatchetSearch(nj.tree[[dataset]], inapplicable.phyData[[dataset]], stopAtScore=scores[[dataset]],
+  k=1000, maxIt=10000, maxIter=3200, maxHits=12)
 }
 )
                    

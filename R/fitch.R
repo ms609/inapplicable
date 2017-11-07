@@ -65,7 +65,7 @@ MorphyTreeLength <- function (tree, morphyObj) {
 #' @author Martin R. Smith
 #' @export
 MorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE, nTaxa=mpl_get_numtaxa(morphyObj)) {
-  if (inPostorder) {
+  if (!inPostorder) {
     edgeList <- PostorderEdges(parent, child, nTaxa=nTaxa)
     parent <- edge[[1]]
     child <- edge[[2]]

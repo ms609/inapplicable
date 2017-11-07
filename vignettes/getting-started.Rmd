@@ -28,8 +28,10 @@ if (!require('devtools')) install.packages('devtools')
 devtools::install_github('ms609/inapplicable')
 ```
 
-You'll probably need to install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) to install
-the latest version, which may be complicated.  If that's well within your comfort zone, then you 
+You'll probably need to install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) before 
+you installing from the GitHub source code, which may be complicated.  
+
+If you do already have Rtools installed, then you 
 may wish to install a byte-compiled version of `ape` for additional speed:
 
 ```r
@@ -62,15 +64,16 @@ my.phyDat <- phangorn::phyDat(my.data, type='USER', levels=c(0:9, '-'))
 
 We can generate a random tree and calculate its parsimony score thus:
 ```{r Random tree}
-set.seed(0) # Set random seed so that random functions will generate consistent output in this document
+# Set random seed so that random functions will generate consistent output in this document
+set.seed(0) 
 random.tree <- TreeSearch::RandomTree(my.phyDat)
 par(mar=rep(0.25, 4), cex=0.75) # make plot easier to read
 plot(random.tree)
 InapplicableFitch(random.tree, my.phyDat)
 ```
 
-It helps tree search if we start with a tree that's a little closer to optimal; perhaps a
-neighbour-joining tree:
+We might save some wasted time in tree search if we can start with a tree that's a little 
+closer to optimal: perhaps a neighbour-joining tree.
 ```{r Neighbour-joining}
 nj.tree <- ape::nj(phangorn::dist.hamming(my.phyDat))
 # We need to set an arbitrary ougroup so that all nodes bifurcate
@@ -81,12 +84,14 @@ plot(nj.tree)
 InapplicableFitch(nj.tree, my.phyDat)
 ```
 
-With the Vinther _et al._ 2008 dataset, brachiopods and nemerteans form an natural outgroup to 
+With the Vinther _et al._ 2008 dataset, nemerteans and brachiopods form an natural outgroup to 
 the other taxa. 
-If we wish, we can avoid making tree rearrangements that would mix ingroup and outgroup taxa.
+If we wish, we can constrain this outgroup and avoid making tree rearrangements that would mix 
+ingroup and outgroup taxa.
 This will accellerate tree search, but it's worth thinking carefully whether you can be perfectly
 confident that the ingroup and outgroup are mutually monophyletic.
-First we need to separate the ingroup from the outgroup:
+
+To constrain an outgroup, we first need to make the outgroup and ingroup monophyletic on our tree:
 
 ```{r Outgroup}
 outgroup <- c('Nemertean', 'Lingula', 'Terebratulina')
@@ -98,10 +103,14 @@ plot(rooted.tree)
 
 Now let's see whether a few Nearest-neighbour interchanges can find us a better tree score. 
 This tends to be the quickest search to run, if not the most exhaustive.
-Using `RootedNNI` instead of `NNI` retains the position of the root, which you'll usually want to do.
+Using `RootedNNI` instead of `NNI` stops taxa from moving from one side of the root to another,
+which we need to do if we're going to enforce our outgroup constraint.  Even if we are using a
+single-taxon outgroup, using `RootedNNI` retains the position of the root, which makes tree
+comparison and interpretation easier later on.
 
 ```{r Basic NNI search}
-better.tree <- BasicSearch(tree=rooted.tree, dataset=my.phyDat, Rearrange=TreeSearch::RootedNNI, verbosity=3)
+better.tree <- BasicSearch(tree=rooted.tree, dataset=my.phyDat, 
+                           Rearrange=TreeSearch::RootedNNI, verbosity=3)
 ```
 
 This score is better than the 85 of the original neighbour-joining tree, but is this the best we can do?
@@ -111,8 +120,10 @@ rearrangements are better at escaping local optima, and find better trees
 further away in tree space.  Using more hits (`maxHits`) and more iterations (`maxIter`) also
 means we'll move closer to an optimal tree.
 ```{r SPR and TBR}
-better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedSPR, verbosity=2)
-better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, Rearrange=TreeSearch::RootedTBR, verbosity=2)
+better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000,
+                           Rearrange=TreeSearch::RootedSPR, verbosity=2)
+better.tree <- BasicSearch(better.tree, my.phyDat, maxHits=40, maxIter=100000, 
+                           Rearrange=TreeSearch::RootedTBR, verbosity=2)
 ```
 
 That score's looking better, but we might still be caught in a local optimum. 
@@ -140,7 +151,8 @@ For each Ratchet iteration, we'll conduct a TBR search to scan tree space,
 then an NNI search to hone in on the local optimum.
 
 ```{r Consensus}
-my.consensus <- RatchetConsensus(best.tree, my.phyDat, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedNNI))
+my.consensus <- RatchetConsensus(best.tree, my.phyDat, rearrangements=
+                                 list(TreeSearch::RootedTBR, TreeSearch::RootedNNI))
 ```
 
 If ten independent runs all ended up at different trees, there are probably many more optimal trees out there to 

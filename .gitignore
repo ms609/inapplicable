@@ -9,4 +9,5 @@ src/*.dll
 inst/ape
 inst/doc
 vignettes/*.html
+vignettes/*.pdf
 vignettes/*_files

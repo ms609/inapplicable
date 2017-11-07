@@ -9,6 +9,7 @@
 #' @param maxIter maximum rearrangements to perform on each bootstrap or ratchet iteration;
 #' @param maxHits maximum times to hit best score before terminating a tree search within a pratchet iteration;
 #' @param k stop when k ratchet iterations have found the same best score;
+#' @template stopAtScoreParam
 #' @template verbosityParam
 #' @param rearrangements (list of) function(s) to use when rearranging trees
 #'        e.g. \code{list(TreeSearch::RootedTBR, TreeSearch::RootedNNI)}
@@ -26,7 +27,7 @@
 #' 
 #' @seealso \code{\link[phangorn]{pratchet}}
 #' @seealso \code{\link{BasicSearch}}
-#' @seealso \code{\link{SectorialSearch}}
+### #' @seealso \code{\link{SectorialSearch}}
 #' 
 #' @examples{
 #' data('inapplicable.datasets')
@@ -38,8 +39,8 @@
 #' @importFrom TreeSearch Renumber RenumberTips
 #' @export
 RatchetSearch <- function 
-(tree, dataset, keepAll=FALSE, maxIt=100, maxIter=5000, 
-  maxHits=40, k=10, verbosity=1L, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedSPR, 
+(tree, dataset, keepAll=FALSE, maxIt=100, maxIter=5000, maxHits=40, k=10, stopAtScore=NULL,
+  verbosity=1L, rearrangements=list(TreeSearch::RootedTBR, TreeSearch::RootedSPR, 
   TreeSearch::RootedNNI), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
@@ -51,6 +52,7 @@ RatchetSearch <- function
   }
   bestScore <- attr(tree, "score")
   if (verbosity > 0L) cat("* Initial score:", bestScore)
+  if (!is.null(stopAtScore) && bestScore < stopAtScore + eps) return(tree)
   if (keepAll) forest <- vector('list', maxIter)
 
   if (class(rearrangements) == 'function') rearrangements <- list(rearrangements)
@@ -63,20 +65,22 @@ RatchetSearch <- function
     for (Rearrange in rearrangements) {
       if (verbosity > 0L) cat ("\n - Rearranging new candidate tree...")
       stop("TODO: Use edgeList approach")
-      candidate <- DoTreeSearch(candidate, morphyObj, Rearrange=Rearrange, 
+      candidate <- DoTreeSearch(candidate, morphyObj, Rearrange=Rearrange, stopAtScore=stopAtScore,
                                 verbosity=verbosity-1L, maxIter=maxIter, maxHits=maxHits, ...)
+      candScore <- attr(candidate, 'score')
+      if (!is.null(stopAtScore) && candScore < stopAtScore + eps) return(candidate)
     }
     cand.pars <- attr(candidate, 'score')
-    if((cand.pars+eps) < bestScore) {
+    if ((candScore + eps) < bestScore) {
       if (keepAll) {
         forest <- vector('list', maxIter)
         forest[[i]] <- candidate
       }
       tree <- candidate
-      bestScore <- cand.pars
+      bestScore <- candScore
       kmax <- 1
     } else {
-      if (bestScore+eps > cand.pars) { # i.e. best == cand, allowing for floating point error
+      if (bestScore + eps > candScore) { # i.e. best == cand, allowing for floating point error
         kmax <- kmax + 1
         candidate$tip.label <- names(dataset)
         tree <- candidate
@@ -122,7 +126,7 @@ RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20
 #' @param maxIter maximum number of iterations to perform in tree search
 #' @param maxHits maximum number of hits to accomplish in tree search
 #' @template verbosityParam
-#' @param \dots further parameters to send to DoTreeSearch
+#' @param \dots further parameters to send to \code{DoTreeSearch}
 #'
 #' @return A tree that is optimal under a random sampling of the original characters
 #' @importFrom TreeSearch RootedNNI
@@ -162,6 +166,7 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
 #' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}.
 #' @param maxIter maximum iterations to conduct.
 #' @param maxHits stop search after this many hits.
+#' @template stopAtScoreParam
 #' @param forestSize how many trees to hold.
 #' @template clusterParam
 #' @template verbosityParam
@@ -241,7 +246,7 @@ DoTreeSearch <- function (edgeList, morphyObj,
 #' @param tree a fully-resolved starting tree in \code{\link{phylo}} format, with the desired outgroup; 
 #'        edge lengths are not supported and will be deleted.
 #' @template datasetParam
-#' @param Rearrange Function used to rearrange trees; default: \code{\link{RootedTBR}}.
+#' @param Rearrange Function used to rearrange trees; default: \code{\link[TreeSearch]{RootedTBR}}.
 #' @param maxIter the maximum number of iterations to perform before abandoning the search.
 #' @param maxHits the maximum times to hit the best score before abandoning the search.
 #' @param forestSize the maximum number of trees to return - useful in concert with \code{\link{consensus}}.
@@ -259,19 +264,15 @@ DoTreeSearch <- function (edgeList, morphyObj,
 #' @seealso
 #' \itemize{
 #' \item \code{\link{InapplicableFitch}}, calculates parsimony score, supports inapplicable tokens;
-#' \item \code{\link{RootedNNI}}, conducts tree rearrangements;
-#' \item \code{\link{SectorialSearch}}, alternative heuristic, useful for larger trees;
+#' \item \code{\link[TreeSearch]{RootedNNI}}, conducts tree rearrangements;
+### #' \item \code{\link{SectorialSearch}}, alternative heuristic, useful for larger trees;
 #' \item \code{\link{RatchetSearch}}, alternative heuristic, useful to escape local optima.
 #' }
 #'
 #' @examples
-#' library('ape'); library('phangorn')
 #' data('inapplicable.datasets')
 #' my.phyDat <- inapplicable.phyData[[1]]
-#' outgroup <- names(my.phyDat)[1]
-#' njtree <- ape::root(ape::nj(phangorn::dist.hamming(my.phyDat)), outgroup, resolve.root=TRUE)
-#' njtree$edge.length <- NULL
-#' njtree <- ape::root(njtree, outgroup, resolve.root=TRUE)
+#' njtree <- TreeSearch::NJTree(my.phyDat)
 #'
 #' \dontrun{
 #' TreeSearch(njtree, my.phyDat, maxIter=20, Rearrange=TreeSearch::NNI)
@@ -307,7 +308,6 @@ BasicSearch <- function
   ret <- DoTreeSearch(edgeList, morphyObj, Rearrange=Rearrange,
                       maxIter=maxIter, maxHits=maxHits, forestSize=forestSize, cluster=cluster, 
                       verbosity, ...)
-                      
   return (ret)
 }
 

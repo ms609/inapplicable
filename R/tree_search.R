@@ -173,9 +173,10 @@ MorphyBootstrap <- function (edgeList, morphyObj, maxIter, maxHits, verbosity=1L
 #' @keywords internal
 #' @export
 
-DoTreeSearch <- function (edgeList, morphyObj,
-                          Rearrange, maxIter=100, maxHits=20, forestSize=1L, 
+DoTreeSearch <- function (edgeList, morphyObj, Rearrange, maxIter=100, maxHits=20, 
+                          stopAtScore=NULL, forestSize=1L, 
                           cluster=NULL, verbosity=1L, ...) {
+  eps <- 1e-07                        
   if (!is.null(forestSize) && length(forestSize)) {
     if (forestSize > 1L) {
       stop("TODO: Forests not supported")
@@ -192,6 +193,7 @@ DoTreeSearch <- function (edgeList, morphyObj,
   }
   hits <- if (length(edgeList) < 4) 0 else edgeList[[4]]
   if (verbosity > 0L) cat("  - Initial score:", bestScore)
+  if (!is.null(stopAtScore) && bestScore < stopAtScore + eps) return(edgeList)
   returnSingle <- !(forestSize > 1L)
   
   for (iter in 1:maxIter) {
@@ -199,7 +201,7 @@ DoTreeSearch <- function (edgeList, morphyObj,
                              inputScore=bestScore, hits=hits, RearrangeEdges=Rearrange,
                              minScore=bestScore, returnSingle=returnSingle, iter=iter, 
                              cluster=cluster, verbosity=verbosity, ...)
-    scoreThisIteration <- attr(candidateLists, 'score')
+    scoreThisIteration <- candidateLists[[3]]
     if (forestSize > 1L) {
       stop("TODO re-code this")
       if (scoreThisIteration == bestScore) {
@@ -218,6 +220,7 @@ DoTreeSearch <- function (edgeList, morphyObj,
       if (scoreThisIteration <= bestScore) {
         bestScore <- scoreThisIteration
         edgeList <- candidateLists
+        if (!is.null(stopAtScore) && bestScore < stopAtScore + eps) return(edgeList)
       }
     }
     if (hits >= maxHits) break

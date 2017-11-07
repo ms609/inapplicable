@@ -36,20 +36,22 @@
 #'         dataset=my.phyDat, maxIt=1, maxIter=50)
 #' }
 #' @keywords  tree 
-#' @importFrom TreeSearch Renumber RenumberTips RootedTBR RootedSPR RootedNNI
+#' @importFrom TreeSearch Renumber RenumberTips TBRCore SPRCore NNICore
 #' @export
 RatchetSearch <- function 
 (tree, dataset, keepAll=FALSE, maxIt=100, maxIter=5000, maxHits=40, k=10, stopAtScore=NULL,
-  verbosity=1L, rearrangements=list(RootedTBR, RootedSPR, RootedNNI), ...) {
+  verbosity=1L, rearrangements=list(TBRCore, SPRCore, NNICore), ...) {
   if (class(dataset) != 'phyDat') stop("dataset must be of class phyDat, not", class(dataset))
   morphyObj <- LoadMorphy(dataset)
   on.exit(morphyObj <- UnloadMorphy(morphyObj))
-  tree <- RenumberTips(Renumber(tree), names(dataset))
+  tree <- RenumberTips(tree, names(dataset))
+  edge <- tree$edge
+  edgeList <- RenumberEdges(edge[, 1], edge[, 2])
   eps <- 1e-08
-  if (is.null(attr(tree, "score"))) {
-    attr(tree, "score") <- MorphyTreeLength(tree, morphyObj, ...)
-  }
   bestScore <- attr(tree, "score")
+  if (is.null(bestScore)) {
+    bestScore <- MorphyLength(edgeList[[1]], edgeList[[2]], morphyObj, ...)
+  }
   if (verbosity > 0L) cat("* Initial score:", bestScore)
   if (!is.null(stopAtScore) && bestScore < stopAtScore + eps) return(tree)
   if (keepAll) forest <- vector('list', maxIter)
@@ -58,7 +60,7 @@ RatchetSearch <- function
   kmax <- 0 
   for (i in 1:maxIt) {
     if (verbosity > 0L) cat ("\n* Ratchet iteration", i, "- Running NNI on bootstrapped dataset. ")
-    candidate <- MorphyBootstrapTree(tree=tree, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
+    candidate <- MorphyBootstrap(edgeList=edgeList, morphyObj=morphyObj, maxIter=maxIter, maxHits=maxHits,
                                verbosity=verbosity-1L, ...)
     
     for (Rearrange in rearrangements) {
@@ -128,9 +130,9 @@ RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20
 #' @param \dots further parameters to send to \code{DoTreeSearch}
 #'
 #' @return A tree that is optimal under a random sampling of the original characters
-#' @importFrom TreeSearch RootedNNI
+#' @importFrom TreeSearch NNICore
 #' @export
-MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L, ...) {
+MorphyBootstrap <- function (edgeList, morphyObj, maxIter, maxHits, verbosity=1L, ...) {
 ## Simplified version of phangorn::bootstrap.phyDat, with bs=1 and multicore=FALSE
   startWeights <- MorphyWeights(morphyObj)[1, ]
   eachChar <- seq_along(startWeights)
@@ -138,16 +140,12 @@ MorphyBootstrapTree <- function (tree, morphyObj, maxIter, maxHits, verbosity=1L
   BS <- tabulate(sample(v, replace=TRUE), length(startWeights))
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, BS[i], morphyObj), integer(1))
-  mpl_apply_tipdata(morphyObj)#
-  attr(tree, 'score') <- NULL
-  stop("TODO: Use edgeList approach")
-  res <- DoTreeSearch(edgeList, morphyObj, Rearrange=RootedNNI, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
-  attr(res, 'score') <- NULL
-  attr(res, 'hits') <- NULL
+  mpl_apply_tipdata(morphyObj)
+  res <- DoTreeSearch(edgeList, morphyObj, Rearrange=NNICore, maxIter=maxIter, maxHits=maxHits, verbosity=verbosity-1L, ...)
   vapply(eachChar, function (i) 
          mpl_set_charac_weight(i, startWeights[i], morphyObj), integer(1))
   mpl_apply_tipdata(morphyObj)
-  res
+  res[1:2]
 }
 
 #' DoTreeSearch

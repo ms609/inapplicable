@@ -104,12 +104,12 @@ MorphyRearrange <- function (parent, child, morphyObj, inputScore=1e+07, hits=0,
   }
   if (length(returnSingle) && returnSingle) {
     ret <- sample(edgeLists, 1)[[1]]
-    ret[3:4] <- c(hits, minScore)
+    ret[3:4] <- c(minScore, hits)
     # Return:
     ret 
     # It's faster not to call return().
   } else {
     # Return:
-    lapply(edgeLists, function (x) x[3:4] <- c(hits, minScore))
+    lapply(edgeLists, function (x) x[3:4] <- c(minScore, hits))
   }
 }

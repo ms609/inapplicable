@@ -20,11 +20,6 @@ void insert_in_order (int *parent_of, int *left, int *right,
   const int old_parent = parent_of[*addition_point];
   if (left[old_parent] == *addition_point) {
     left[old_parent] = *new_node;
-  } else if (old_parent == *addition_point) {
-    // Adding at root node
-    insert_and_reorder(parent_of, left, right, addition_point, new_node, new_tip);
-    return;
-    
   } else {
     // The same, but on the right
     right[old_parent] = *new_node;
@@ -43,14 +38,15 @@ void insert_in_order (int *parent_of, int *left, int *right,
 
 // parent_of, left and right have been initialized with a two-taxon tree with tips 0 & 1
 // left and right point n_tip _before_ left and right, so we don't need to subtract n_tip each time
-void build_postorder_tree(int *parent_of, int *left, int *right, const int *n_tip)
-{
+void build_postorder_tree(int *parent_of, int *left, int *right, const int *n_tip) {
   int i, addition_point, new_node;
   for (i = 2; i < *n_tip; i++) {
     new_node = i + *n_tip - 1L;
     addition_point = rand() % (i + i - 1L);
     if (addition_point < i) { // Adding below a tip
       insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
+    } else if (addition_point == i) {
+      insert_and_reorder(parent_of, left, right, n_tip, &new_node, &i);
     } else { // Adding below an existing node
       addition_point += *n_tip - i;
       insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);

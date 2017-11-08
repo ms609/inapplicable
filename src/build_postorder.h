@@ -1,22 +1,6 @@
 #include <stdlib.h>
-void insert_in_order (int *parent_of, int *left, int *right, 
-                      const int *addition_point, const int *new_node,
-                      const int *new_tip) {
-  const int old_parent = parent_of[*addition_point];
-  if (left[old_parent] == *addition_point) {
-    left[old_parent] = *new_node;
-  } else {
-    // The same, but on the right
-    right[old_parent] = *new_node;
-  }
-  left[*new_node] = *new_tip;
-  parent_of[*new_tip] = *new_node;
-  right[*new_node] = *addition_point;
-  parent_of[*addition_point] = *new_node;
-  parent_of[*new_node] = old_parent;
-}
 
-#include <stdlib.h>
+
 void insert_and_reorder (int *parent_of, int *left, int *right, 
                       const int *addition_point, const int *new_node,
                       const int *new_tip) {
@@ -29,6 +13,29 @@ void insert_and_reorder (int *parent_of, int *left, int *right,
   parent_of[*new_node] = *addition_point;
   right[*addition_point] = *new_node;
 }
+
+void insert_in_order (int *parent_of, int *left, int *right, 
+                      const int *addition_point, const int *new_node,
+                      const int *new_tip) {
+  const int old_parent = parent_of[*addition_point];
+  if (left[old_parent] == *addition_point) {
+    left[old_parent] = *new_node;
+  } else if (old_parent == *addition_point) {
+    // Adding at root node
+    insert_and_reorder(parent_of, left, right, addition_point, new_node, new_tip);
+    return;
+    
+  } else {
+    // The same, but on the right
+    right[old_parent] = *new_node;
+  }
+  left[*new_node] = *new_tip;
+  parent_of[*new_tip] = *new_node;
+  right[*new_node] = *addition_point;
+  parent_of[*addition_point] = *new_node;
+  parent_of[*new_node] = old_parent;
+}
+
 
 // static R_NativePrimitiveArgType build_postorder_tree_t[] = {
 //   INTSXP, INTSXP, INTSXP, INTSXP, INTSXP
@@ -46,11 +53,7 @@ void build_postorder_tree(int *parent_of, int *left, int *right, const int *n_ti
       insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
     } else { // Adding below an existing node
       addition_point += *n_tip - i;
-      if (parent_of[addition_point] < new_node) {
-        insert_and_reorder(parent_of, left, right, &addition_point, &new_node, &i);
-      } else {
-        insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
-      }
+      insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
     }
   }
 }

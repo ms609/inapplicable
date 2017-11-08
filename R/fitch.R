@@ -59,7 +59,7 @@ MorphyTreeLength <- function (tree, morphyObj) {
   MorphyLength(tree.edge[, 1], tree.edge[, 2], morphyObj, inPostorder, nTaxa)
 }
 
-#' @documentIn MorphyTreeLength Faster function that requires internal tree parameters
+#' @describeIn MorphyTreeLength Faster function that requires internal tree parameters
 #' @template treeParent
 #' @template treeChild
 #' @author Martin R. Smith
@@ -75,7 +75,7 @@ MorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE, nTaxa=mpl
   rootNode <- nTaxa + 1L
   allNodes <- rootNode:maxNode
   
-  parentOf <- parent[match(1:maxNode, child )]
+  parentOf <- parent[match(1:maxNode, child)]
   # parentOf[rootNode] <- maxNode + 1 # Root node's parent is a dummy node
   parentOf[rootNode] <- rootNode # Root node's parent is a dummy node
   leftChild <- child[length(parent) + 1L - match(allNodes, rev(parent))]
@@ -86,3 +86,15 @@ MorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE, nTaxa=mpl
                as.integer(rightChild -1L), morphyObj)
 }
 
+#' @describeIn MorphyTreeLength Direct call to C function. Use with caution.
+#' @param parentOf For each node, numbered in postorder, the number of its parent node.
+#' @param leftChild  For each internal node, numbered in postorder, the number of its left 
+#'                   child node or tip.
+#' @param rightChild For each internal node, numbered in postorder, the number of its right
+#'                   child node or tip.
+#' @keywords internal
+#' @export
+C_MorphyLength <- function (parentOf, leftChild, rightChild, morphyObj) {
+  .Call('MORPHYLENGTH', as.integer(parentOf -1L), as.integer(leftChild -1L), 
+               as.integer(rightChild -1L), morphyObj)
+}

@@ -15,8 +15,16 @@ void insert_in_order (int *parent_of, int *left, int *right,
   parent_of[*addition_point] = *new_node;
 }
 
-void swap_nodes(const int node1, const int *node2, parent_of, left, right) {
-  // TODO WRITE THIS FUNCTION
+#include <stdlib.h>
+void insert_and_reorder (int *parent_of, int *left, int *right, 
+                      const int *addition_point, const int *new_node
+                      const int *new_tip) {
+   left[*new_node] = left [*addition_point];
+  right[*new_node] = right[*addition_point];
+  parent_of[left [*new_node]] = *new_node;
+  parent_of[right[*new_node]] = *new_node;
+  left[*addition_point] = *new_tip;
+  right[*addition_point] = *new_node;
 }
 
 static R_NativePrimitiveArgType build_postorder_tree_t[] = {
@@ -28,15 +36,16 @@ extern void build_postorder_tree(int *parent_of, int *left, int *right, const in
 {
   int i, addition_point, new_node;
   for (i = 2; i < *n_tip; i++) {
-    new_node = i + *n_tip;
+    new_node = i + *n_tip - 1L;
     addition_point = rand() % (i + i - 1L);
-    if (addition_point < *n_tip) { // Adding below a tip
+    if (addition_point < i) { // Adding below a tip
       insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
     } else { // Adding below an existing node
-      addition_point += n_tip;
-      insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
+      addition_point += n_tip - i;
       if (parent_of[addition_point] < new_node) {
-        swap_nodes(parent_of[addition_point], new_node, parent_of, left, right);
+        insert_and_reorder(parent_of, left, right, &addition_point, &new_node, &i);
+      } else {
+        insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
       }
     }
   }

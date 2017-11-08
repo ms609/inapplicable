@@ -133,9 +133,9 @@ extern SEXP BUILD_POSTORDER(SEXP ntip, SEXP MorphyHandl) {
           right[0] = 0; // Already true
            left[0] = 1;
   
-  build_postorder_tree(parent_of, left - n_tip, right - n_tip, &n_tip);
+  build_tree(parent_of, left - n_tip, right - n_tip, &n_tip);
   renumber_postorder(parent_of, left - n_tip, right - n_tip, &n_tip);
-  // Then score:
+  
   // score = MORPHYLENGTH(parent_of, left, right, MorphyHandl); 
   // Can you send R objects as SEXPs?
   // If not, we'll need to hollow out MORPHYLENGTH to create a callable.

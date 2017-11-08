@@ -107,8 +107,11 @@ void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip)
 extern SEXP BUILD_POSTORDER(SEXP ntip, SEXP MorphyHandl) {
   // tipnames run from 0 to nTip - 1, in random order
   const int n_tip = INTEGER(ntip)[0];
+  Morphy handl = R_ExternalPtrAddr(MorphyHandl);
   SEXP RESULT = PROTECT(allocVector(INTSXP, 1));
-  int *score = INTEGER(RESULT);
+  int *score;
+  score = INTEGER(RESULT);
+  *score = 0;
   if (n_tip < 2) {
     INTEGER(RESULT)[0] = 0;
     UNPROTECT(1);
@@ -128,7 +131,7 @@ extern SEXP BUILD_POSTORDER(SEXP ntip, SEXP MorphyHandl) {
   build_tree(parent_of, left - n_tip, right - n_tip, &n_tip);
   renumber_postorder(parent_of, left - n_tip, right - n_tip, &n_tip);
   
-  *score = morphy_length(parent_of, left, right, R_ExternalPtrAddr(MorphyHandl)); 
+  morphy_length(parent_of, left, right, handl, score); 
   
   free(parent_of);
   free(right);

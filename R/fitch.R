@@ -64,6 +64,7 @@ MorphyTreeLength <- function (tree, morphyObj) {
 #' @template treeChild
 #' @author Martin R. Smith
 #' @keywords internal
+#' @importFrom TreeSearch PostorderEdges
 #' @export
 MorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE, nTaxa=mpl_get_numtaxa(morphyObj)) {
   if (!inPostorder) {

@@ -25,6 +25,8 @@ void insert_and_reorder (int *parent_of, int *left, int *right,
   parent_of[left [*new_node]] = *new_node;
   parent_of[right[*new_node]] = *new_node;
   left[*addition_point] = *new_tip;
+  parent_of[*new_tip] = *addition_point;
+  parent_of[*new_node] = *addition_point;
   right[*addition_point] = *new_node;
 }
 

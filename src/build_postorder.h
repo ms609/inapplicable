@@ -87,18 +87,16 @@ void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip)
     // Tips have not been renumbered; they are easy
     parent_of[i] = replacement_number[parent_ref[i]];
   }
-  for (i = *n_tip + 1L; i < (*n_tip + *n_tip - 1L); i++) { // Don't need to visit root node; no change
+  for (i = *n_tip; i < (*n_tip + *n_tip - 1L); i++) {
     // Nodes may have been renumbered; make sure we use the new numbers.
     parent_of[i] = replacement_number[parent_ref[replacement_number[i]]];
+    left[i] = (left_ref[replacement_number[i]] > *n_tip) ?
+                replacement_number[left_ref[replacement_number[i]]] :
+                left_ref[replacement_number[i]];
+    right[i] = (right_ref[replacement_number[i]] > *n_tip) ?
+                replacement_number[right_ref[replacement_number[i]]] :
+                right_ref[replacement_number[i]];
   }
-  //for (i = 0; i < *n_tip; i++) {
-  //  if (left_ref[i] > *n_tip) {
-  //    left [i] = replacement_number[left_ref[i]];
-  //  }
-  //  if (right_ref[i] > *n_tip) {
-  //    right[i] = replacement_number[right_ref[i]];
-  //  }
-  //}
   free(replacement_array);
   free(right_array);
   free(left_array);

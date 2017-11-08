@@ -1,12 +1,10 @@
 #' Random postorder tree
 #' 
 #' @param nTip number of tips
-#' @return a list of three integer vectors: 
-#'          First entry: parentOf: For each node, numbered in postorder, the number of its parent node.
-#'          Second entry: leftChild: For each internal node, numbered in postorder, the number of its left 
-#'                   child node or tip.
-#'          Third entry: rightChild: For each internal node, numbered in postorder, the number of its right
-#'                   child node or tip.
+#' @template morphyObjParam
+#'
+#' @return the parsimony score of a random tree, for the given Morphy object.
+#'
 #' @export
 RandomPostorder <- function (nTip, morphyObj) {  
   # Return:

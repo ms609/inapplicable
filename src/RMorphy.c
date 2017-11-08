@@ -283,30 +283,19 @@ SEXP _R_wrap_mpl_update_lower_root(SEXP lower_id, SEXP upper_id, SEXP MorphyHand
     return Rret;
 }
 
-SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl) {
-  Morphy handl = R_ExternalPtrAddr(MorphyHandl);
-  const int n_taxa = mpl_get_numtaxa(handl); 
-  const int n_internal = mpl_get_num_internal_nodes(handl);
-  const int root_node = n_taxa;
-  const int max_node = n_taxa + n_internal;
-  
-  // R_descendants and R_ancestors have already had one subtracted to convert them to an index 
-  const int *ancestor=INTEGER(R_ancestors), *left=INTEGER(R_left), 
-            *right=INTEGER(R_right); // INTEGER gives pointer to first element of length n R vector
-  
-  // Declare and protect result, to return to R
-  SEXP Rres = PROTECT(allocVector(INTSXP, 1));
-  
+int morphy_length (const int *ancestor, const int *left, const int *right, Morphy handl) {
   // Initialize return variables
   int i;
-  int *pscore_temp;
-  pscore_temp = INTEGER(Rres);
-  *pscore_temp = 0;
-   
+  int *pscore_temp = 0;
+  
+  const int n_taxa = mpl_get_numtaxa(handl); 
+  const int n_internal = mpl_get_num_internal_nodes(handl);
+  const int max_node = n_taxa + n_internal;
+  const int root_node = n_taxa;
+  
   for (i = max_node - 1; i >= n_taxa; i--) { // First Downpass 
     *pscore_temp += mpl_first_down_recon(i,  left[i - n_taxa], right[i - n_taxa], handl);
     //Rprintf("Downpass on node %i -< %i,%i ... pscore is %i\n", i, left[i-n_taxa], right[i-n_taxa], *pscore_temp);
-    
   }
   mpl_update_lower_root(root_node, root_node, handl); // We could use a spare internal node with index = max_node as a dummy root node.
                                                       // Or we can just pass the root node as its own ancestor.
@@ -329,6 +318,17 @@ SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl)
   for (i = 0; i < n_taxa; i++) { // Second uppass: finalize tips (fwiw)
     mpl_finalize_tip(i, ancestor[i], handl);
   }
+  return *pscore_temp;
+}
+
+SEXP MORPHYLENGTH(SEXP R_ancestors, SEXP R_left, SEXP R_right, SEXP MorphyHandl) {
+  // Declare and protect result, to return to R
+  SEXP Rres = PROTECT(allocVector(INTSXP, 1));
+  int *score = INTEGER(Rres);
+    // R_descendants and R_ancestors have already had one subtracted to convert them to an index 
+  // INTEGER gives pointer to first element of length n R vector
+  *score = morphy_length(INTEGER(R_ancestors), INTEGER(R_left), INTEGER(R_right), 
+                            R_ExternalPtrAddr(MorphyHandl));
   UNPROTECT(1);
   return Rres;
 }

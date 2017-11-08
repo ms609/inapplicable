@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "RMorphy.h"
 
 
 void insert_in_order (int *parent_of, int *left, int *right, 
@@ -36,8 +37,8 @@ void insert_and_reorder (int *parent_of, int *left, int *right,
 void build_tree(int *parent_of, int *left, int *right, const int *n_tip) {
   int i, addition_point, new_node;
   for (i = 2; i < *n_tip; i++) {
-    new_node = i + *n_tip - 1L;
-    addition_point = rand() % (i + i - 1L);
+    new_node = i + *n_tip - 1;
+    addition_point = rand() % (i + i - 1);
     if (addition_point < i) { // Adding below a tip
       insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
     } else if (addition_point == i) { // Adding below root node
@@ -62,22 +63,22 @@ void move_to_node(const int *node, const int *parent_of, const int *left, const 
 }
 
 void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip) {
-  int  *replacement_array = malloc((*n_tip - 1L)           * sizeof(int)),
-              *parent_ref = malloc((*n_tip + *n_tip - 1L)  * sizeof(int)),
-              *left_array = malloc((*n_tip - 1L)           * sizeof(int)),
-             *right_array = malloc((*n_tip - 1L)           * sizeof(int)),
+  int  *replacement_array = malloc((*n_tip - 1)           * sizeof(int)),
+              *parent_ref = malloc((*n_tip + *n_tip - 1)  * sizeof(int)),
+              *left_array = malloc((*n_tip - 1)           * sizeof(int)),
+             *right_array = malloc((*n_tip - 1)           * sizeof(int)),
       *replacement_number = replacement_array - *n_tip,
                 *left_ref = left_array        - *n_tip,
                *right_ref = right_array       - *n_tip,
                         i = *n_tip,
-                        j = *n_tip + 1L;
+                        j = *n_tip + 1;
   replacement_number[*n_tip] = *n_tip;
   move_to_node(&i, parent_of, left, right, replacement_number, &j, n_tip);
   
   for (i = 0; i < *n_tip; i++) {
     parent_ref[i] = parent_of[i];
   }
-  for (i = *n_tip; i < (*n_tip + *n_tip - 1L); i++) {
+  for (i = *n_tip; i < (*n_tip + *n_tip - 1); i++) {
     parent_ref[i] = parent_of[i];
     left_ref  [i] = left[i];
     right_ref [i] = right[i];
@@ -87,7 +88,7 @@ void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip)
     // Tips have not been renumbered; they are easy
     parent_of[i] = replacement_number[parent_ref[i]];
   }
-  for (i = *n_tip; i < (*n_tip + *n_tip - 1L); i++) {
+  for (i = *n_tip; i < (*n_tip + *n_tip - 1); i++) {
     // Nodes may have been renumbered; make sure we use the new numbers.
     parent_of[i] = replacement_number[parent_ref[replacement_number[i]]];
     left[i] = (left_ref[replacement_number[i]] > *n_tip) ?
@@ -106,26 +107,17 @@ void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip)
 extern SEXP BUILD_POSTORDER(SEXP ntip, SEXP MorphyHandl) {
   // tipnames run from 0 to nTip - 1, in random order
   const int n_tip = INTEGER(ntip)[0];
-  //int i, score;
-  //PROTECT(RESULT = allocVector(INTSXP, 1L));
-  SEXP RESULT, PARENT_OF, RIGHT, LEFT;
-  PROTECT(RESULT = allocVector(VECSXP, 3L));
-  PROTECT(PARENT_OF = allocVector(INTSXP, n_tip + n_tip - 1L));
-  PROTECT(LEFT      = allocVector(INTSXP, n_tip - 1L));
-  PROTECT(RIGHT     = allocVector(INTSXP, n_tip - 1L));
+  SEXP RESULT = PROTECT(allocVector(INTSXP, 1));
+  int *score = INTEGER(RESULT);
   if (n_tip < 2) {
     INTEGER(RESULT)[0] = 0;
     UNPROTECT(1);
     return(RESULT);
   }
   
-  // int *parent_of = calloc(n_tip + n_tip - 1L, sizeof(int)),
-  //          *left = calloc(n_tip - 1L, sizeof(int)),
-  //         *right = calloc(n_tip - 1L, sizeof(int));
-  
-  int *parent_of = INTEGER(PARENT_OF),
-          *right = INTEGER(RIGHT),
-           *left = INTEGER(LEFT);
+  int *parent_of = calloc(n_tip + n_tip - 1, sizeof(int)),
+           *left = calloc(n_tip - 1, sizeof(int)),
+          *right = calloc(n_tip - 1, sizeof(int));
   // Initialize with 
       parent_of[0] = n_tip;
       parent_of[1] = n_tip;
@@ -136,19 +128,11 @@ extern SEXP BUILD_POSTORDER(SEXP ntip, SEXP MorphyHandl) {
   build_tree(parent_of, left - n_tip, right - n_tip, &n_tip);
   renumber_postorder(parent_of, left - n_tip, right - n_tip, &n_tip);
   
-  // score = MORPHYLENGTH(parent_of, left, right, MorphyHandl); 
-  // Can you send R objects as SEXPs?
-  // If not, we'll need to hollow out MORPHYLENGTH to create a callable.
+  *score = morphy_length(parent_of, left, right, R_ExternalPtrAddr(MorphyHandl)); 
   
-  // free (*parent_of);
-  // free (*right);
-  // free (*left);
-  
-  SET_VECTOR_ELT(RESULT, 0, PARENT_OF);
-  SET_VECTOR_ELT(RESULT, 1, LEFT);
-  SET_VECTOR_ELT(RESULT, 2, RIGHT);
-  //INTEGER(RESULT)[0] = score;
-  //UNPROTECT(1);
-  UNPROTECT(4);
+  free(parent_of);
+  free(right);
+  free(left);
+  UNPROTECT(1);
   return(RESULT);
 }

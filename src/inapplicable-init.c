@@ -11,6 +11,7 @@
 #include "mpl.h"
 #include "RMorphyUtils.h"
 #include "RMorphy.h"
+#include "build_postorder.h"
 
 static const R_CallMethodDef callMethods[] = {
   {"_R_wrap_mpl_new_Morphy",        (DL_FUNC) &_R_wrap_mpl_new_Morphy, 0},
@@ -36,6 +37,7 @@ static const R_CallMethodDef callMethods[] = {
   {"_R_wrap_mpl_update_tip",        (DL_FUNC) &_R_wrap_mpl_update_tip, 3},
   {"_R_wrap_mpl_update_lower_root", (DL_FUNC) &_R_wrap_mpl_update_lower_root, 3},
   {"MORPHYLENGTH",                  (DL_FUNC) &MORPHYLENGTH, 4},
+  {"BUILD_POSTORDER",               (DL_FUNC) &BUILD_POSTORDER, 2},
   {NULL, NULL, 0}
 };
 

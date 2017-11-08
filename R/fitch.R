@@ -69,8 +69,8 @@ MorphyTreeLength <- function (tree, morphyObj) {
 MorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE, nTaxa=mpl_get_numtaxa(morphyObj)) {
   if (!inPostorder) {
     edgeList <- PostorderEdges(parent, child, nTaxa=nTaxa)
-    parent <- edge[[1]]
-    child <- edge[[2]]
+    parent <- edgeList[[1]]
+    child <- edgeList[[2]]
   }
   if (nTaxa < 1L) stop("Error: ", mpl_translate_error(nTaxa))
   maxNode <- nTaxa + mpl_get_num_internal_nodes(morphyObj)

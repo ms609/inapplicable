@@ -17,7 +17,8 @@ DoTreeSearch(edgeList, morphyObj, Rearrange, maxIter = 100, maxHits = 20,
 
 \item{morphyObj}{A morphy object created with \code{\link{LoadMorphy}}.}
 
-\item{Rearrange}{Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}.}
+\item{Rearrange}{Function to use to rearrange trees; example: 
+\code{TreeSearch::\link[TreeSearch]{RootedTBR}}.}
 
 \item{maxIter}{maximum iterations to conduct.}
 
@@ -39,8 +40,8 @@ Performs a tree search
 }
 \details{
 Does the hard work of searching for a most parsimonious tree, given the
-parent and child vectors of a tree arranged in preorder (perhaps with \code{\link[TreeSearch]
-{RenumberTreeList}}).
+parent and child vectors of a tree arranged in preorder (perhaps with 
+\code{\link[TreeSearch]{RenumberEdges}}).
 End-users are expected to access this function through its wrapper, TreeSearch
 It is also called directly by RatchetSearch and Sectorial functions
 }

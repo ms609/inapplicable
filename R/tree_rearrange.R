@@ -9,10 +9,10 @@
 #' @param Rearrange a rearrangement function that returns a tree: probably one of 
 #'     \code{\link[TreeSearch]{RootedNNI}}, \code{\link[TreeSearch]{RootedSPR}} or
 #'     \code{\link[TreeSearch]{RootedTBR}}.
-#' @param  min.score trees longer than \code{min.score}, probably the score of the starting tree,
+#' @param minScore trees longer than \code{min.score}, probably the score of the starting tree,
 #'     will be discarded.
-#' @param  returnSingle returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE};}
-#'   \item{iter}{iteration number of calling function, for reporting to user only.
+#' @param returnSingle returns all trees if \kbd{FALSE} or a randomly selected tree if \kbd{TRUE}.
+#' @param iter iteration number of calling function, for reporting to user only.
 #' @template clusterParam
 #' @template verbosityParam
 #' 
@@ -30,7 +30,7 @@
 #' @importFrom TreeSearch Renumber RenumberTips
 #' @export
 MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, minScore=NULL, returnSingle=TRUE,
-                           iter='?', cluster=NULL, verbosity=0L) {
+                                 iter='?', cluster=NULL, verbosity=0L) {
   if (is.null(attr(tree, 'score'))) bestScore <- 1e+07 else bestScore <- attr(tree, 'score')
   if (is.null(attr(tree, 'hits'))) hits <- 1 else hits <- attr(tree, 'hits')
   if (is.null(cluster)) {
@@ -67,11 +67,13 @@ MorphyRearrangeTree <- function (tree, morphyObj, Rearrange, minScore=NULL, retu
 }
 
 #' @describeIn MorphyRearrangeTree optimised version that requires parent and child vectors to be extracted from a tree
-#' @param score the score of the tree, if known
+#' @template treeParent
+#' @template treeChild
+#' @param inputScore the score of the tree, if known
 #' @param hits number of times that this score has been hit
 #' @param RearrangeEdges a function that rearranges a parent and child vector, 
-#'                       and returns a list with modified vectors; for example \code{\link[TreeSearch]
-#'                       {SPRCore}}.
+#'                       and returns a list with modified vectors; for example
+#'                       \code{\link[TreeSearch]{SPRCore}}.
 MorphyRearrange <- function (parent, child, morphyObj, inputScore=1e+07, hits=0, 
                              RearrangeEdges, minScore=NULL, returnSingle=TRUE,
                              iter='?', cluster=NULL, verbosity=0L) {

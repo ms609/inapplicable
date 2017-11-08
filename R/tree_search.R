@@ -4,7 +4,7 @@
 #'
 #' @template treeParam 
 #' @template datasetParam
-#' @param keepAll Set to \code{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus
+#' @param keepAll Set to \kbd{TRUE} to report all MPTs encountered during the search, perhaps to analyze consensus
 #' @param maxIt   maximum ratchet iterations to perform;
 #' @param maxIter maximum rearrangements to perform on each bootstrap or ratchet iteration;
 #' @param maxHits maximum times to hit best score before terminating a tree search within a pratchet iteration;
@@ -120,7 +120,7 @@ RatchetConsensus <- function (tree, dataset, maxIt=5000, maxIter=500, maxHits=20
 
 #' Bootstrap tree search with inapplicable data
 #' 
-#' @template labelledTreeParam
+#' @template edgeListParam
 #' @template morphyObjParam
 #' @param maxIter maximum number of iterations to perform in tree search
 #' @param maxHits maximum number of hits to accomplish in tree search
@@ -152,14 +152,15 @@ MorphyBootstrap <- function (edgeList, morphyObj, maxIter, maxHits, verbosity=1L
 #' Performs a tree search
 #' 
 #' Does the hard work of searching for a most parsimonious tree, given the
-#' parent and child vectors of a tree arranged in preorder (perhaps with \code{\link[TreeSearch]
-#' {RenumberTreeList}}).
+#' parent and child vectors of a tree arranged in preorder (perhaps with 
+#' \code{\link[TreeSearch]{RenumberEdges}}).
 #' End-users are expected to access this function through its wrapper, TreeSearch
 #' It is also called directly by RatchetSearch and Sectorial functions
 #'
 #' @template edgeListParam
 #' @template morphyObjParam
-#' @param Rearrange Function to use to rearrange trees; example: \code{TreeSearch::\link[TreeSearch]{RootedTBR}}.
+#' @param Rearrange Function to use to rearrange trees; example: 
+#'                  \code{TreeSearch::\link[TreeSearch]{RootedTBR}}.
 #' @param maxIter maximum iterations to conduct.
 #' @param maxHits stop search after this many hits.
 #' @template stopAtScoreParam

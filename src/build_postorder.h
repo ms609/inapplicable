@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include "RMorphy.h"
 
+// Random number generator from http://www.cse.yorku.ca/~oz/marsaglia-rng.html
+// 1+MWC%10 generates an integer from 1 to 10
+#define znew (z=36969*(z&65535)+(z>>16))
+#define wnew (w=18000*(w&65535)+(w>>16))
+#define random_int ((znew<<16)+wnew)
 
 void insert_in_order (int *parent_of, int *left, int *right, 
                       const int *addition_point, const int *new_node,
@@ -34,11 +39,13 @@ void insert_and_reorder (int *parent_of, int *left, int *right,
 
 // parent_of, left and right have been initialized with a two-taxon tree with tips 0 & 1
 // left and right point n_tip _before_ left and right, so we don't need to subtract n_tip each time
+// We arbitrarily choose to root our tree on tip 0, so never add to that edge or the 
+// "dummy" root edge.
 void build_tree(int *parent_of, int *left, int *right, const int *n_tip) {
   int i, addition_point, new_node;
-  for (i = 2; i < *n_tip; i++) {
+  for (i = 3; i < *n_tip; i++) {
     new_node = i + *n_tip - 1;
-    addition_point = rand() % (i + i - 1);
+    addition_point = 1 + random_int % (i + i - 3); // +1 to avoid edge 0
     if (addition_point < i) { // Adding below a tip
       insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
     } else if (addition_point == i) { // Adding below root node
@@ -118,18 +125,32 @@ extern SEXP BUILD_POSTORDER(SEXP ntip, SEXP MorphyHandl) {
     return(RESULT);
   }
   
-  int *parent_of = calloc(n_tip + n_tip - 1, sizeof(int)),
-           *left = calloc(n_tip - 1, sizeof(int)),
-          *right = calloc(n_tip - 1, sizeof(int));
-  // Initialize with 
+  int *parent_of = malloc(n_tip + n_tip - 1 * sizeof(int)),
+           *left = malloc(n_tip - 1         * sizeof(int)),
+          *right = malloc(n_tip - 1         * sizeof(int));
+          
+  if (n_tip < 3) {
+        // Initialize with 2-tip tree
       parent_of[0] = n_tip;
       parent_of[1] = n_tip;
   parent_of[n_tip] = n_tip; // Root is its own parent
-          right[0] = 0; // Already true
-           left[0] = 1;
-  
-  build_tree(parent_of, left - n_tip, right - n_tip, &n_tip);
-  renumber_postorder(parent_of, left - n_tip, right - n_tip, &n_tip);
+           left[0] = 0;
+          right[0] = 1;
+  } else {
+    // Initialize with 3-tip tree, arbitrarily rooted on tip 0
+        parent_of[0] = n_tip;
+        parent_of[1] = n_tip + 1;
+        parent_of[2] = n_tip + 1;
+    parent_of[n_tip] = n_tip; // Root is its own parent
+             left[0] = 0;
+             left[1] = 1;
+            right[0] = n_tip + 1;
+            right[1] = 2;
+  }
+  if (n_tip > 3) {    
+    build_tree(parent_of, left - n_tip, right - n_tip, &n_tip);
+    renumber_postorder(parent_of, left - n_tip, right - n_tip, &n_tip);
+  }
   
   morphy_length(parent_of, left, right, handl, score); 
   

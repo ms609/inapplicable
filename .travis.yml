@@ -16,6 +16,7 @@ r_binary_packages:
 r_packages:
  - devtools
  - roxygen2
+ - TreeSearch
 # - covr
   
 install:
@@ -30,8 +31,6 @@ install:
  - R -e "install.packages('roxygen2')"
  - R -e "devtools::document()"
 
-r_github_packages:
- - ms609/TreeSearch
 
 #blacklist
 branches:

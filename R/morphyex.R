@@ -12,22 +12,22 @@
 
 mpl_translate_error <- function (errorCode) {
   mplErrorCodes <- rev(c(
-      "ERR_EX_DATA_CONF     ",
-      "ERR_OUT_OF_BOUNDS    ",
-      "ERR_CASE_NOT_IMPL    ",
-      "ERR_UNKNOWN_CHTYPE   ",
-      "ERR_SYMBOL_MISMATCH  ",
+      "ERR_EX_DATA_CONF",
+      "ERR_OUT_OF_BOUNDS",
+      "ERR_CASE_NOT_IMPL",
+      "ERR_UNKNOWN_CHTYPE",
+      "ERR_SYMBOL_MISMATCH",
       "ERR_MATCHING_PARENTHS",
       "ERR_ATTEMPT_OVERWRITE",
-      "ERR_NO_DIMENSIONS    ",
-      "ERR_DIMENS_UNDER     ",
-      "ERR_DIMENS_OVER      ",
-      "ERR_NO_DATA          ",
-      "ERR_BAD_MALLOC       ",
-      "ERR_BAD_PARAM        ",
-      "ERR_UNEXP_NULLPTR    ",
-      "ERR_INVALID_SYMBOL   ",
-      "ERR_NO_ERROR         "))
+      "ERR_NO_DIMENSIONS",
+      "ERR_DIMENS_UNDER",
+      "ERR_DIMENS_OVER",
+      "ERR_NO_DATA",
+      "ERR_BAD_MALLOC",
+      "ERR_BAD_PARAM",
+      "ERR_UNEXP_NULLPTR",
+      "ERR_INVALID_SYMBOL",
+      "ERR_NO_ERROR"))
   return (mplErrorCodes[1-errorCode])
 }
 

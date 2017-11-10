@@ -61,15 +61,15 @@ void move_to_node(const int *node, const int *parent_of, const int *left, const 
 }
 
 void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip) {
-  int  *replacement_array = malloc((*n_tip - 1)           * sizeof(int)),
-              *parent_ref = malloc((*n_tip + *n_tip - 1)  * sizeof(int)),
-              *left_array = malloc((*n_tip - 1)           * sizeof(int)),
-             *right_array = malloc((*n_tip - 1)           * sizeof(int)),
-      *replacement_number = replacement_array - *n_tip,
-                *left_ref = left_array        - *n_tip,
-               *right_ref = right_array       - *n_tip,
-                        i = *n_tip,
-                        j = *n_tip + 1;
+  int     *parent_ref = malloc((*n_tip + *n_tip - 1) * sizeof(int)),
+   *replacement_array = malloc((*n_tip - 1)          * sizeof(int)),     
+          *left_array = malloc((*n_tip - 1)          * sizeof(int)),
+         *right_array = malloc((*n_tip - 1)          * sizeof(int)),
+  *replacement_number = replacement_array - *n_tip,
+            *left_ref = left_array        - *n_tip,
+           *right_ref = right_array       - *n_tip,
+                    i = *n_tip,
+                    j = *n_tip + 1;
   replacement_number[*n_tip] = *n_tip;
   move_to_node(&i, parent_of, left, right, replacement_number, &j, n_tip);
   
@@ -112,14 +112,15 @@ void random_tree(int *parent_of, int *left, int *right, const int *n_tip) {
            right[0] = 1;
   } else {
     // Initialize with 3-tip tree, arbitrarily rooted on tip 0
-        parent_of[0] = *n_tip;
-        parent_of[1] = *n_tip + 1;
-        parent_of[2] = *n_tip + 1;
-    parent_of[*n_tip] = *n_tip; // Root is its own parent
-             left[0] = 0;
-             left[1] = 1;
-            right[0] = *n_tip + 1;
-            right[1] = 2;
+             parent_of[0] = *n_tip;
+             parent_of[1] = *n_tip + 1;
+             parent_of[2] = *n_tip + 1;
+        parent_of[*n_tip] = *n_tip; // Root is its own parent
+    parent_of[*n_tip + 1] = *n_tip;
+                  left[0] = 0;
+                  left[1] = 1;
+                 right[0] = *n_tip + 1;
+                 right[1] = 2;
   }
   if (*n_tip > 3) {    
     build_tree(parent_of, left - *n_tip, right - *n_tip, n_tip);

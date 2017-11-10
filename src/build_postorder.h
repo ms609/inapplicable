@@ -13,21 +13,24 @@ typedef unsigned long UL;
 static UL z=362436069, w=521288629;
 /* Use random seeds to reset z and w*/
 
-void insert_in_order (int *parent_of, int *left, int *right, 
-                      const int *addition_point, const int *new_node,
-                      const int *new_tip) {
-  const int old_parent = parent_of[*addition_point];
-  if (left[old_parent] == *addition_point) {
+void insert_tip_below (const int *new_tip,
+                       const int *add_below, const int *new_node,
+                       int *parent_of, int *left, int *right
+                       ) {
+  const int old_parent = parent_of[*add_below];
+  if (left[old_parent] == *add_below) {
     left[old_parent] = *new_node;
   } else {
     // The same, but on the right
     right[old_parent] = *new_node;
   }
+  parent_of[*new_node] = old_parent;
+  
   left[*new_node] = *new_tip;
   parent_of[*new_tip] = *new_node;
-  right[*new_node] = *addition_point;
-  parent_of[*addition_point] = *new_node;
-  parent_of[*new_node] = old_parent;
+  
+  right[*new_node] = *add_below;
+  parent_of[*add_below] = *new_node;
 }
 
 // parent_of, left and right have been initialized with a two-taxon tree with tips 0 & 1
@@ -35,44 +38,53 @@ void insert_in_order (int *parent_of, int *left, int *right,
 // We arbitrarily choose to root our tree on tip 0, so never add to that edge or the 
 // "dummy" root edge.
 void build_tree(int *parent_of, int *left, int *right, const int *n_tip) {
-  int i, addition_point, new_node;
-  for (i = 3; i < *n_tip; i++) {
-    new_node = i + *n_tip - 1;
-    addition_point = 1 + random_int % (i + i - 3); // +1 to avoid edge 0
-    if (addition_point < i) { // Adding below a tip
-      insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
+  int tip_to_add, add_below, new_node;
+  for (tip_to_add = 3; tip_to_add < *n_tip; tip_to_add++) {
+    new_node = tip_to_add + *n_tip - 1;
+    add_below = 1 + random_int % (tip_to_add + tip_to_add - 3); // +1 to avoid edge 0
+    if (add_below < tip_to_add) { // Adding below a tip
+      insert_tip_below(&tip_to_add, &add_below, &new_node, parent_of, left, right);
     } else { // Adding below an existing node
-      addition_point += *n_tip - i + 1; // + 1 to avoid dummy root
-      insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
+      add_below += *n_tip - tip_to_add + 1; // +1 so we never touch dummy root edge
+      insert_tip_below(&tip_to_add, &add_below, &new_node, parent_of, left, right);
     }
   }
 }
 
-void move_to_node(const int *node, const int *parent_of, const int *left, const int *right, 
-                  int *replacement, int *next_label, const int *n_tip) {
-  if (left [*node] > *n_tip) { // won't be equal, as that the root is no-one's descendant
-    replacement[left[*node]] = (*next_label)++;
-    move_to_node(&(left[*node]), parent_of, left, right, replacement, next_label, n_tip);
+void move_to_node(const int *old_node_id, int *new_parent, int *new_left, int *new_right,
+                  const int *old_parent, const int *old_left, const int *old_right, 
+                  int *next_label, const int *n_tip) {
+  const int new_node_id = *next_label;
+  if (old_right[*old_node_id] > *n_tip) {
+    new_right[new_node_id] = ++(*next_label);
+    new_parent[*next_label] = new_node_id;
+    move_to_node(&old_right[*old_node_id], new_parent, new_left, new_right,
+                                 old_parent, old_left, old_right, 
+                                 next_label, n_tip);    
+  } else if (new_node_id != *old_node_id) { // Otherwise no change
+    new_parent[old_right[*old_node_id]] = new_node_id;
+    new_right[new_node_id] = old_right[*old_node_id];
   }
-  if (right[*node] > *n_tip) {
-    replacement[right[*node]] = (*next_label)++;
-    move_to_node(&right[*node], parent_of, left, right, replacement, next_label, n_tip);    
+  if (old_left[*old_node_id] > *n_tip) {
+    new_left[new_node_id] = ++(*next_label);
+    new_parent[*next_label] = new_node_id;
+    move_to_node(&old_left[*old_node_id], new_parent, new_left, new_right,
+                                 old_parent, old_left, old_right, 
+                                 next_label, n_tip);    
+  } else if (new_node_id != *old_node_id) { // Otherwise no change
+    new_parent[old_left[*old_node_id]] = new_node_id;
+    new_right[new_node_id] = old_left[*old_node_id];
   }
 }
 
 void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip) {
-  int     *parent_ref = malloc((*n_tip + *n_tip - 1) * sizeof(int)),
-   *replacement_array = malloc((*n_tip - 1)          * sizeof(int)),     
-          *left_array = malloc((*n_tip - 1)          * sizeof(int)),
-         *right_array = malloc((*n_tip - 1)          * sizeof(int)),
-  *replacement_number = replacement_array - *n_tip,
-            *left_ref = left_array        - *n_tip,
-           *right_ref = right_array       - *n_tip,
-                    i = *n_tip,
-                    j = *n_tip + 1;
-  replacement_number[*n_tip] = *n_tip;
-  move_to_node(&i, parent_of, left, right, replacement_number, &j, n_tip);
-  
+  int *parent_ref = malloc((*n_tip + *n_tip - 1) * sizeof(int)),
+      *left_array = malloc((*n_tip - 1)          * sizeof(int)),
+     *right_array = malloc((*n_tip - 1)          * sizeof(int)),
+        *left_ref = left_array  - *n_tip,
+       *right_ref = right_array - *n_tip,
+       next_label = *n_tip + 1,
+                i;
   for (i = 0; i < *n_tip; i++) {
     parent_ref[i] = parent_of[i];
   }
@@ -82,21 +94,9 @@ void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip)
     right_ref [i] = right[i];
   }
   
-  for (i = 0; i < *n_tip; i++) {
-    // Tips have not been renumbered; they are easy
-    parent_of[i] = replacement_number[parent_ref[i]];
-  }
-  for (i = *n_tip; i < (*n_tip + *n_tip - 1); i++) {
-    // Nodes may have been renumbered; make sure we use the new numbers.
-    parent_of[i] = replacement_number[parent_ref[replacement_number[i]]];
-    left[i] = (left_ref[replacement_number[i]] > *n_tip) ?
-                replacement_number[left_ref[replacement_number[i]]] :
-                left_ref[replacement_number[i]];
-    right[i] = (right_ref[replacement_number[i]] > *n_tip) ?
-                replacement_number[right_ref[replacement_number[i]]] :
-                right_ref[replacement_number[i]];
-  }
-  free(replacement_array);
+  move_to_node(n_tip, parent_of, left, right, 
+               parent_ref, left_ref, right_ref, &next_label, n_tip);
+  
   free(right_array);
   free(left_array);
   free(parent_ref);
@@ -162,6 +162,8 @@ extern SEXP RANDOM_TREE_SCORE(SEXP ntip, SEXP MorphyHandl) {
     return(RESULT);
   }
   
+  // NOTE: malloc here causes segfault.
+  //       Does this mean that we're accessing uninitialzied values somewhere?
   int *parent_of = calloc(n_tip + n_tip - 1 , sizeof(int)),
            *left = calloc(n_tip - 1         , sizeof(int)),
           *right = calloc(n_tip - 1         , sizeof(int));

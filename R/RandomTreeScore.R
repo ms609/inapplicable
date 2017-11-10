@@ -32,3 +32,15 @@ RandomMorphyTree <- function (nTip) {
   # Return:
   .Call('RANDOM_TREE', as.integer(nTip))
 }
+
+plot.morphyTree <- function (morphyTree) {
+  parentOf <- morphyTree[[1]]
+  left <- morphyTree[[2]]
+  right <- morphyTree[[3]]
+  nTip <- length(left) + 1L
+  
+  edge <- matrix(c(rep(seq(nTip, len=nTip - 1L), 2), right, left), ncol=2) + 1L
+  tree <- list(edge=edge, Nnode=nTip - 1L, tip.label=seq_len(nTip) - 1L)
+  class(tree) <- 'phylo'
+  plot(tree)
+}

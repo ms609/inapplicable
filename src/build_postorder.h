@@ -132,9 +132,9 @@ void random_tree(int *parent_of, int *left, int *right, const int *n_tip) {
 extern SEXP RANDOM_TREE(SEXP ntip) {
   const int n_tip = INTEGER(ntip)[0];
   SEXP RESULT = PROTECT(allocVector(VECSXP, 3)),
-    PARENT_OF = PROTECT(allocVector(INTSXP, n_tip + n_tip - 1L)),
-         LEFT = PROTECT(allocVector(INTSXP, n_tip - 1L)),
-        RIGHT = PROTECT(allocVector(INTSXP, n_tip - 1L));
+    PARENT_OF = PROTECT(allocVector(INTSXP, n_tip + n_tip - 1)),
+         LEFT = PROTECT(allocVector(INTSXP, n_tip - 1)),
+        RIGHT = PROTECT(allocVector(INTSXP, n_tip - 1));
   
   int *parent_of = INTEGER(PARENT_OF),
           *right = INTEGER(RIGHT),
@@ -162,16 +162,16 @@ extern SEXP RANDOM_TREE_SCORE(SEXP ntip, SEXP MorphyHandl) {
     return(RESULT);
   }
   
-  int *parent_of = malloc(n_tip + n_tip - 1 * sizeof(int)),
-           *left = malloc(n_tip - 1         * sizeof(int)),
-          *right = malloc(n_tip - 1         * sizeof(int));
-  random_tree(parent_of, left, right, &n_tip);
+  int *parent_of = calloc(n_tip + n_tip - 1 , sizeof(int)),
+           *left = calloc(n_tip - 1         , sizeof(int)),
+          *right = calloc(n_tip - 1         , sizeof(int));
   
+  random_tree(parent_of, left, right, &n_tip);
   morphy_length(parent_of, left, right, handl, score); 
   
   free(parent_of);
-  free(right);
   free(left);
+  free(right);
   UNPROTECT(1);
   return(RESULT);
 }

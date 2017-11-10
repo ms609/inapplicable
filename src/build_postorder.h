@@ -73,33 +73,33 @@ void move_to_node(const int *old_node_id, int *new_parent, int *new_left, int *n
                                  next_label, n_tip);    
   } else if (new_node_id != *old_node_id) { // Otherwise no change
     new_parent[old_left[*old_node_id]] = new_node_id;
-    new_right[new_node_id] = old_left[*old_node_id];
+    new_left[new_node_id] = old_left[*old_node_id];
   }
 }
 
 void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip) {
-  int *parent_ref = malloc((*n_tip + *n_tip - 1) * sizeof(int)),
+  int *old_parent = malloc((*n_tip + *n_tip - 1) * sizeof(int)),
       *left_array = malloc((*n_tip - 1)          * sizeof(int)),
      *right_array = malloc((*n_tip - 1)          * sizeof(int)),
-        *left_ref = left_array  - *n_tip,
-       *right_ref = right_array - *n_tip,
-       next_label = *n_tip + 1,
+        *old_left = left_array  - *n_tip,
+       *old_right = right_array - *n_tip,
+       next_label = *n_tip,
                 i;
   for (i = 0; i < *n_tip; i++) {
-    parent_ref[i] = parent_of[i];
+    old_parent[i] = parent_of[i];
   }
   for (i = *n_tip; i < (*n_tip + *n_tip - 1); i++) {
-    parent_ref[i] = parent_of[i];
-    left_ref  [i] = left[i];
-    right_ref [i] = right[i];
+    old_parent[i] = parent_of[i];
+    old_left  [i] = left[i];
+    old_right [i] = right[i];
   }
   
   move_to_node(n_tip, parent_of, left, right, 
-               parent_ref, left_ref, right_ref, &next_label, n_tip);
+               old_parent, old_left, old_right, &next_label, n_tip);
   
   free(right_array);
   free(left_array);
-  free(parent_ref);
+  free(old_parent);
 }
 
 void random_tree(int *parent_of, int *left, int *right, const int *n_tip) {

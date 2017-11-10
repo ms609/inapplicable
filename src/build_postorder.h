@@ -7,10 +7,9 @@
 #define znew (z=36969*(z&65535)+(z>>16))
 #define wnew (w=18000*(w&65535)+(w>>16))
 #define random_int ((znew<<16)+wnew)
-typedef unsigned long UL;
 
 /* Global static variables: */
-static UL z=362436069, w=521288629;
+static unsigned long z=362436069, w=521288629;
 /* Use random seeds to reset z and w*/
 
 void insert_tip_below (const int *new_tip,

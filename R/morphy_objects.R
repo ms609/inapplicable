@@ -97,6 +97,40 @@ LoadMorphy <- function (phy) {
   morphyObj
 }
 
+#' Check for error whilst modifying Morphy object
+#' @param action action to perform
+#'
+#' @keywords internal
+#' @export
+MorphyErrorCheck <- function (action) {
+  if (action -> error) stop("Morphy object encountered error", mpl_translate_error(error), "\n")
+}
+
+#' Morphy object from single character
+#' 
+#' @param char state of each character at each tip in turn, in a format that will be converted
+#'             to a character string by \code{\link{paste0}(char, ';', collapse='')}.
+#'
+#' @return a pointer to a morphyObj. Don't forget to unload it when you're done with it:
+#'         \code{morphyObj <- \link{UnloadMorphy}(morphyObj)}.
+#'
+#' @author Martin R. Smith
+#'
+#' @export
+SingleCharMorphy <- function (char) {
+  char <- paste0(c(char, ';'), collapse='')
+  nTip <- nchar(char) - 1L
+  morphyObj <- mpl_new_Morphy()
+  MorphyErrorCheck(mpl_init_Morphy(nTip, 1, morphyObj)) 
+  MorphyErrorCheck(mpl_attach_rawdata(char, morphyObj)) 
+  MorphyErrorCheck(mpl_set_num_internal_nodes(nTip - 1L, morphyObj)) 
+  MorphyErrorCheck(mpl_set_parsim_t(1, 'FITCH', morphyObj))
+  MorphyErrorCheck(mpl_set_charac_weight(1, 1, morphyObj)) 
+  MorphyErrorCheck(mpl_apply_tipdata(morphyObj))
+  class(morphyObj) <- 'morphyPtr'
+  morphyObj
+}
+
 #' Destroy a Morphy Object
 #'
 #' Best practice is to call \code{morphyObj <- UnloadMorphy(morphyObj)}

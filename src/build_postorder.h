@@ -24,18 +24,18 @@ void insert_in_order (int *parent_of, int *left, int *right,
   parent_of[*new_node] = old_parent;
 }
 
-void insert_and_reorder (int *parent_of, int *left, int *right, 
-                      const int *addition_point, const int *new_node,
-                      const int *new_tip) {
-   left[*new_node] = left [*addition_point];
-  right[*new_node] = right[*addition_point];
-  parent_of[left [*new_node]] = *new_node;
-  parent_of[right[*new_node]] = *new_node;
-  left[*addition_point] = *new_tip;
-  parent_of[*new_tip] = *addition_point;
-  parent_of[*new_node] = *addition_point;
-  right[*addition_point] = *new_node;
-}
+// void insert_and_reorder (int *parent_of, int *left, int *right, 
+//                       const int *addition_point, const int *new_node,
+//                       const int *new_tip) {
+//    left[*new_node] = left [*addition_point];
+//   right[*new_node] = right[*addition_point];
+//   parent_of[left [*new_node]] = *new_node;
+//   parent_of[right[*new_node]] = *new_node;
+//   left[*addition_point] = *new_tip;
+//   parent_of[*new_tip] = *addition_point;
+//   parent_of[*new_node] = *addition_point;
+//   right[*addition_point] = *new_node;
+// }
 
 // parent_of, left and right have been initialized with a two-taxon tree with tips 0 & 1
 // left and right point n_tip _before_ left and right, so we don't need to subtract n_tip each time
@@ -48,10 +48,8 @@ void build_tree(int *parent_of, int *left, int *right, const int *n_tip) {
     addition_point = 1 + random_int % (i + i - 3); // +1 to avoid edge 0
     if (addition_point < i) { // Adding below a tip
       insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
-    } else if (addition_point == i) { // Adding below root node
-      insert_and_reorder(parent_of, left, right, n_tip, &new_node, &i);
     } else { // Adding below an existing node
-      addition_point += *n_tip - i;
+      addition_point += *n_tip - i + 1; // + 1 to avoid dummy root
       insert_in_order(parent_of, left, right, &addition_point, &new_node, &i);
     }
   }

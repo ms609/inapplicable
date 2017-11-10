@@ -24,19 +24,6 @@ void insert_in_order (int *parent_of, int *left, int *right,
   parent_of[*new_node] = old_parent;
 }
 
-// void insert_and_reorder (int *parent_of, int *left, int *right, 
-//                       const int *addition_point, const int *new_node,
-//                       const int *new_tip) {
-//    left[*new_node] = left [*addition_point];
-//   right[*new_node] = right[*addition_point];
-//   parent_of[left [*new_node]] = *new_node;
-//   parent_of[right[*new_node]] = *new_node;
-//   left[*addition_point] = *new_tip;
-//   parent_of[*new_tip] = *addition_point;
-//   parent_of[*new_node] = *addition_point;
-//   right[*addition_point] = *new_node;
-// }
-
 // parent_of, left and right have been initialized with a two-taxon tree with tips 0 & 1
 // left and right point n_tip _before_ left and right, so we don't need to subtract n_tip each time
 // We arbitrarily choose to root our tree on tip 0, so never add to that edge or the 

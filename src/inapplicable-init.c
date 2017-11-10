@@ -37,7 +37,8 @@ static const R_CallMethodDef callMethods[] = {
   {"_R_wrap_mpl_update_tip",        (DL_FUNC) &_R_wrap_mpl_update_tip, 3},
   {"_R_wrap_mpl_update_lower_root", (DL_FUNC) &_R_wrap_mpl_update_lower_root, 3},
   {"MORPHYLENGTH",                  (DL_FUNC) &MORPHYLENGTH, 4},
-  {"BUILD_POSTORDER",               (DL_FUNC) &BUILD_POSTORDER, 2},
+  {"RANDOM_TREE",                   (DL_FUNC) &RANDOM_TREE, 1},
+  {"RANDOM_TREE_SCORE",             (DL_FUNC) &RANDOM_TREE_SCORE, 2},
   {NULL, NULL, 0}
 };
 

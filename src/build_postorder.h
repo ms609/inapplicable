@@ -1,11 +1,17 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "RMorphy.h"
 
 // Random number generator from http://www.cse.yorku.ca/~oz/marsaglia-rng.html
-// 1+MWC%10 generates an integer from 1 to 10
+// 1+random_int%10 generates an integer from 1 to 10 [MWC renamed to random_int]
 #define znew (z=36969*(z&65535)+(z>>16))
 #define wnew (w=18000*(w&65535)+(w>>16))
 #define random_int ((znew<<16)+wnew)
+typedef unsigned long UL;
+
+/* Global static variables: */
+static UL z=362436069, w=521288629;
+/* Use random seeds to reset z and w*/
 
 void insert_in_order (int *parent_of, int *left, int *right, 
                       const int *addition_point, const int *new_node,
@@ -96,8 +102,53 @@ void renumber_postorder(int *parent_of, int *left, int *right, const int *n_tip)
   free(parent_ref);
 }
 
-extern SEXP BUILD_POSTORDER(SEXP ntip, SEXP MorphyHandl) {
-  // tipnames run from 0 to nTip - 1, in random order
+void random_tree(int *parent_of, int *left, int *right, const int *n_tip) {
+  if (*n_tip < 3) {
+        // Initialize with 2-tip tree
+       parent_of[0] = *n_tip;
+       parent_of[1] = *n_tip;
+  parent_of[*n_tip] = *n_tip; // Root is its own parent
+            left[0] = 0;
+           right[0] = 1;
+  } else {
+    // Initialize with 3-tip tree, arbitrarily rooted on tip 0
+        parent_of[0] = *n_tip;
+        parent_of[1] = *n_tip + 1;
+        parent_of[2] = *n_tip + 1;
+    parent_of[*n_tip] = *n_tip; // Root is its own parent
+             left[0] = 0;
+             left[1] = 1;
+            right[0] = *n_tip + 1;
+            right[1] = 2;
+  }
+  if (*n_tip > 3) {    
+    build_tree(parent_of, left - *n_tip, right - *n_tip, n_tip);
+    renumber_postorder(parent_of, left - *n_tip, right - *n_tip, n_tip);
+  }
+}
+
+
+extern SEXP RANDOM_TREE(SEXP ntip) {
+  const int n_tip = INTEGER(ntip)[0];
+  SEXP RESULT = PROTECT(allocVector(VECSXP, 3)),
+    PARENT_OF = PROTECT(allocVector(INTSXP, n_tip + n_tip - 1L)),
+         LEFT = PROTECT(allocVector(INTSXP, n_tip - 1L)),
+        RIGHT = PROTECT(allocVector(INTSXP, n_tip - 1L));
+  
+  int *parent_of = INTEGER(PARENT_OF),
+          *right = INTEGER(RIGHT),
+           *left = INTEGER(LEFT);
+ 
+  random_tree(parent_of, left, right, &n_tip);
+  
+  SET_VECTOR_ELT(RESULT, 0, PARENT_OF);
+  SET_VECTOR_ELT(RESULT, 1, LEFT);
+  SET_VECTOR_ELT(RESULT, 2, RIGHT);
+  UNPROTECT(4);
+  return(RESULT);
+}
+
+extern SEXP RANDOM_TREE_SCORE(SEXP ntip, SEXP MorphyHandl) {
   const int n_tip = INTEGER(ntip)[0];
   Morphy handl = R_ExternalPtrAddr(MorphyHandl);
   SEXP RESULT = PROTECT(allocVector(INTSXP, 1));
@@ -113,29 +164,7 @@ extern SEXP BUILD_POSTORDER(SEXP ntip, SEXP MorphyHandl) {
   int *parent_of = malloc(n_tip + n_tip - 1 * sizeof(int)),
            *left = malloc(n_tip - 1         * sizeof(int)),
           *right = malloc(n_tip - 1         * sizeof(int));
-          
-  if (n_tip < 3) {
-        // Initialize with 2-tip tree
-      parent_of[0] = n_tip;
-      parent_of[1] = n_tip;
-  parent_of[n_tip] = n_tip; // Root is its own parent
-           left[0] = 0;
-          right[0] = 1;
-  } else {
-    // Initialize with 3-tip tree, arbitrarily rooted on tip 0
-        parent_of[0] = n_tip;
-        parent_of[1] = n_tip + 1;
-        parent_of[2] = n_tip + 1;
-    parent_of[n_tip] = n_tip; // Root is its own parent
-             left[0] = 0;
-             left[1] = 1;
-            right[0] = n_tip + 1;
-            right[1] = 2;
-  }
-  if (n_tip > 3) {    
-    build_tree(parent_of, left - n_tip, right - n_tip, &n_tip);
-    renumber_postorder(parent_of, left - n_tip, right - n_tip, &n_tip);
-  }
+  random_tree(parent_of, left, right, &n_tip);
   
   morphy_length(parent_of, left, right, handl, score); 
   

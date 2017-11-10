@@ -12,5 +12,23 @@ RandomTreeScore <- function (nTip, morphyObj) {
     return (0)
   }
   # Return:
-  .Call('BUILD_POSTORDER', as.integer(nTip), morphyObj)
+  .Call('RANDOM_TREE_SCORE', as.integer(nTip), morphyObj)
+}
+
+#' Random postorder tree
+#' 
+#' @param nTip number of tips (minimum 3)
+#'
+#' @return A list with three elements, each a vector of integers, respectively containing:
+#'         - The parent of each tip and node, in order
+#'         - The left child of each node
+#'         - The right child of each node.
+#'
+#' @export
+RandomMorphyTree <- function (nTip) {  
+  if (nTip < 2) {
+    stop("nTip < 2 not implemented: a tip is not a tree.")
+  }
+  # Return:
+  .Call('RANDOM_TREE', as.integer(nTip))
 }

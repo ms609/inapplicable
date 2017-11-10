@@ -56,7 +56,7 @@ MorphyTreeLength <- function (tree, morphyObj) {
   inPostorder <- (!is.null(treeOrder) && treeOrder == "postorder")
   tree.edge <- tree$edge
   # Return:
-  MorphyLength(tree.edge[, 1], tree.edge[, 2], morphyObj, inPostorder, nTaxa)
+  ParentChildMorphyLength(tree.edge[, 1], tree.edge[, 2], morphyObj, inPostorder, nTaxa)
 }
 
 #' @describeIn MorphyTreeLength Faster function that requires internal tree parameters
@@ -66,7 +66,37 @@ MorphyTreeLength <- function (tree, morphyObj) {
 #' @keywords internal
 #' @importFrom TreeSearch PostorderEdges
 #' @export
-MorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE, nTaxa=mpl_get_numtaxa(morphyObj)) {
+ParentChildMorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE, nTaxa=mpl_get_numtaxa(morphyObj)) {
+  if (!inPostorder) {
+    edgeList <- PostorderEdges(parent, child, nTaxa=nTaxa)
+    parent <- edgeList[[1]]
+    child <- edgeList[[2]]
+  }
+  if (nTaxa < 1L) stop("Error: ", mpl_translate_error(nTaxa))
+  maxNode <- nTaxa + mpl_get_num_internal_nodes(morphyObj)
+  rootNode <- nTaxa + 1L
+  allNodes <- rootNode:maxNode
+  
+  parentOf <- parent[match(1:maxNode, child)]
+  # parentOf[rootNode] <- maxNode + 1 # Root node's parent is a dummy node
+  parentOf[rootNode] <- rootNode # Root node's parent is a dummy node
+  leftChild <- child[length(parent) + 1L - match(allNodes, rev(parent))]
+  rightChild <- child[match(allNodes, parent)]
+  
+  # Return:
+  .Call('MORPHYLENGTH', as.integer(parentOf -1L), as.integer(leftChild -1L), 
+               as.integer(rightChild -1L), morphyObj)
+}
+
+#' @describeIn MorphyTreeLength Fastest function that requires internal tree parameters
+#' @template parentOfParam
+#' @template leftChildParam
+#' @template rightChildParam
+#' @author Martin R. Smith
+#' @keywords internal
+#' @importFrom TreeSearch PostorderEdges
+#' @export
+MorphyLength <- function (parentOf, leftChild, rightChild, morphyObj, nTaxa=mpl_get_numtaxa(morphyObj)) {
   if (!inPostorder) {
     edgeList <- PostorderEdges(parent, child, nTaxa=nTaxa)
     parent <- edgeList[[1]]

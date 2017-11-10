@@ -94,28 +94,11 @@ ParentChildMorphyLength <- function (parent, child, morphyObj, inPostorder=FALSE
 #' @template rightChildParam
 #' @author Martin R. Smith
 #' @keywords internal
-#' @importFrom TreeSearch PostorderEdges
 #' @export
-MorphyLength <- function (parentOf, leftChild, rightChild, morphyObj, nTaxa=mpl_get_numtaxa(morphyObj)) {
-  if (!inPostorder) {
-    edgeList <- PostorderEdges(parent, child, nTaxa=nTaxa)
-    parent <- edgeList[[1]]
-    child <- edgeList[[2]]
-  }
-  if (nTaxa < 1L) stop("Error: ", mpl_translate_error(nTaxa))
-  maxNode <- nTaxa + mpl_get_num_internal_nodes(morphyObj)
-  rootNode <- nTaxa + 1L
-  allNodes <- rootNode:maxNode
-  
-  parentOf <- parent[match(1:maxNode, child)]
-  # parentOf[rootNode] <- maxNode + 1 # Root node's parent is a dummy node
-  parentOf[rootNode] <- rootNode # Root node's parent is a dummy node
-  leftChild <- child[length(parent) + 1L - match(allNodes, rev(parent))]
-  rightChild <- child[match(allNodes, parent)]
-  
+MorphyLength <- function (parentOf, leftChild, rightChild, morphyObj) {
   # Return:
-  .Call('MORPHYLENGTH', as.integer(parentOf -1L), as.integer(leftChild -1L), 
-               as.integer(rightChild -1L), morphyObj)
+  .Call('MORPHYLENGTH', as.integer(parentOf), as.integer(leftChild), 
+               as.integer(rightChild), morphyObj)
 }
 
 #' @describeIn MorphyTreeLength Direct call to C function. Use with caution.

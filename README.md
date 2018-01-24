@@ -4,8 +4,10 @@
 [![CRAN Status Badge](http://www.r-pkg.org/badges/version/inapplicable)](https://cran.r-project.org/package=inapplicable)
 
 # inapplicable
-`inapplicable` is an R package that allows parsimony search on morphological datasets that contain
+`inapplicable` was an R package that allows parsimony search on morphological datasets that contain
 inapplicable data, following the algorithm proposed by Brazeau, Guillerme and Smith (2017).
+
+It has now been superceded by the more versatile package [TreeSearch](https://github.com/ms609/TreeSearch).
 
 You can install inapplicable into R thus:
 
@@ -13,16 +15,6 @@ You can install inapplicable into R thus:
 if(!require(inapplicable)) install.packages("inapplicable")
 library(inapplicable)
 ```
-
-If you're feeling brave, you can install the development version thus:
-```r
-if(!require(devtools)) install.packages("devtools")
-devtools::install_github('ms609/inapplicable')
-
-# Load the inapplicable package into R
-library('inapplicable')
-```
-
 Details on how to use the package are provided in the 'Getting started' vignette.
 
 # Reference
